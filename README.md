@@ -1,4 +1,6 @@
-> # CFXS Embedded C/C++ Debugger Planned Features
+# CFXS Embedded C/C++ Debugger
+
+> # Planned Features
 > - Will not crash every 5-15 minutes
 > - Dark theme enabled by default
 > - Live variable/expression Watch
