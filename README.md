@@ -9,3 +9,8 @@
 # Planned Debug Probe Support
 - Segger J-Link
 - Other probes too... some time next year maybe?
+
+# Why this project exists
+When your embedded C/C++ IDE/Debugger crashes enough times a day and is just difficult to work with, you might just want to make your own debugger.
+So this is it - my own debug tool.
+The solution to all problems of IDEs/debuggers I have tested - a debugger with some IDE functionality that is actually easy to use and powerful enough for serious debugging (hopefully)
