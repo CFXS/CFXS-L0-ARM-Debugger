@@ -4,7 +4,7 @@
 - Live variable/expression Watch
 - STL container support in Watch window
 - User definable custom data structure decoding in Watch window
-- ?Remote VSCode integration somehow?
+- Some type of VSCode integration somehow? (at least "Open current file in VSCode")
 
 # Planned Debug Probe Support
 - Segger J-Link
