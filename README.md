@@ -1,4 +1,5 @@
 # CFXS Embedded C/C++ Debugger
+![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/CFXS_HWD_V1.png)
 
 # Planned Features
 - Will not crash every 5-15 minutes
