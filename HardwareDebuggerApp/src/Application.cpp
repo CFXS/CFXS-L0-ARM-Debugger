@@ -1,6 +1,10 @@
 // [source]
 #include "Application.hpp"
 
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+
 namespace HWD {
 
     Application::Application(int argc, char** argv) {

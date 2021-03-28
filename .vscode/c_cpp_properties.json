@@ -13,6 +13,7 @@
             "includePath": [
                 "${workspaceFolder}/HardwareDebuggerApp/src/",
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/",
+                "${workspaceFolder}/HardwareDebuggerApp/vendor/Lua/src",
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/spdlog/include",
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/SDL/include"
             ],
