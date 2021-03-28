@@ -1,9 +1,12 @@
 # CFXS Embedded C/C++ Debugger
 ![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
 
-# Build Requirements
+# Build/Development Requirements
+- `VSCode` or `Visual Studio`
 - `ninja-build` (https://ninja-build.org/)
-- `Python`
+- `Visual Studio (Windows MSVC Compiler)` (https://visualstudio.microsoft.com/)
+- `CMake` (https://cmake.org/)
+- `Python` (https://www.python.org/)
 
 # Planned Features
 - Will not crash every 5-15 minutes
