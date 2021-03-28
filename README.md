@@ -1,5 +1,5 @@
 # CFXS Embedded C/C++ Debugger
-![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/CFXS_HWD_V1.png)
+![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
 
 # Planned Features
 - Will not crash every 5-15 minutes
@@ -12,7 +12,7 @@
  
 # Debug Probe Support
 - `Segger J-Link`
-- Other probes too... some time next year maybe?
+- `Other probes too... some time next year maybe?`
 
 ---
 
