@@ -1,10 +1,11 @@
 // [source]
 #include "main.hpp"
-#include <iostream>
+#include "Application.hpp"
 
 int main(int argc, char** argv) {
-    printf("[CFXS Hardware Debugger %s]\n", CFXS_HWD_VERSION_STRING);
+    auto app = new HWD::Application(argc, argv);
 
-    while(1);
+    app->Run();
+
     return 0;
-} 
+}

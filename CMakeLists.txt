@@ -48,7 +48,4 @@ if(ENABLE_PCH)
     )
 endif()
 
-add_subdirectory(HardwareDebuggerApp/vendor/spdlog)
-add_subdirectory(HardwareDebuggerApp/vendor/ImGui)
-add_subdirectory(HardwareDebuggerApp/vendor/SDL)
 add_subdirectory(HardwareDebuggerApp)
