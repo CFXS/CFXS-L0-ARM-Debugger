@@ -31,7 +31,7 @@ if(ENABLE_IPO)
   if(result)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
   else()
-    message(SEND_ERROR "IPO is not supported: ${output}")
+    message("IPO is not supported: ${output}")
   endif()
 endif()
 

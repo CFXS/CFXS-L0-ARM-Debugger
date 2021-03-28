@@ -7,11 +7,12 @@ namespace HWD {
     class Application {
     public:
         Application(int argc, char** argv);
+        ~Application();
 
         void Run();
 
     private:
-        void Initialize_SDL();
+        bool Initialize_SDL();
 
     private:
         bool m_Running = true;
