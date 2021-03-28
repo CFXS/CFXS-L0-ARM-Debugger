@@ -20,6 +20,13 @@ namespace HWD {
     }
 
     void Application::Run() {
+        lua_State* ls = luaL_newstate();
+
+        int r = luaL_dostring(ls, "a = 0xAABBCCDDEEFF1122");
+        lua_getglobal(ls, "a");
+
+        printf("Lua a = 0x%llx\n", (long long)lua_tointeger(ls, -1));
+
         while (m_Running) {
             SDL_Event e;
             while (SDL_PollEvent(&e)) {
