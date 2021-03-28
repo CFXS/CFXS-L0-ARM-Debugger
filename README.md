@@ -2,9 +2,8 @@
 ![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
 
 # Build Requirements
-> System PATH:
-- 'Python'
-- 'Ninja' (https://ninja-build.org/)
+- `Python`
+- `ninja-build` (https://ninja-build.org/)
 
 # Planned Features
 - Will not crash every 5-15 minutes
