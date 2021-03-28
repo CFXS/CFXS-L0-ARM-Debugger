@@ -8,3 +8,6 @@
 	path = HardwareDebuggerApp/vendor/ImGui
 	url = https://github.com/CFXS/imgui.git
 	branch = docking
+[submodule "HardwareDebuggerApp/vendor/Lua"]
+	path = HardwareDebuggerApp/vendor/Lua
+	url = https://github.com/CFXS/lua.git
