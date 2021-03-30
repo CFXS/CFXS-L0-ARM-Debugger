@@ -45,7 +45,7 @@ namespace HWD {
             return false;
         }
 
-        m_MainWindow = SDL_CreateWindow("CFXS Hardware Debugger", 100, 100, 640, 480, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+        m_MainWindow = SDL_CreateWindow("CFXS Hardware Debugger", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
         if (m_MainWindow == NULL) {
             fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
             return false;
