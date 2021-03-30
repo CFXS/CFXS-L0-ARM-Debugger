@@ -5,6 +5,7 @@
         "xiosbase": "cpp",
         "filesystem": "cpp",
         "vector": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "memory": "cpp"
     }
 }
