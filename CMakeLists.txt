@@ -10,7 +10,7 @@ if(STATIC_RUNTIME)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-project(HardwareDebuggerProject CXX)
+project(HardwareDebuggerProject CXX C)
 
 include("CMake/Settings.cmake")
 
