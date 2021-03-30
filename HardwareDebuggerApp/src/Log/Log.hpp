@@ -10,9 +10,9 @@ namespace HWD {
 
     class Log {
     public:
-        static void Init();
+        static void Initialize();
 
-        static std::shared_ptr<spdlog::logger>& GetCoreLogger() {
+        static inline std::shared_ptr<spdlog::logger>& GetCoreLogger() {
             return s_CoreLogger;
         }
 
@@ -21,3 +21,10 @@ namespace HWD {
     };
 
 } // namespace HWD
+
+// Core log macros
+#define HWD_CORE_TRACE(...)    ::HWD::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define HWD_CORE_INFO(...)     ::HWD::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define HWD_CORE_WARN(...)     ::HWD::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define HWD_CORE_ERROR(...)    ::HWD::Log::GetCoreLogger()->error(__VA_ARGS__)
+#define HWD_CORE_CRITICAL(...) ::HWD::Log::GetCoreLogger()->critical(__VA_ARGS__)

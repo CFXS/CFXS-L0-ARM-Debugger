@@ -29,25 +29,4 @@ set_project_warnings(project_warnings)
 include("CMake/Sanitizers.cmake")
 enable_sanitizers(project_options)
 
-option(ENABLE_PCH "Use Precompiled Headers" ON)
-if(ENABLE_PCH)
-    target_precompile_headers(
-        project_options
-        INTERFACE
-        <iostream>
-        <vector>
-        <string>
-        <map>
-        <utility>
-        <memory>
-        <algorithm>
-        <unordered_map>
-        <chrono>
-        <array>
-        <ostream>
-        <sstream>
-        <unordered_set>
-    )
-endif()
-
 add_subdirectory(HardwareDebuggerApp)

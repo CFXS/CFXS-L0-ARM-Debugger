@@ -11,56 +11,42 @@ extern "C" {
 
 namespace HWD {
 
-    Application::Application(int argc, char** argv) {
-        printf("[CFXS Hardware Debugger %s]\n", CFXS_HWD_VERSION_STRING);
-        printf("[HWD] Application(%d, 0x%p)\n", argc, argv);
+    Application* Application::s_Instance = nullptr;
 
-        bool sdlInitialized = Initialize_SDL();
-        (void)sdlInitialized;
+    Application::Application(int argc, char** argv, const std::string& name) {
+        HWD_ASSERT(!s_Instance, "Application already exists!");
+        s_Instance = this;
+
+        //m_Window = Window::Create(WindowProps(name));
+        //m_Window->SetEventCallback(HZ_BIND_EVENT_FN(Application::OnEvent));
     }
 
     Application::~Application() {
-        printf("[HWD] ~Application()\n");
+    }
+
+    void Application::Close() {
+        m_Running = false;
     }
 
     void Application::Run() {
-        lua_State* ls = luaL_newstate();
-
-        int r = luaL_dostring(ls, "a = 0xAABBCCDDEEFF1122");
-        lua_getglobal(ls, "a");
-
-        printf("Lua a = 0x%llx\n", (long long)lua_tointeger(ls, -1));
-
         while (m_Running) {
-            SDL_Event e;
-            while (SDL_PollEvent(&e)) {
-                if (e.type == SDL_QUIT) {
-                    m_Running = false;
-                }
+            //float time        = (float)glfwGetTime();
+            //Timestep timestep = time - m_LastFrameTime;
+            //m_LastFrameTime   = time;
+
+            //for (Layer* layer : m_LayerStack)
+            //    layer->OnUpdate(timestep);
+
+            if (!m_Minimized) {
+                //m_ImGuiLayer->Begin();
+
+                //for (Layer* layer : m_LayerStack)
+                //    layer->OnImGuiRender();
+                //m_ImGuiLayer->End();
             }
+
+            //m_Window->OnUpdate();
         }
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    bool Application::Initialize_SDL() {
-        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-            fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
-            return false;
-        }
-
-        m_MainWindow = SDL_CreateWindow("CFXS Hardware Debugger",
-                                        SDL_WINDOWPOS_CENTERED,
-                                        SDL_WINDOWPOS_CENTERED,
-                                        640,
-                                        480,
-                                        SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-        if (m_MainWindow == NULL) {
-            fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
-            return false;
-        }
-
-        return true;
     }
 
 } // namespace HWD
