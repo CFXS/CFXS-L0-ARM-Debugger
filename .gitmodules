@@ -8,6 +8,3 @@
 [submodule "HardwareDebuggerApp/vendor/Lua"]
 	path = HardwareDebuggerApp/vendor/Lua
 	url = https://github.com/CFXS/lua.git
-[submodule "HardwareDebuggerApp/vendor/SDL"]
-	path = HardwareDebuggerApp/vendor/SDL
-	url = https://github.com/CFXS/SDL.git
