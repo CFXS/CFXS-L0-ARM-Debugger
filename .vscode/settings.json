@@ -3,6 +3,7 @@
     "cmake.buildDirectory": "${workspaceFolder}/out/build",
     "files.associations": {
         "xiosbase": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "memory": "cpp"
     }
 }

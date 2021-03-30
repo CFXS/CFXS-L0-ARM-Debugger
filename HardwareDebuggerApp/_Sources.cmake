@@ -2,6 +2,8 @@ set(sources
     "${ROOT_DIR}/src/Application.cpp"
     "${ROOT_DIR}/src/main.cpp"
     "${ROOT_DIR}/src/Log/Log.cpp"
+    "${ROOT_DIR}/src/Probe/JLink.cpp"
+    "${ROOT_DIR}/src/Test/RVeips_ProbeTest.cpp"
 )
 
 set(headers
@@ -10,4 +12,8 @@ set(headers
     "${ROOT_DIR}/src/Compiler.hpp"
     "${ROOT_DIR}/src/main.hpp"
     "${ROOT_DIR}/src/Log/Log.hpp"
+    "${ROOT_DIR}/src/Probe/IProbe.hpp"
+    "${ROOT_DIR}/src/Probe/JLink.hpp"
+    "${ROOT_DIR}/src/Probe/JLink_Platform.hpp"
+    "${ROOT_DIR}/src/Test/RVeips_ProbeTest.hpp"
 )

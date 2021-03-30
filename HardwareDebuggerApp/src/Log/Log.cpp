@@ -7,6 +7,7 @@
 namespace HWD {
 
     std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
+    std::shared_ptr<spdlog::logger> Log::s_ProbeLogger;
 
     void Log::Initialize() {
         std::vector<spdlog::sink_ptr> logSinks;
@@ -20,6 +21,11 @@ namespace HWD {
         spdlog::register_logger(s_CoreLogger);
         s_CoreLogger->set_level(spdlog::level::trace);
         s_CoreLogger->flush_on(spdlog::level::trace);
+
+        s_ProbeLogger = std::make_shared<spdlog::logger>("HWD", begin(logSinks), end(logSinks));
+        spdlog::register_logger(s_ProbeLogger);
+        s_ProbeLogger->set_level(spdlog::level::trace);
+        s_ProbeLogger->flush_on(spdlog::level::trace);
     }
 
 } // namespace HWD
