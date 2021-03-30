@@ -1,0 +1,2 @@
+- [Rihards Veips](https://github.com/RVeips)
+- [Krists Niedrītis](https://github.com/JesusKrists)
