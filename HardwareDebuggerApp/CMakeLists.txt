@@ -7,9 +7,7 @@ include("_Sources.cmake")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui)
 
-set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
-set(SDL_STATIC_ENABLED_BY_DEFAULT ON)
-set(LIBC ON)
+include("_SDL_Options.cmake")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL)
 
 add_executable(${EXE_NAME} ${headers} ${sources})

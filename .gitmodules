@@ -1,6 +1,3 @@
-[submodule "HardwareDebuggerApp/vendor/SDL"]
-	path = HardwareDebuggerApp/vendor/SDL
-	url = https://github.com/libsdl-org/SDL.git
 [submodule "HardwareDebuggerApp/vendor/spdlog"]
 	path = HardwareDebuggerApp/vendor/spdlog
 	url = https://github.com/gabime/spdlog.git

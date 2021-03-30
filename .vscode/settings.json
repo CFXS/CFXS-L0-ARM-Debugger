@@ -1,5 +1,4 @@
 {
     "cmake.generator": "Ninja",
-    "cmake.buildDirectory": "${workspaceFolder}/out/build",
-    "editor.defaultFormatter": "xaver.clang-format",
+    "cmake.buildDirectory": "${workspaceFolder}/out/build"
 }
