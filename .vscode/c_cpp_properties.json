@@ -22,7 +22,8 @@
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "msvc-x86"
+            "intelliSenseMode": "msvc-x86",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ]
 }
