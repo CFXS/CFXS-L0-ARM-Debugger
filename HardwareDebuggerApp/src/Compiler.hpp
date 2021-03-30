@@ -8,3 +8,5 @@
 #else
 #error "Platform not defined"
 #endif
+
+#define __CLASS__ typeid(*this).name()

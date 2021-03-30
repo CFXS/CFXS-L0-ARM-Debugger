@@ -17,7 +17,7 @@ namespace HWD {
         }
 
         static inline std::shared_ptr<spdlog::logger>& GetProbeLogger() {
-            return s_CoreLogger;
+            return s_ProbeLogger;
         }
 
     private:

@@ -1,6 +1,8 @@
 // [source]
 #include "Application.hpp"
 
+#include "Test/RVeips_ProbeTest.hpp"
+
 extern "C" {
 #include <lua.h>
 #include <lualib.h>
@@ -29,6 +31,8 @@ namespace HWD {
     }
 
     void Application::Run() {
+        Test::RVeips_ProbeTest::Run();
+
         while (m_Running) {
             //float time        = (float)glfwGetTime();
             //Timestep timestep = time - m_LastFrameTime;

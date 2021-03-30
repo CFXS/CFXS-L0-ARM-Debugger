@@ -7,17 +7,19 @@
 namespace HWD::Probe {
 
     JLink::JLink() {
+        HWDLOG_PROBE_TRACE("JLink::JLink() [{0}]", fmt::ptr(this));
     }
 
     JLink::~JLink() {
+        HWDLOG_PROBE_TRACE("JLink::~JLink() [{0}]", fmt::ptr(this));
     }
 
     const std::string& JLink::GetModel() const {
-        return "SEGGER J-Link Mini"; // RVeips test device
+        return m_Model; // RVeips test device
     }
 
     const std::string& JLink::GetSerialNumber() const {
-        return "801022602"; // RVeips test device
+        return m_SerialNumber; // RVeips test device
     }
 
 } // namespace HWD::Probe
