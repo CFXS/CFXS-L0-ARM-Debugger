@@ -2,6 +2,7 @@
 ![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
 
 # Build/Development Requirements
+- `JLink_x64.dll` in environment path (If `SEGGER Embedded Studio for ARM` is installed, then the DLL will be located in `C:\Program Files\SEGGER\SEGGER Embedded Studio for ARM <VERSION>\bin`)
 - `VSCode` or `Visual Studio`
 - `ninja-build` (https://ninja-build.org/)
 - `Visual Studio (Windows MSVC Compiler)` (https://visualstudio.microsoft.com/)
