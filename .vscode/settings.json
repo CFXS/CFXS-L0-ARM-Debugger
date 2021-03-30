@@ -4,6 +4,8 @@
     "files.associations": {
         "xiosbase": "cpp",
         "filesystem": "cpp",
+        "vector": "cpp",
+        "xutility": "cpp",
         "memory": "cpp"
     }
 }
