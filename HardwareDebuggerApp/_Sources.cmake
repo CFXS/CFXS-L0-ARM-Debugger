@@ -6,4 +6,5 @@ set(sources
 set(headers
     "${ROOT_DIR}/src/Application.hpp"
     "${ROOT_DIR}/src/main.hpp"
+    "${ROOT_DIR}/src/Log/Log.hpp"
 )
