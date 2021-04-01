@@ -1,6 +1,8 @@
 // [source]
 #include "Application.hpp"
 
+#include <Test/RVeips_ProbeTest.hpp>
+
 namespace HWD {
 
     Application* Application::s_Instance = nullptr;
@@ -20,8 +22,10 @@ namespace HWD {
     }
 
     void Application::Run() {
+        Test::RVeips_ProbeTest::Run();
+
         while (m_Running) {
-            m_Window->OnUpdate();
+            Window::OnUpdate();
         }
     }
 
