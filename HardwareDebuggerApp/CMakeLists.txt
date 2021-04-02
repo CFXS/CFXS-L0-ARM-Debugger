@@ -35,6 +35,7 @@ target_precompile_headers(
   "src/Compiler.hpp"
   "src/Assert.hpp"
   "src/Log/Log.hpp"
+  "src/Utils.hpp"
 )
 
 if (WIN32)

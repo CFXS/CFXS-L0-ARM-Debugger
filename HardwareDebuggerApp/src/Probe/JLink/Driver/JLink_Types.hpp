@@ -1,4 +1,5 @@
 #pragma once
+#include <Utils.hpp>
 
 namespace HWD::Probe::Driver::JLink_Types {
 
@@ -130,7 +131,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         EXCLUDE_RANGE = 3,
     };
 
-    enum class DeviceFamily {
+    enum class DeviceFamily : int {
         AUTO      = 0,
         CM1       = 1,  // Cortex-M1
         CF        = 2,  // ColdFire
@@ -323,10 +324,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         USB      = 1 << 0,
         ETHERNET = 1 << 1,
     };
-
-    //
-    // Flags for JLINKARM_BP_
-    //
+    HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(HostInterfaceType, int)
 
     namespace Breakpoint {
 
@@ -361,11 +359,6 @@ namespace HWD::Probe::Driver::JLink_Types {
         };
 
     } // namespace Breakpoint
-
-    /*********************************************************************
-*
-*       Flags for JLINKARM_SetDataEvent()
-*/
 
     namespace Event {
 
@@ -433,11 +426,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         DEFAULT             = 0xFFFFFFFF,
     };
 
-    //
-    // Flags for JLINKARM_BeginDownload()
-    //
-
-    enum class DownloadFlags {
+    enum DownloadFlags : int {
         ALLOW_FLASH        = 1 << 0,
         ALLOW_BUFFERED_RAM = 1 << 1,
     };
@@ -469,16 +458,6 @@ namespace HWD::Probe::Driver::JLink_Types {
         TYPE_PROT_WRITE = 2 << 28,
     };
 
-    /*********************************************************************
-*
-*       Types required for API
-*
-**********************************************************************
-*/
-
-    //
-    // JLINKARM_CM3_REG
-    //
     namespace CPU_Registers {
 
         enum class ARM {
@@ -625,9 +604,6 @@ namespace HWD::Probe::Driver::JLink_Types {
         };
     } // namespace CPU_Registers
 
-    //
-    // JLINKARM_CM4_REG
-    //
     enum class Cortex_M4 {
         R0,
         R1,
@@ -912,7 +888,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         uint64_t udpDiscoverTime_usec;
         uint32_t hardwareVersion;
         uint8_t macAddress[6];
-        char productName[32];
+        char modelName[32];
         char nickname[32];
         char firmwareString[112];
         char useDhcpAddress;

@@ -6,7 +6,7 @@ namespace HWD::Probe::Driver {
     JLink_Driver::JLink_Driver() {
         HWDLOG_PROBE_TRACE("JLink_Driver::JLink_Driver() [{0}]", fmt::ptr(this));
 
-        m_Library = std::make_shared<DynamicLibrary>("C:/CFXS/JLink_x64.dll");
+        m_Library = std::make_unique<DynamicLibrary>("C:/CFXS/JLink_x64.dll");
 
         if (m_Library->IsLoaded()) {
             LoadFunctionPointers();

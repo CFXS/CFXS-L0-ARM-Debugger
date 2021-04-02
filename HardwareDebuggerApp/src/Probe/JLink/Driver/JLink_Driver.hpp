@@ -10,17 +10,18 @@ namespace HWD::Probe::Driver {
 
     public:
         JLink_Driver();
+        ~JLink_Driver() = default;
 
-        bool IsInitialized() const {
-            return m_Initialized;
+        bool IsLoaded() const {
+            return m_Loaded;
         }
 
     private:
         void LoadFunctionPointers();
 
     private:
-        std::shared_ptr<DynamicLibrary> m_Library;
-        bool m_Initialized = false;
+        std::unique_ptr<DynamicLibrary> m_Library;
+        bool m_Loaded = false;
 
     public: // library functions
         int (*Configure)(const char* pConfig)                                                                                     = nullptr;
@@ -29,7 +30,6 @@ namespace HWD::Probe::Driver {
         const uint8_t* (*GetPCode)(int PCodeIndex, uint32_t* pNumBytes)                                                           = nullptr;
         int (*PrintConfig)(const char* pConfig, uint32_t Mask, char* pBuffer, uint32_t BufferSize)                                = nullptr;
         int (*EraseChip)(void)                                                                                                    = nullptr;
-        int (*SPI_Transfer)(const uint8_t* pDataDown, uint8_t* pDataUp, uint32_t NumBits, uint32_t Flags)                         = nullptr;
         void (*AddMirrorArea)(uint32_t Addr)                                                                                      = nullptr;
         void (*AddMirrorAreaEx)(uint32_t Addr, uint32_t Size)                                                                     = nullptr;
         void (*BeginDownload)(uint32_t Flags)                                                                                     = nullptr;
@@ -291,7 +291,7 @@ namespace HWD::Probe::Driver {
         void (*SWO_Read)(uint8_t* pData, uint32_t Offset, uint32_t* pNumBytes)                                                    = nullptr;
         int (*SWO_ReadStimulus)(int Port, uint8_t* pData, uint32_t NumBytes)                                                      = nullptr;
         void (*TIF_GetAvailable)(uint32_t* pMask)                                                                                 = nullptr;
-        int (*TIF_Select)(int Interface)                                                                                          = nullptr;
+        int (*TIF_Select)(JLink_Types::TargetInterface targetIf)                                                                  = nullptr;
         uint32_t (*TRACE_Control)(uint32_t Cmd, uint32_t* p)                                                                      = nullptr;
         uint32_t (*TRACE_Read)(JLink_Types::TraceData* pData, uint32_t Off, uint32_t* pNumItems)                                  = nullptr;
         char (*WA_AddRange)(uint32_t Addr, uint32_t NumBytes)                                                                     = nullptr;

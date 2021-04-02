@@ -12,7 +12,6 @@ namespace HWD::Probe::Driver {
         GetPCode                     = m_Library->GetFunction<decltype(GetPCode)>("JLINK_GetPCode");
         PrintConfig                  = m_Library->GetFunction<decltype(PrintConfig)>("JLINK_PrintConfig");
         EraseChip                    = m_Library->GetFunction<decltype(EraseChip)>("JLINK_EraseChip");
-        SPI_Transfer                 = m_Library->GetFunction<decltype(SPI_Transfer)>("JLINK_SPI_Transfer");
         AddMirrorArea                = m_Library->GetFunction<decltype(AddMirrorArea)>("JLINKARM_AddMirrorArea");
         AddMirrorAreaEx              = m_Library->GetFunction<decltype(AddMirrorAreaEx)>("JLINKARM_AddMirrorAreaEx");
         BeginDownload                = m_Library->GetFunction<decltype(BeginDownload)>("JLINKARM_BeginDownload");
@@ -281,7 +280,7 @@ namespace HWD::Probe::Driver {
         WA_Restore                   = m_Library->GetFunction<decltype(WA_Restore)>("JLINKARM_WA_Restore");
         SetFlashProgProgressCallback = m_Library->GetFunction<decltype(SetFlashProgProgressCallback)>("JLINK_SetFlashProgProgressCallback");
 
-        m_Initialized = true;
+        m_Loaded = true;
     }
 
 } // namespace HWD::Probe::Driver
