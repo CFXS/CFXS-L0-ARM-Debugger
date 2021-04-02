@@ -105,39 +105,29 @@ namespace HWD::Probe {
         ret = m_Driver->Reset();
         HWDLOG_PROBE_TRACE("Reset return: {0}", ret);
 
-        m_Driver->Go();
-
-        std::thread t([=]() {
+        // Delayed Go
+        new std::thread([=]() {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            uint32_t fp    = 0;
-            uint8_t status = 0;
-            auto ret       = m_Driver->ReadMemU32(addr_FLASH_PERIOD, 1, &fp, &status);
-            HWDLOG_PROBE_TRACE("ReadMemU32 return: {0} - status {1}", ret, status);
+            m_Driver->Go();
+            while (1 < 2) {
+            }
+        });
 
-            HWDLOG_PROBE_ERROR("Current FLASH_PERIOD: {0}", fp);
+        // RTT
+        std::thread t([=]() {
+            auto ret = m_Driver->RTTERMINAL_Control(Driver::JLink_Types::RTT_Command::START, nullptr);
+            HWDLOG_PROBE_TRACE("RTT Start return: {0}", ret);
+            char str[1024];
+            while (1 < 2) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                int bytesRead = m_Driver->RTTERMINAL_Read(0, str, 1024);
+                if (bytesRead > 0) {
+                    str[bytesRead] = 0;
+                    std::cout << str;
+                }
+            }
         });
         t.join();
-
-        std::thread t1([=]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-            auto ret = m_Driver->WriteU32(addr_FLASH_PERIOD, 100);
-            HWDLOG_PROBE_TRACE("WriteU32 set flash period to 100ms return: {0}", ret);
-        });
-        t1.join();
-
-        std::thread t2([=]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-            auto ret = m_Driver->WriteU32(addr_FLASH_PERIOD, 50);
-            HWDLOG_PROBE_TRACE("WriteU32 set flash period to 50ms return: {0}", ret);
-        });
-        t2.join();
-
-        std::thread t3([=]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-            auto ret = m_Driver->WriteU32(addr_FLASH_PERIOD, 1000);
-            HWDLOG_PROBE_TRACE("WriteU32 set flash period to 1000ms return: {0}", ret);
-        });
-        t3.join();
 
         return true;
     }

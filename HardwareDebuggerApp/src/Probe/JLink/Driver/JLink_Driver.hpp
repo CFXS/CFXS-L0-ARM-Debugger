@@ -263,7 +263,7 @@ namespace HWD::Probe::Driver {
         int (*HSS_Read)(void* pBuffer, uint32_t BufferSize)                                                                       = nullptr;
         int (*RAWTRACE_Control)(uint32_t Cmd, void* pData)                                                                        = nullptr;
         int (*RAWTRACE_Read)(uint8_t* pData, uint32_t NumBytes)                                                                   = nullptr;
-        int (*RTTERMINAL_Control)(uint32_t Cmd, void* p)                                                                          = nullptr;
+        int (*RTTERMINAL_Control)(JLink_Types::RTT_Command cmd, void* p)                                                          = nullptr;
         int (*RTTERMINAL_Read)(uint32_t BufferIndex, char* sBuffer, uint32_t BufferSize)                                          = nullptr;
         int (*RTTERMINAL_Write)(uint32_t BufferIndex, const char* sBuffer, uint32_t BufferSize)                                   = nullptr;
         int (*STRACE_Config)(const char* sConfig)                                                                                 = nullptr;

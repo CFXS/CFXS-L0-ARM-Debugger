@@ -1079,7 +1079,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         static constexpr uint32_t LTRACE_USB = 1 << 6;
     } // namespace RawTraceCapabilities
 
-    enum class RTT_Command {
+    enum class RTT_Command : uint32_t {
         START     = 0,
         STOP      = 1,
         GETDESC   = 2,
