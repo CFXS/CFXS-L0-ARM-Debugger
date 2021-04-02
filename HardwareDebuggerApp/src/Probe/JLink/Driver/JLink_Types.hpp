@@ -8,6 +8,11 @@ namespace HWD::Probe::Driver::JLink_Types {
     using UnsecureDialogHook    = int (*)(const char* title, const char* message, uint32_t flags);
     using WaitFunction          = void (*)(void* context);
 
+    namespace Commands {
+        static constexpr const char* ENABLE_FLASH_PROGRESS_POPUP  = "EnableInfoWinFlashDL\n";
+        static constexpr const char* DISABLE_FLASH_PROGRESS_POPUP = "DisableInfoWinFlashDL\n";
+    } // namespace Commands
+
     enum class Emulator_PID {
         UNKNOWN            = 0x00,
         JLINK              = 0x01,
@@ -460,7 +465,7 @@ namespace HWD::Probe::Driver::JLink_Types {
 
     namespace CPU_Registers {
 
-        enum class ARM {
+        enum class ARM : uint32_t {
             R0,
             R1,
             R2,
@@ -544,7 +549,7 @@ namespace HWD::Probe::Driver::JLink_Types {
             COUNT,
         };
 
-        enum class Cortex_M3 {
+        enum class Cortex_M3 : uint32_t {
             R0,
             R1,
             R2,

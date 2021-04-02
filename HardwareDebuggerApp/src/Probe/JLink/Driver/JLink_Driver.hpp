@@ -52,12 +52,12 @@ namespace HWD::Probe::Driver {
         int (*Connect)(void)                                                                                                      = nullptr;
         void (*Core2CoreName)(uint32_t core, char* pBuffer, unsigned BufferSize)                                                  = nullptr;
         void (*EnableFlashCache)(char enable)                                                                                     = nullptr;
-        void (*EnableLog)(JLink_Types::LogCallback* pfLog)                                                                        = nullptr;
-        void (*EnableLogCom)(JLink_Types::LogCallback* pfLog)                                                                     = nullptr;
+        void (*EnableLog)(JLink_Types::LogCallback pfLog)                                                                         = nullptr;
+        void (*EnableLogCom)(JLink_Types::LogCallback pfLog)                                                                      = nullptr;
         void (*EnablePerformanceCnt)(uint32_t Index, uint32_t OnOff)                                                              = nullptr;
         void (*EnableSoftBPs)(char Enable)                                                                                        = nullptr;
         int (*EndDownload)(void)                                                                                                  = nullptr;
-        int (*ExecCommand)(const char* pIn, char* pOut, int BufferSize)                                                           = nullptr;
+        int (*ExecuteCommand)(const char* pIn, char* pOut, int BufferSize)                                                        = nullptr;
         void (*ExecECode)(void)                                                                                                   = nullptr;
         int (*FindBP)(uint32_t Addr)                                                                                              = nullptr;
         int (*FreeMem)(void* pMem)                                                                                                = nullptr;
@@ -109,7 +109,7 @@ namespace HWD::Probe::Driver {
         int (*MeasureCPUSpeed)(uint32_t RAMAddr, int PreserveMem)                                                                 = nullptr;
         int (*MeasureCPUSpeedEx)(uint32_t RAMAddr, int PreserveMem, int AllowFail)                                                = nullptr;
         const char* (*Open)(void)                                                                                                 = nullptr;
-        const char* (*OpenEx)(JLink_Types::LogCallback* pfLog, JLink_Types::LogCallback* pfErrorOut)                              = nullptr;
+        const char* (*OpenEx)(JLink_Types::LogCallback pfLog, JLink_Types::LogCallback pfErrorOut)                                = nullptr;
         int (*ReadCodeMem)(uint32_t Addr, uint32_t NumBytes, void* pData)                                                         = nullptr;
         int (*ReadConfigReg)(uint32_t RegIndex, uint32_t* pData)                                                                  = nullptr;
         int (*ReadControlReg)(uint32_t RegIndex, uint32_t* pData)                                                                 = nullptr;
@@ -147,8 +147,8 @@ namespace HWD::Probe::Driver {
         int (*SetDataEvent)(JLink_Types::DataEvent* pEvent, uint32_t* pHandle)                                                    = nullptr;
         void (*SetDebugUnitBlockMask)(int Type, uint32_t Mask)                                                                    = nullptr;
         int (*SetEndian)(int v)                                                                                                   = nullptr;
-        void (*SetErrorOutHandler)(JLink_Types::LogCallback* pfErrorOut)                                                          = nullptr;
-        int (*SetHookUnsecureDialog)(JLink_Types::UnsecureDialogHook* pfHook)                                                     = nullptr;
+        void (*SetErrorOutHandler)(JLink_Types::LogCallback pfErrorOut)                                                           = nullptr;
+        int (*SetHookUnsecureDialog)(JLink_Types::UnsecureDialogHook pfHook)                                                      = nullptr;
         int (*SetInitRegsOnReset)(int v)                                                                                          = nullptr;
         void (*SetLogFile)(const char* sFilename)                                                                                 = nullptr;
         void (*SetMaxSpeed)(void)                                                                                                 = nullptr;
@@ -162,7 +162,7 @@ namespace HWD::Probe::Driver {
         void (*SetTMS)(void)                                                                                                      = nullptr;
         void (*SetTRST)(void)                                                                                                     = nullptr;
         void (*SetWaitFunction)(JLink_Types::WaitFunction, void* pContext)                                                        = nullptr;
-        void (*SetWarnOutHandler)(JLink_Types::LogCallback* pfWarnOut)                                                            = nullptr;
+        void (*SetWarnOutHandler)(JLink_Types::LogCallback pfWarnOut)                                                             = nullptr;
         int (*SetWP)(uint32_t Addr, uint32_t AddrMask, uint32_t Data, uint32_t DataMask, uint8_t Ctrl, uint8_t CtrlMask)          = nullptr;
         char (*SimulateInstruction)(uint32_t Inst)                                                                                = nullptr;
         char (*Step)(void)                                                                                                        = nullptr;
@@ -296,7 +296,7 @@ namespace HWD::Probe::Driver {
         uint32_t (*TRACE_Read)(JLink_Types::TraceData* pData, uint32_t Off, uint32_t* pNumItems)                                  = nullptr;
         char (*WA_AddRange)(uint32_t Addr, uint32_t NumBytes)                                                                     = nullptr;
         char (*WA_Restore)(void)                                                                                                  = nullptr;
-        void (*SetFlashProgProgressCallback)(JLink_Types::FlashProgressCallback* pfOnFlashProgess)                                = nullptr;
+        void (*SetFlashProgProgressCallback)(JLink_Types::FlashProgressCallback pfOnFlashProgess)                                 = nullptr;
     };
 
 } // namespace HWD::Probe::Driver

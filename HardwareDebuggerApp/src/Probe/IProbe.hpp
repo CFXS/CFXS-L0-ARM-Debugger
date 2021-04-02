@@ -3,19 +3,16 @@
 namespace HWD::Probe {
 
     enum class TargetStatus {
-        CONNECTED,
-        DISCONNECTED,
-        CONNECTION_ERROR,
+        CONNECTED,          // connected to targer
+        DISCONNECTED,       // not connected to target
+        NO_TARGET_DETECTED, // target not present
+        CONNECTION_ERROR,   // error while connecting to target
     };
 
     class IProbe {
     public:
-        IProbe() {
-            HWDLOG_PROBE_TRACE("IProbe::IProbe() @ {0}", fmt::ptr(this));
-        };
-        virtual ~IProbe() {
-            HWDLOG_PROBE_TRACE("IProbe::~IProbe() @ {0}", fmt::ptr(this));
-        };
+        IProbe()          = default;
+        virtual ~IProbe() = default;
 
         /// \return is probe ready for use
         virtual bool IsInitialized() const = 0;

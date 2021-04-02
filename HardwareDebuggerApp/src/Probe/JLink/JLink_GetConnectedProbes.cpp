@@ -32,6 +32,10 @@ namespace HWD::Probe {
                 if (std::find_if(s_Probes.begin(), s_Probes.end(), [&](JLink_Probe* a) {
                         return probeInfoBuffer[i].serialNumber == a->GetRawSerialNumber();
                     }) == s_Probes.end()) {
+                    HWDLOG_PROBE_INFO("found new probe on {0} interface: \"{1}\" - S/N: {1}",
+                                      probeInfoBuffer[i].interface == HostInterfaceType::USB ? "USB" : "ETHERNET",
+                                      probeInfoBuffer[i].modelName,
+                                      probeInfoBuffer[i].serialNumber);
                     s_Probes.push_back(new JLink_Probe(probeInfoBuffer[i]));
                 }
             }

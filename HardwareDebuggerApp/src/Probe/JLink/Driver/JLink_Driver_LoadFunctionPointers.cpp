@@ -4,8 +4,6 @@
 namespace HWD::Probe::Driver {
 
     void JLink_Driver::LoadFunctionPointers() {
-        HWDLOG_PROBE_TRACE("JLink_Driver[{0}] Load function pointers", fmt::ptr(this));
-
         Configure                    = m_Library->GetFunction<decltype(Configure)>("JLINK_Configure");
         DownloadFile                 = m_Library->GetFunction<decltype(DownloadFile)>("JLINK_DownloadFile");
         GetAvailableLicense          = m_Library->GetFunction<decltype(GetAvailableLicense)>("JLINK_GetAvailableLicense");
@@ -39,7 +37,7 @@ namespace HWD::Probe::Driver {
         EnablePerformanceCnt         = m_Library->GetFunction<decltype(EnablePerformanceCnt)>("JLINKARM_EnablePerformanceCnt");
         EnableSoftBPs                = m_Library->GetFunction<decltype(EnableSoftBPs)>("JLINKARM_EnableSoftBPs");
         EndDownload                  = m_Library->GetFunction<decltype(EndDownload)>("JLINKARM_EndDownload");
-        ExecCommand                  = m_Library->GetFunction<decltype(ExecCommand)>("JLINKARM_ExecCommand");
+        ExecuteCommand               = m_Library->GetFunction<decltype(ExecuteCommand)>("JLINKARM_ExecCommand");
         ExecECode                    = m_Library->GetFunction<decltype(ExecECode)>("JLINKARM_ExecECode");
         FindBP                       = m_Library->GetFunction<decltype(FindBP)>("JLINKARM_FindBP");
         FreeMem                      = m_Library->GetFunction<decltype(FreeMem)>("JLINKARM_FreeMem");
