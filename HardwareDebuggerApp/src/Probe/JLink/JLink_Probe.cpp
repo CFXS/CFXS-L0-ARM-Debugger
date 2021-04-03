@@ -281,6 +281,7 @@ namespace HWD::Probe {
         if (haltAfterReset) {
             if (m_Driver->probe_GetCapabilities() & ProbeCapabilities::RESET_STOP_TIMED) {
                 ec = m_Driver->target_Reset();
+                // TODO: finish this
             } else {
                 HWDLOG_PROBE_WARN("[JLink_Probe@{0}] immediate reset and halt not supported - resetting and halting seperately",
                                   fmt::ptr(this));
@@ -289,8 +290,9 @@ namespace HWD::Probe {
             }
         } else {
             m_Driver->target_ResetAndRun();
-            return true;
         }
+
+        return true;
     }
 
     // TODO: Implement error reason callback for higher level callers
@@ -322,6 +324,7 @@ namespace HWD::Probe {
                 }
             });
             terminalThread->detach();
+            return true;
         }
     }
 
