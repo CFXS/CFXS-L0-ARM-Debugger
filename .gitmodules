@@ -11,6 +11,3 @@
 [submodule "HardwareDebuggerApp/vendor/SDL"]
 	path = HardwareDebuggerApp/vendor/SDL
 	url = https://github.com/CFXS/SDL.git
-[submodule "HardwareDebuggerApp/vendor/glew"]
-	path = HardwareDebuggerApp/vendor/glew
-	url = https://github.com/Perlmint/glew-cmake.git
