@@ -15,7 +15,10 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
-        m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
+        (new std::thread([=]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
+        }))->detach();
     }
 
     void HWD_Application::OnDestroy() {
@@ -28,7 +31,8 @@ namespace HWD {
 
     float val[4] = {0, 0, 0, 0};
     void HWD_Application::OnImGuiRender() {
-        ImGui::Begin("Status Bar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Begin(
+            "Status Bar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("Dedoid Text");
         ImGui::DragFloat4("Test Float4", val);
         ImGui::ProgressBar(0.25f);
