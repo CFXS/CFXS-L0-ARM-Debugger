@@ -14,16 +14,16 @@ namespace HWD::Probe {
         std::shared_ptr<Driver::JLink_Driver> driver;
 
         // create new driver or get driver from existing probe
-        bool probeArrayEmpty = true;
+        int probeArrayIndex = -1;
         for (int i = 0; i < MAX_DISCOVERABLE_PROBE_COUNT; i++) {
             if (s_Probes[i]) {
-                probeArrayEmpty = false;
+                probeArrayIndex = i;
                 break;
             }
         }
 
-        if (!probeArrayEmpty) {
-            driver = s_Probes[0]->GetDriver();
+        if (probeArrayIndex != -1) {
+            driver = s_Probes[probeArrayIndex]->GetDriver();
         } else {
             driver = std::make_shared<Driver::JLink_Driver>();
         }

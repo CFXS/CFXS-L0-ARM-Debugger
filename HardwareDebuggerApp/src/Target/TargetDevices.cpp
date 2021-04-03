@@ -17,7 +17,7 @@ namespace HWD {
             "TM4C1294NCPDT",
             {
                 TargetDeviceDescription::MemoryRegion{"Flash", 0, 0x100000, MemoryRegion::AccessPermissions::READ},
-                TargetDeviceDescription::MemoryRegion{"ROM", 0x01000000, 0x8C00, MemoryRegion::AccessPermissions::READ},
+                TargetDeviceDescription::MemoryRegion{"ROM", 0x1000000, 0x8C00, MemoryRegion::AccessPermissions::READ},
                 TargetDeviceDescription::MemoryRegion{"SRAM", 0x20000000, 0x40000, MemoryRegion::AccessPermissions::READ_WRITE},
             }};
 
