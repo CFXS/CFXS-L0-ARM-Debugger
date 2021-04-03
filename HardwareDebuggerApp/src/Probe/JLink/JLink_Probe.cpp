@@ -310,32 +310,41 @@ namespace HWD::Probe {
     bool JLink_Probe::Target_StartTerminal(void* params) {
         if (!Probe_IsConnected()) {
             HWDLOG_PROBE_ERROR("[JLink_Probe@{0}] Failed to start terminal - probe not connected", fmt::ptr(this));
+            m_TerminalEnabled = false;
             return false;
         }
 
         if (params) {
             HWDLOG_PROBE_ERROR("[JLink_Probe@{0}] Start terminal with params not implemented", fmt::ptr(this));
+            m_TerminalEnabled = false;
             return false;
         } else {
-            auto* terminalThread = new std::thread([=]() {
-                ErrorCode ec = m_Driver->target_RTT_Control(Driver::JLink_Types::RTT_Command::START, nullptr);
-                if (ec == ErrorCode::OK) {
-                    HWDLOG_PROBE_TRACE("[JLink_Probe@{0}] Terminal started", fmt::ptr(this));
+            ErrorCode ec = m_Driver->target_RTT_Control(Driver::JLink_Types::RTT_Command::START, nullptr);
+            if (ec == ErrorCode::OK) {
+                HWDLOG_PROBE_TRACE("[JLink_Probe@{0}] Terminal started", fmt::ptr(this));
+                m_TerminalEnabled = true;
+                return true;
+            } else {
+                HWDLOG_PROBE_ERROR("[JLink_Probe@{0}] Failed to start terminal - {1}", fmt::ptr(this), ErrorCodeToString(ec));
 
-                    char str[1024];
-                    while (1 < 2) {
-                        int bytesRead = m_Driver->target_RTT_Read(0, str, 1024);
-                        if (bytesRead > 0) {
-                            str[bytesRead] = 0;
-                            std::cout << str;
-                        }
-                    }
-                } else {
-                    HWDLOG_PROBE_ERROR("[JLink_Probe@{0}] Failed to start terminal - {1}", fmt::ptr(this), ErrorCodeToString(ec));
+                m_TerminalEnabled = false;
+                return true;
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Process
+    void JLink_Probe::Process() {
+        if (m_TerminalEnabled) {
+            char str[1024];
+            while (1 < 2) {
+                int bytesRead = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
+                if (bytesRead > 0) {
+                    str[bytesRead] = 0;
+                    std::cout << str;
                 }
-            });
-            terminalThread->detach();
-            return true;
+            }
         }
     }
 

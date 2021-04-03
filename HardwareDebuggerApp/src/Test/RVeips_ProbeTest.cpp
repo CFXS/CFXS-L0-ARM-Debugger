@@ -11,13 +11,14 @@ namespace HWD::Test {
 
     RVeips_ProbeTest::RVeips_ProbeTest() {
         TargetDevices::LoadSupportedDevices();
+        auto& testDevice = TargetDevices::GetSupportedDevices().at("TM4C1294NC");
 
         auto connectedProbes = JLink_Probe::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
             probe->Probe_Connect();
 
             probe->Target_SelectDebugInterface(IProbe::DebugInterface::SWD);
-            probe->Target_SelectDevice(TargetDevices::GetSupportedDevices().at("TM4C1294NCPDT"));
+            probe->Target_SelectDevice(testDevice);
             probe->Target_Connect();
 
             if (probe->Target_IsConnected()) {
@@ -26,6 +27,13 @@ namespace HWD::Test {
 
                 probe->Target_StartTerminal();
             }
+
+            auto thread = new std::thread([=]() {
+                while (1 < 2) {
+                    probe->Process();
+                }
+            });
+            thread->detach();
         }
     }
 

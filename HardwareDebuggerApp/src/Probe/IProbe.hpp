@@ -18,6 +18,9 @@ namespace HWD::Probe {
         IProbe()          = default;
         virtual ~IProbe() = default;
 
+        /// Process loop
+        virtual void Process() = 0;
+
         /// Is probe ready for use
         /// \return is probe ready for use
         virtual bool Probe_IsReady() const = 0;

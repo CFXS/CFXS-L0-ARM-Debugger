@@ -19,6 +19,8 @@ namespace HWD::Probe {
         virtual ~JLink_Probe();
 
         /////////////////////////////////////////
+        void Process() override;
+        /////////////////////////////////////////
         // Probe overrides
         bool Probe_IsReady() const override;
         bool Probe_Connect() override;
@@ -79,6 +81,9 @@ namespace HWD::Probe {
     private:
         std::shared_ptr<Driver::JLink_Driver> m_Driver;
         int m_ProbeIndex;
+
+        // terminal
+        bool m_TerminalEnabled = true;
 
     private: // generic properties
         uint32_t m_RawSerialNumber       = 0;
