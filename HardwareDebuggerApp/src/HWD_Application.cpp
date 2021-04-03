@@ -28,11 +28,7 @@ namespace HWD {
 
     float val[4] = {0, 0, 0, 0};
     void HWD_Application::OnImGuiRender() {
-        ImGui::Begin("Status Bar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("Dedoid Text");
-        ImGui::DragFloat4("Test Float4", val);
-        ImGui::ProgressBar(0.25f);
-        ImGui::End();
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
     }
 
     void HWD_Application::OnEvent() {
