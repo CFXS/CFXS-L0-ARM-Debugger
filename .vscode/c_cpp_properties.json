@@ -15,7 +15,9 @@
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/",
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/Lua/src",
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/spdlog/include",
-                "${workspaceFolder}/HardwareDebuggerApp/vendor/SDL/include"
+                "${workspaceFolder}/HardwareDebuggerApp/vendor/SDL/include",
+                "${workspaceFolder}/HardwareDebuggerApp/vendor/GLEW/include"
+
             ],
             "forcedInclude": [
                 "${workspaceFolder}/out/build/HardwareDebuggerApp/CMakeFiles/HardwareDebuggerApp.dir/cmake_pch.hxx"

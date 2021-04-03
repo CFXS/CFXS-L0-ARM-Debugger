@@ -9,8 +9,9 @@ namespace HWD {
 
     Window::Window(const WindowProps& props) : m_Data(props) {
         if (!s_SDLWindowCount) {
+            HWDLOG_CORE_INFO("Initializing SDL2");
             if (SDL_Init(SDL_INIT_VIDEO)) {
-                HWDLOG_PROBE_CRITICAL("Failed to initialize SDL2 - {0}", SDL_GetError());
+                HWDLOG_CORE_CRITICAL("Failed to initialize SDL2 - {0}", SDL_GetError());
                 HWD_DEBUGBREAK();
             }
         }
@@ -24,9 +25,11 @@ namespace HWD {
                                     SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
         s_SDLWindowCount++;
         if (!m_Window) {
-            HWDLOG_PROBE_CRITICAL("Failed to create window - {0}", SDL_GetError());
+            HWDLOG_CORE_CRITICAL("Failed to create window - {0}", SDL_GetError());
             HWD_DEBUGBREAK();
         }
+
+        m_Context = std::make_unique<OpenGL_Context>(m_Window);
     }
 
     Window::~Window() {
@@ -46,6 +49,10 @@ namespace HWD {
                 case SDL_EventType::SDL_QUIT: Application::Get().Close(); break;
             }
         }
+    }
+
+    void Window::SwapBuffers() {
+        m_Context->SwapBuffers();
     }
 
 } // namespace HWD

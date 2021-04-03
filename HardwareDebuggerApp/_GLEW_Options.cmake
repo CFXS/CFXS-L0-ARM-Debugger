@@ -1,0 +1,1 @@
+set(glew-cmake_BUILD_SHARED OFF)
