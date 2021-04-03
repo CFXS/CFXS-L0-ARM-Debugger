@@ -8,14 +8,20 @@ namespace HWD {
 
     class Application {
     public:
-        Application(int argc, char** argv, const std::string& name = "HWD App");
+        Application(int argc, char** argv, const std::string& name = "App");
         virtual ~Application();
+
+        virtual void OnCreate()      = 0;
+        virtual void OnDestroy()     = 0;
+        virtual void OnUpdate()      = 0;
+        virtual void OnImGuiRender() = 0;
+        virtual void OnEvent()       = 0;
+
+        void Close();
 
         inline Window& GetWindow() {
             return *m_Window;
         }
-
-        void Close();
 
         static inline Application& Get() {
             return *s_Instance;

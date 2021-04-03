@@ -1,6 +1,5 @@
 // [source]
-#include "main.hpp"
-#include "Core/Application.hpp"
+#include "HWD_Application.hpp"
 #include "Log/Log.hpp"
 
 int main(int argc, char** argv) {
@@ -8,11 +7,12 @@ int main(int argc, char** argv) {
     HWDLOG_CORE_INFO("Initialized Logging");
 
     HWDLOG_CORE_INFO("Creating Application");
-    auto app = new HWD::Application(argc, argv, "CFXS Hardware Debugger " CFXS_HWD_VERSION_STRING);
+    auto app = new HWD::HWD_Application(argc, argv);
 
-    HWDLOG_CORE_INFO("Running Application");
     app->Run();
     delete app;
+
+    std::cin.get();
 
     return 0;
 }

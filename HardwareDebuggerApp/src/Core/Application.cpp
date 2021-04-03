@@ -18,14 +18,20 @@ namespace HWD {
     }
 
     void Application::Close() {
+        HWDLOG_CORE_INFO("Closing application");
         m_Running = false;
+        OnDestroy();
     }
 
     void Application::Run() {
-        Test::RVeips_ProbeTest probeTest;
+        HWDLOG_CORE_INFO("Running application");
+        OnCreate();
 
         while (m_Running) {
+            OnUpdate();
+            OnImGuiRender();
             Window::OnUpdate();
+            m_Window->SwapBuffers();
         }
     }
 

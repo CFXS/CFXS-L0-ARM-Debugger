@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL.h>
+#include "OpenGL_Context.hpp"
 
 namespace HWD {
 
@@ -19,6 +20,7 @@ namespace HWD {
         virtual ~Window();
 
         static void OnUpdate();
+        void SwapBuffers();
 
         inline const std::string& WindowTitle() const {
             return m_Data.Title;
@@ -37,8 +39,9 @@ namespace HWD {
         }
 
     private:
-        SDL_Window* m_Window = nullptr;
         WindowProps m_Data;
+        SDL_Window* m_Window = nullptr;
+        std::unique_ptr<OpenGL_Context> m_Context;
     };
 
 } // namespace HWD

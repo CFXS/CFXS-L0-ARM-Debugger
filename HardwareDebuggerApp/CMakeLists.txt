@@ -1,7 +1,6 @@
 set(EXE_NAME HardwareDebuggerApp)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
 
-
 exec_program(py ARGS "\"${CMAKE_SOURCE_DIR}/Tools/GenerateSources.py\" \"${ROOT_DIR}/src\" \"${ROOT_DIR}/_Sources.cmake\" \"// [source]\"")
 include("_Sources.cmake")
 
@@ -12,6 +11,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui)
 
 include("_SDL_Options.cmake")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL)
+
+include("_GLEW_Options.cmake")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/GLEW)
 
 add_executable(${EXE_NAME} ${headers} ${sources})
 
@@ -48,17 +50,13 @@ endif()
 
 target_include_directories(${EXE_NAME} PRIVATE src)
 target_include_directories(${EXE_NAME} SYSTEM PRIVATE vendor)
-target_include_directories(${EXE_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui"
-    "${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua/src"
-)
+target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
 
 if(MSVC)
   target_compile_options(${EXE_NAME} PRIVATE "/MP")
 endif()
 
-target_link_libraries(${EXE_NAME} PRIVATE project_options project_warnings SDL2-static SDL2main Lua)
+target_link_libraries(${EXE_NAME} PRIVATE project_options project_warnings SDL2-static SDL2main Lua libglew_static)
 
 
 string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
