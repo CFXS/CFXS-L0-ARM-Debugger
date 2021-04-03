@@ -44,6 +44,7 @@ namespace HWD::Probe {
         virtual bool Target_WriteProgram(const uint8_t* data, uint32_t size) override;
         virtual bool Target_Reset(bool haltAfterReset = true) override;
         virtual bool Target_StartTerminal(void* params = nullptr) override;
+        virtual const char* Target_GetTerminalBuffer() override;
         /////////////////////////////////////////
 
     public:
@@ -84,6 +85,7 @@ namespace HWD::Probe {
 
         // terminal
         bool m_TerminalEnabled = true;
+        std::vector<char> m_TerminalBuffer;
 
     private: // generic properties
         uint32_t m_RawSerialNumber       = 0;

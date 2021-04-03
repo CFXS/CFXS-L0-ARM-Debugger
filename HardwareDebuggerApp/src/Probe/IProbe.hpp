@@ -77,6 +77,9 @@ namespace HWD::Probe {
         /// \return true if started successfully
         virtual bool Target_StartTerminal(void* params = nullptr) = 0;
 
+        /// Get terminal buffer
+        virtual const char* Target_GetTerminalBuffer() = 0;
+
     private:
     };
 

@@ -323,6 +323,7 @@ namespace HWD::Probe {
             if (ec == ErrorCode::OK) {
                 HWDLOG_PROBE_TRACE("[JLink_Probe@{0}] Terminal started", fmt::ptr(this));
                 m_TerminalEnabled = true;
+                m_TerminalBuffer.reserve(1024 * 1024 * 16);
                 return true;
             } else {
                 HWDLOG_PROBE_ERROR("[JLink_Probe@{0}] Failed to start terminal - {1}", fmt::ptr(this), ErrorCodeToString(ec));
@@ -333,6 +334,10 @@ namespace HWD::Probe {
         }
     }
 
+    const char* JLink_Probe::Target_GetTerminalBuffer() {
+        return m_TerminalBuffer.data();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////
     // Process
     void JLink_Probe::Process() {
@@ -340,9 +345,8 @@ namespace HWD::Probe {
             char str[1024];
             while (1 < 2) {
                 int bytesRead = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
-                if (bytesRead > 0) {
-                    str[bytesRead] = 0;
-                    std::cout << str;
+                for (int i = 0; i < bytesRead; i++) {
+                    m_TerminalBuffer.push_back(str[i]);
                 }
             }
         }

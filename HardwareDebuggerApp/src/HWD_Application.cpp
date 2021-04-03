@@ -14,28 +14,37 @@ namespace HWD {
     HWD_Application::~HWD_Application() {
     }
 
+    static ImFont* font_SCP;
     void HWD_Application::OnCreate() {
         (new std::thread([=]() {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
         }))->detach();
+
+        auto& io = ImGui::GetIO();
+        font_SCP = io.Fonts->AddFontFromFileTTF("C:/CFXS/SourceCodePro-Regular.ttf", 24);
     }
 
     void HWD_Application::OnDestroy() {
     }
 
     void HWD_Application::OnUpdate() {
-        glClearColor(0.1f, 0.1f, 0.1f, 1);
+        glClearColor(0.1f, 0.1f, 0.1f, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     float val[4] = {0, 0, 0, 0};
     void HWD_Application::OnImGuiRender() {
-        ImGui::Begin(
-            "Status Bar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("Dedoid Text");
-        ImGui::DragFloat4("Test Float4", val);
+        ImGui::Begin("JLink", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_HorizontalScrollbar);
         ImGui::ProgressBar(0.25f);
+
+        ImGui::BeginChild("Terminal");
+        ImGui::Text("CFXS::Time::ms = %llu", 0);
+        ImGui::Text("");
+        ImGui::Text(m_RihardsTest ? m_RihardsTest->GetTerminalText() : "Waiting for debug session");
+        ImGui::SetScrollHereY(1.0f);
+        ImGui::EndChild();
+
         ImGui::End();
     }
 

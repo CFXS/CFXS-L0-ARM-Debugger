@@ -26,6 +26,7 @@ namespace HWD::Test {
                 probe->Target_Reset(false);
 
                 probe->Target_StartTerminal();
+                m_Probe = probe;
             }
 
             auto thread = new std::thread([=]() {
@@ -42,6 +43,15 @@ namespace HWD::Test {
         for (IProbe* probe : connectedProbes) {
             delete probe;
         }
+    }
+
+    //
+
+    const char* RVeips_ProbeTest::GetTerminalText() {
+        if (m_Probe)
+            m_Probe->Target_GetTerminalBuffer();
+        else
+            return "Waiting for target...";
     }
 
 } // namespace HWD::Test
