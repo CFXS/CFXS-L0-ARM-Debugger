@@ -88,7 +88,7 @@ namespace HWD {
             m_Handle = _DynamicLibrary::Load(path.c_str());
 
             if (m_Handle == nullptr) {
-                HWDLOG_CORE_ERROR(" - Failed to load library: [{0}]({1})", GetErrorCode(), GetErrorString());
+                HWDLOG_CORE_ERROR(" - Failed to load library: ({0}) - {1}", GetErrorCode(), GetErrorString());
             }
         }
 

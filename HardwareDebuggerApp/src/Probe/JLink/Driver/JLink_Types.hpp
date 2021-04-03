@@ -45,16 +45,16 @@ namespace HWD::Probe::Driver::JLink_Types {
         FLASHER_PRO        = 0x22
     };
 
-    enum class ErrorCode {
-        // emulator
-        EMU_NO_CONNECTION            = -256,
-        EMU_COMM_ERROR               = -257,
-        DLL_NOT_OPEN                 = -258,
-        TARGET_NOT_POWERED_FAILURE   = -259,
+    enum class ErrorCode : int {
+        OK                           = 0,
+        PROBE_NO_CONNECTION          = -256,
+        PROBE_COM_ERROR              = -257,
+        DLL_NOT_LOADED               = -258,
+        TARGET_NOT_POWERED           = -259,
         INVALID_HANDLE               = -260,
         NO_CPU_FOUND                 = -261,
-        EMU_FEATURE_NOT_SUPPORTED    = -262,
-        EMU_NO_MEMORY                = -263,
+        PROBE_FEATURE_NOT_SUPPORTED  = -262,
+        PROBE_NO_MEMORY              = -263,
         TIF_STATUS_ERROR             = -264,
         FLASH_PROG_COMPARE_FAILED    = -265,
         FLASH_PROG_PROGRAM_FAILED    = -266,
@@ -63,28 +63,75 @@ namespace HWD::Probe::Driver::JLink_Types {
         UNKNOWN_FILE_FORMAT          = -269,
         WRITE_TARGET_MEMORY_FAILED   = -270,
         DEVICE_FEATURE_NOT_SUPPORTED = -271,
-        WRONG_USER_CONFIG            = -272,
+        BAD_USER_CONFIG              = -272,
         NO_TARGET_DEVICE_SELECTED    = -273,
         CPU_IN_LOW_POWER_MODE        = -274,
+        NO_CPU_CLOCK                 = -2147483647,
+        NO_CPU_POWER                 = -2147483646,
+        GENERIC_ERROR                = -1,
+        SPECIFIC_ERROR               = -2,
+        NO_FLASH_BANK                = -3,
+        PROGRAM_TOO_BIG              = -4,
+    };
 
-        // target cpu
-        CPU_NO_CLOCK = -2147483647,
-        CPU_NO_POWER = -2147483646,
-
-        // memory access (JLINK_FLASH_ERR)
+    enum class FlashErrorCode : int {
         BLOCK_VERIFICATION_ERROR = 1,
         ITEM_VERIFICATION_ERROR  = 2,
         TIMEOUT                  = 3,
         PROGRAM_ERROR            = 4,
         PROGRAM_1_OVER_0         = 5,
-        SECTOR_IS_LOCKED         = 6,
+        SECTOR_LOCKED            = 6,
         ERASE_ERROR              = 7,
         NO_FLASH_MEMORY          = 8,
-        GENERIC_ERROR            = 9,
-        ALGO_SPECIFIC_ERROR      = -2,
-        NO_FLASH_BANK            = -3,
-        PROGRAM_DOES_NOT_FIT     = -4,
+        ERR                      = 9,
     };
+
+    inline const char* ErrorCodeToString(ErrorCode ec) {
+        switch (ec) {
+            case ErrorCode::OK: return "No error";
+            case ErrorCode::PROBE_NO_CONNECTION: return "Probe not connected";
+            case ErrorCode::GENERIC_ERROR: return "Error";
+            case ErrorCode::PROBE_COM_ERROR: return "Probe communication error";
+            case ErrorCode::DLL_NOT_LOADED: return "Library not laoded";
+            case ErrorCode::TARGET_NOT_POWERED: return "Target not powered";
+            case ErrorCode::INVALID_HANDLE: return "Invalid handle";
+            case ErrorCode::NO_CPU_FOUND: return "No CPU found";
+            case ErrorCode::PROBE_FEATURE_NOT_SUPPORTED: return "Probe feature not supported";
+            case ErrorCode::PROBE_NO_MEMORY: return "Probe out of memory";
+            case ErrorCode::TIF_STATUS_ERROR: return "Target interface status error";
+            case ErrorCode::FLASH_PROG_COMPARE_FAILED: return "Flash program compare failed";
+            case ErrorCode::FLASH_PROG_PROGRAM_FAILED: return "Flash program write failed";
+            case ErrorCode::FLASH_PROG_VERIFY_FAILED: return "Flash program verify failed";
+            case ErrorCode::OPEN_FILE_FAILED: return "Failed to open file";
+            case ErrorCode::UNKNOWN_FILE_FORMAT: return "Unknown file format";
+            case ErrorCode::WRITE_TARGET_MEMORY_FAILED: return "Failed to write target memory";
+            case ErrorCode::DEVICE_FEATURE_NOT_SUPPORTED: return "Device feature not supported";
+            case ErrorCode::BAD_USER_CONFIG: return "Bad user config";
+            case ErrorCode::NO_TARGET_DEVICE_SELECTED: return "No target device selected";
+            case ErrorCode::CPU_IN_LOW_POWER_MODE: return "CPU in low power mode";
+            case ErrorCode::NO_CPU_CLOCK: return "No CPU clock";
+            case ErrorCode::NO_CPU_POWER: return "No CPU power";
+            case ErrorCode::SPECIFIC_ERROR: return "Error";
+            case ErrorCode::NO_FLASH_BANK: return "No flash bank";
+            case ErrorCode::PROGRAM_TOO_BIG: return "Program too big";
+            default: return "Unknown error";
+        };
+    }
+
+    inline const char* FlashErrorCodeToString(FlashErrorCode fec) {
+        switch (fec) {
+            case FlashErrorCode::BLOCK_VERIFICATION_ERROR: return "Block verification failed";
+            case FlashErrorCode::ITEM_VERIFICATION_ERROR: return "Item verification failed";
+            case FlashErrorCode::TIMEOUT: return "Timed out";
+            case FlashErrorCode::PROGRAM_ERROR: return "Program error";
+            case FlashErrorCode::PROGRAM_1_OVER_0: return "Program error 1/0";
+            case FlashErrorCode::SECTOR_LOCKED: return "Sector locked";
+            case FlashErrorCode::ERASE_ERROR: return "Erase failed";
+            case FlashErrorCode::NO_FLASH_MEMORY: return "No flash memory";
+            case FlashErrorCode::ERR: return "Error";
+            default: return "Unknown error";
+        };
+    }
 
     enum class PinStatus {
         LOW     = 0,
@@ -102,16 +149,16 @@ namespace HWD::Probe::Driver::JLink_Types {
         UART_RXTX    = 6,
     };
 
-    enum class TargetInterface {
-        JTAG  = 0,
-        SWD   = 1,
-        BDM3  = 2,
-        FINE  = 3,
-        ICSP  = 4,
-        SPI   = 5,
-        C2    = 6,
-        CJTAG = 7,
+    enum class TargetInterface : uint32_t {
+        JTAG = 0,
+        SWD  = 1,
     };
+
+    enum class TargetInterfaceMask : uint32_t {
+        JTAG = 1 << 0,
+        SWD  = 1 << 1,
+    };
+    HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(TargetInterfaceMask, uint32_t)
 
     static constexpr auto HSS_FLAG_TIMESTAMP_US = 1UL << 0;
 
@@ -232,7 +279,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         static constexpr uint32_t HSS        = 1 << 15;
     } // namespace CPU_Capacilities
 
-    enum class EmulatorCapabilities : uint32_t {
+    enum class ProbeCapabilities : uint32_t {
         RESERVED           = 1 << 0,
         GET_HW_VERSION     = 1 << 1,
         WRITE_DCC          = 1 << 2,
@@ -266,8 +313,9 @@ namespace HWD::Probe::Driver::JLink_Types {
         RAWTRACE           = 1 << 30,
         GET_CAPS_EX        = 1ul << 31,
     };
+    HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(ProbeCapabilities, uint32_t)
 
-    enum class EmulatorExtendedCapabilities : uint8_t {
+    enum class ProbeExtendedCapabilities : uint8_t {
         RESERVED                  = 0,
         GET_HW_VERSION            = 1,
         WRITE_DCC                 = 2,

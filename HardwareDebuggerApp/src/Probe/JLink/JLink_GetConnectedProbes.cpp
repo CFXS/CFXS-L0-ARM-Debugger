@@ -3,19 +3,26 @@
 
 namespace HWD::Probe {
 
-    /////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
     using namespace Driver::JLink_Types;
-    /////////////////////////////////////////////////////
-    static constexpr auto MAX_DISCOVERABLE_PROBE_COUNT = 32; // limit max discoverable probe count
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static std::vector<JLink_Probe*> s_Probes;
-    /////////////////////////////////////////////////////
-
-    const std::vector<JLink_Probe*>& JLink_Probe::GetConnectedProbes() {
+    /// Get vector of connected JLink probes
+    // Not the best performing function. Will not be called a lot of times, so should be ok.
+    // Maybe still optimize later
+    std::vector<JLink_Probe*> JLink_Probe::s_GetConnectedProbes() {
         std::shared_ptr<Driver::JLink_Driver> driver;
 
         // create new driver or get driver from existing probe
-        if (!s_Probes.empty()) {
+        bool probeArrayEmpty = true;
+        for (int i = 0; i < MAX_DISCOVERABLE_PROBE_COUNT; i++) {
+            if (s_Probes[i]) {
+                probeArrayEmpty = false;
+                break;
+            }
+        }
+
+        if (!probeArrayEmpty) {
             driver = s_Probes[0]->GetDriver();
         } else {
             driver = std::make_shared<Driver::JLink_Driver>();
@@ -28,20 +35,38 @@ namespace HWD::Probe {
                 HostInterfaceType::USB | HostInterfaceType::ETHERNET, probeInfoBuffer, MAX_DISCOVERABLE_PROBE_COUNT);
 
             for (int i = 0; i < connectedProbeCount; i++) {
-                // add if not already in vector
-                if (std::find_if(s_Probes.begin(), s_Probes.end(), [&](JLink_Probe* a) {
-                        return probeInfoBuffer[i].serialNumber == a->GetRawSerialNumber();
-                    }) == s_Probes.end()) {
-                    HWDLOG_PROBE_INFO("found new probe on {0} interface: \"{1}\" - S/N: {1}",
+                // find free slot
+                int freeIndex = -1;
+                for (int j = 0; j < MAX_DISCOVERABLE_PROBE_COUNT; j++) {
+                    if (s_Probes[i] == nullptr) {
+                        freeIndex = i;
+                        break;
+                    }
+                }
+
+                // add if not already in array and array has free slot
+                if (freeIndex >= 0 && std::find_if(s_Probes.begin(), s_Probes.end(), [&](JLink_Probe* a) {
+                                          if (a == nullptr)
+                                              return false;
+                                          return probeInfoBuffer[i].serialNumber == a->GetRawSerialNumber();
+                                      }) == s_Probes.end()) {
+                    HWDLOG_PROBE_INFO("found new probe on {0} interface: \"{1}\" - S/N: {2}",
                                       probeInfoBuffer[i].interface == HostInterfaceType::USB ? "USB" : "ETHERNET",
                                       probeInfoBuffer[i].modelName,
                                       probeInfoBuffer[i].serialNumber);
-                    s_Probes.push_back(new JLink_Probe(probeInfoBuffer[i]));
+                    s_Probes[freeIndex] = new JLink_Probe(probeInfoBuffer[i], freeIndex);
                 }
             }
         }
 
-        return s_Probes;
+        std::vector<JLink_Probe*> probes;
+        probes.reserve(MAX_DISCOVERABLE_PROBE_COUNT);
+
+        for (int i = 0; i < MAX_DISCOVERABLE_PROBE_COUNT; i++) {
+            if (s_Probes[i])
+                probes.push_back(s_Probes[i]);
+        }
+        return probes;
     }
 
 } // namespace HWD::Probe
