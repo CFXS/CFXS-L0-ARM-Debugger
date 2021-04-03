@@ -10,9 +10,7 @@ namespace HWD::Test {
 
     using namespace Probe;
 
-    void RVeips_ProbeTest::Run() {
-        HWDLOG_CORE_TRACE("RVeips_ProbeTest::Run()");
-
+    RVeips_ProbeTest::RVeips_ProbeTest() {
         auto connectedProbes = JLink_Probe::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
             probe->Probe_Connect();
@@ -27,8 +25,13 @@ namespace HWD::Test {
 
                 probe->Target_StartTerminal();
             }
+        }
+    }
 
-            //probe->Probe_Disconnect();
+    RVeips_ProbeTest::~RVeips_ProbeTest() {
+        auto connectedProbes = JLink_Probe::s_GetConnectedProbes();
+        for (IProbe* probe : connectedProbes) {
+            delete probe;
         }
     }
 

@@ -154,7 +154,7 @@ namespace HWD::Probe::Driver {
         uint32_t (*probe_GetConnectedDeviceCount)(void)                                                                           = nullptr;
         int (*probe_IsCapableOfEx)(JLink_Types::ProbeExtendedCapabilities CapEx)                                                  = nullptr;
         char (*target_IsConnected)(void)                                                                                          = nullptr;
-        int (*probe_SelectBySerialNumber_USB)(uint32_t SerialNo)                                                                  = nullptr;
+        JLink_Types::ErrorCode (*probe_SelectBySerialNumber_USB)(uint32_t SerialNo)                                               = nullptr;
         int (*probe_SelectByIP)(char* pIPAddr, int BufferSize, uint16_t* pPort)                                                   = nullptr;
         void (*probe_SelectBySerialNumber_Ethernet)(uint32_t SerialNo)                                                            = nullptr;
         char (*target_ETB_IsPresent)(void)                                                                                        = nullptr;
