@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TargetDevice.hpp"
+#include <Target/TargetDevices.hpp>
 
 namespace HWD::Probe {
 

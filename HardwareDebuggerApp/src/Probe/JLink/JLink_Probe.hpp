@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../IProbe.hpp"
+#include <Probe/IProbe.hpp>
 #include "Driver/JLink_Driver.hpp"
 
 namespace HWD::Probe {

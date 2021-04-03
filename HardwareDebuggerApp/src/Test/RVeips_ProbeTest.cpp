@@ -1,6 +1,5 @@
 // [source]
 #include "RVeips_ProbeTest.hpp"
-
 #include <Probe/JLink/JLink_Probe.hpp>
 
 #include "TestFirmware.h"
@@ -11,12 +10,14 @@ namespace HWD::Test {
     using namespace Probe;
 
     RVeips_ProbeTest::RVeips_ProbeTest() {
+        TargetDevices::LoadSupportedDevices();
+
         auto connectedProbes = JLink_Probe::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
             probe->Probe_Connect();
 
             probe->Target_SelectDebugInterface(IProbe::DebugInterface::SWD);
-            probe->Target_SelectDevice({"TM4C129ENCPDT"});
+            probe->Target_SelectDevice(TargetDevices::GetSupportedDevices().at("TM4C1294NCPDT"));
             probe->Target_Connect();
 
             if (probe->Target_IsConnected()) {
