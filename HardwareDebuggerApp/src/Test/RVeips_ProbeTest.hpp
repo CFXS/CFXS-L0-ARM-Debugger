@@ -4,7 +4,8 @@ namespace HWD::Test {
 
     class RVeips_ProbeTest {
     public:
-        static void Run();
+        RVeips_ProbeTest();
+        ~RVeips_ProbeTest();
     };
 
 } // namespace HWD::Test

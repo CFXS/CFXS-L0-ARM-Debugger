@@ -121,6 +121,12 @@ namespace HWD::Probe {
             return true;
         }
 
+        ErrorCode ec = m_Driver->probe_SelectBySerialNumber_USB(GetRawSerialNumber());
+        if (ec != ErrorCode::OK) {
+            HWDLOG_PROBE_ERROR("[JLink_Probe@{0}] failed to select probe by serial number - {1}", fmt::ptr(this), ErrorCodeToString(ec));
+            return false;
+        }
+
         const char* openStatus =
             m_Driver->probe_ConnectEx(s_ProbeCallbackEntries[m_ProbeIndex].log, s_ProbeCallbackEntries[m_ProbeIndex].error);
 

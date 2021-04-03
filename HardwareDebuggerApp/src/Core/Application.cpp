@@ -22,7 +22,7 @@ namespace HWD {
     }
 
     void Application::Run() {
-        Test::RVeips_ProbeTest::Run();
+        Test::RVeips_ProbeTest probeTest;
 
         while (m_Running) {
             Window::OnUpdate();
