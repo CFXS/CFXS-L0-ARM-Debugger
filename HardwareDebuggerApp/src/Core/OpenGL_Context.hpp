@@ -5,6 +5,8 @@
 namespace HWD {
 
     class OpenGL_Context {
+        friend class Application;
+
     public:
         OpenGL_Context(SDL_Window* windowHandle);
         void SwapBuffers();
