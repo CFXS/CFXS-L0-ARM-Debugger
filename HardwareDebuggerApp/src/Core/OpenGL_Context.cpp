@@ -21,6 +21,8 @@ namespace HWD {
             HWDLOG_CORE_ERROR("Failed to initialize GLEW - {0}", glewGetErrorString(ec));
             HWD_DEBUGBREAK();
         }
+
+        HWDLOG_CORE_INFO("OpenGL version: {0}", glGetString(GL_VERSION));
     }
 
     void OpenGL_Context::SwapBuffers() {

@@ -15,7 +15,10 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL)
 include("_GLEW_Options.cmake")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/GLEW)
 
-add_executable(${EXE_NAME} ${headers} ${sources})
+add_executable(${EXE_NAME} ${headers} ${sources}
+  "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui/backends/imgui_impl_sdl.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui/backends/imgui_impl_opengl3.cpp"
+)
 
 target_precompile_headers(
   ${EXE_NAME}
@@ -56,7 +59,7 @@ if(MSVC)
   target_compile_options(${EXE_NAME} PRIVATE "/MP")
 endif()
 
-target_link_libraries(${EXE_NAME} PRIVATE project_options project_warnings SDL2-static SDL2main Lua libglew_static)
+target_link_libraries(${EXE_NAME} PRIVATE project_options project_warnings SDL2-static SDL2main Lua libglew_static ImGui)
 
 
 string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")

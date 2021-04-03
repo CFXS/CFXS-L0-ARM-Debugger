@@ -15,6 +15,8 @@ namespace HWD {
     };
 
     class Window {
+        friend class Application;
+
     public:
         Window(const WindowProps& props);
         virtual ~Window();
