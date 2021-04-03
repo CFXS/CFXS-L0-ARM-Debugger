@@ -15,7 +15,10 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
-        m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
+        (new std::thread([=]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
+        }))->detach();
     }
 
     void HWD_Application::OnDestroy() {
