@@ -10,6 +10,7 @@ namespace HWD {
     public:
         OpenGL_Context(SDL_Window* windowHandle);
         void SwapBuffers();
+        void MakeContextCurrent();
 
     private:
         SDL_Window* m_WindowHandle;

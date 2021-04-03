@@ -40,6 +40,10 @@ namespace HWD {
             return m_Window;
         }
 
+        inline void MakeContextCurrent() {
+            m_Context->MakeContextCurrent();
+        }
+
     private:
         WindowProps m_Data;
         SDL_Window* m_Window = nullptr;

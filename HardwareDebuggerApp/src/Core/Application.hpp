@@ -16,6 +16,7 @@ namespace HWD {
         virtual void OnUpdate()      = 0;
         virtual void OnImGuiRender() = 0;
         virtual void OnEvent()       = 0;
+        void OnSDLEvent(SDL_Event& e);
 
         void Close();
 

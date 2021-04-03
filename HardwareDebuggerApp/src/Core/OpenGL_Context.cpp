@@ -29,4 +29,8 @@ namespace HWD {
         SDL_GL_SwapWindow(m_WindowHandle);
     }
 
+    void OpenGL_Context::MakeContextCurrent() {
+        SDL_GL_MakeCurrent(m_WindowHandle, m_ContextHandle);
+    }
+
 } // namespace HWD

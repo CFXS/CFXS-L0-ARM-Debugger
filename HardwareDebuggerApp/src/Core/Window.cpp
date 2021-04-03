@@ -45,6 +45,7 @@ namespace HWD {
     void Window::OnUpdate() {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
+            Application::Get().OnSDLEvent(e);
             switch (e.type) {
                 case SDL_EventType::SDL_QUIT: Application::Get().Close(); break;
             }
