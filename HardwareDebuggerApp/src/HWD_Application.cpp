@@ -46,6 +46,8 @@ namespace HWD {
         ImGui::EndChild();
 
         ImGui::End();
+
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
     }
 
     void HWD_Application::OnEvent() {
