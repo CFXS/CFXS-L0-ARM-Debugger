@@ -45,6 +45,13 @@ namespace HWD::Probe {
         virtual bool Target_Reset(bool haltAfterReset = true) override;
         virtual bool Target_StartTerminal(void* params = nullptr) override;
         virtual const char* Target_GetTerminalBuffer() override;
+        virtual bool Target_ReadMemory_32(uint32_t address, uint32_t* readTo) override;
+        virtual bool Target_ReadMemory_64(uint32_t address, uint64_t* readTo) override;
+        virtual bool Target_WriteMemory_32(uint32_t address, uint32_t value) override;
+        virtual bool Target_Halt() override;
+        virtual bool Target_Run() override;
+        virtual bool Target_IsRunning() override;
+        virtual float Target_GetFlashProgress() override;
         /////////////////////////////////////////
 
     public:
@@ -86,6 +93,9 @@ namespace HWD::Probe {
         // terminal
         bool m_TerminalEnabled = true;
         std::vector<char> m_TerminalBuffer;
+
+        // flash
+        float m_FlashProgress = 0;
 
     private: // generic properties
         uint32_t m_RawSerialNumber       = 0;

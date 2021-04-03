@@ -95,7 +95,10 @@ namespace HWD::Probe::Driver {
         int (*target_ReadMemory_64)(uint32_t Addr, uint32_t NumItems, uint64_t* pData, uint8_t* pStatus)                  = nullptr;
         int (*target_ReadMemoryZonedEx)(uint32_t Addr, uint32_t NumBytes, void* pData, uint32_t Flags, const char* sZone) = nullptr;
         uint32_t (*target_ReadRegister)(JLink_Types::CPU_Registers::ARM RegIndex)                                         = nullptr;
-        int (*target_ReadRegisters)(const uint32_t* paRegIndex, uint32_t* paData, uint8_t* paStatus, uint32_t NumRegs)    = nullptr;
+        JLink_Types::ErrorCode (*target_ReadRegisters)(const uint32_t* paRegIndex,
+                                                       uint32_t* paData,
+                                                       uint8_t* paStatus,
+                                                       uint32_t NumRegs)                                                  = nullptr;
         JLink_Types::ErrorCode (*target_Reset)(void)                                                                      = nullptr;
         void (*target_ResetAndRun)(void)                                                                                  = nullptr;
         void (*target_SelectTraceSource)(JLink_Types::TraceSource source)                                                 = nullptr;

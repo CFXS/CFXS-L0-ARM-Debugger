@@ -101,6 +101,7 @@ namespace HWD::Probe {
 
     void JLink_Probe::Probe_FlashProgressCallback(const char* action, const char* prog, int percentage) {
         HWDLOG_PROBE_INFO("[JLink_Probe@{0}][PROG] >> {1} {2} {3}%", fmt::ptr(this), action ? action : "", prog ? prog : "", percentage);
+        m_FlashProgress = percentage / 100.0f;
     }
 
     /////////////////////////////////////////////////////////////
@@ -334,8 +335,35 @@ namespace HWD::Probe {
         }
     }
 
+    bool JLink_Probe::Target_ReadMemory_32(uint32_t address, uint32_t* readTo) {
+        return m_Driver->target_ReadMemory_32(address, 1, readTo, nullptr) == 1;
+    }
+
+    bool JLink_Probe::Target_ReadMemory_64(uint32_t address, uint64_t* readTo) {
+        return m_Driver->target_ReadMemory_64(address, 1, readTo, nullptr) == 1;
+    }
+
+    bool JLink_Probe::Target_WriteMemory_32(uint32_t address, uint32_t value) {
+        return m_Driver->target_WriteMemory_32(address, value) == 0;
+    }
+
+    bool JLink_Probe::Target_Halt() {
+        return m_Driver->target_Halt();
+    }
+    bool JLink_Probe::Target_Run() {
+        m_Driver->target_Run();
+        return true;
+    }
+    bool JLink_Probe::Target_IsRunning() {
+        return m_Driver->target_IsHalted();
+    }
+
     const char* JLink_Probe::Target_GetTerminalBuffer() {
         return m_TerminalBuffer.data();
+    }
+
+    float JLink_Probe::Target_GetFlashProgress() {
+        return m_FlashProgress;
     }
 
     ////////////////////////////////////////////////////////////////////////////////

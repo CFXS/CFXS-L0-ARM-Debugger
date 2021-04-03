@@ -14,6 +14,9 @@ namespace HWD {
     HWD_Application::~HWD_Application() {
     }
 
+    namespace Test {
+        extern RVeips_ProbeTest* m_RV;
+    }
     static ImFont* font_SCP;
     void HWD_Application::OnCreate() {
         (new std::thread([=]() {
@@ -35,19 +38,30 @@ namespace HWD {
 
     float val[4] = {0, 0, 0, 0};
     void HWD_Application::OnImGuiRender() {
-        ImGui::Begin("JLink", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_HorizontalScrollbar);
-        ImGui::ProgressBar(0.25f);
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-        ImGui::BeginChild("Terminal");
-        ImGui::Text("CFXS::Time::ms = %llu", 0);
+        ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_HorizontalScrollbar);
+
+        ImGui::Text("Flash progress");
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, {0.0f, 0.4f, 1.0f, 1.0f});
+        ImGui::ProgressBar(Test::m_RV ? Test::m_RV->FlashProgress() : 0);
+
+        int currentPeriod = m_RihardsTest ? m_RihardsTest->Read32(536871532) : 0;
+
+        ImGui::Text("CFXS::Time::ms = %llu", m_RihardsTest ? m_RihardsTest->ReadMilliseconds() : 0);
+        ImGui::Text("CPU_CYCLES     = %u", m_RihardsTest ? m_RihardsTest->Read32(0xE0001004, true) : 0);
+        ImGui::Text("PORT_N_BASE    = 0x%X", m_RihardsTest ? m_RihardsTest->Read32(0x40025004) : 0);
+        ImGui::Text("FLASH_PERIOD");
+        if (ImGui::InputInt("", &currentPeriod, 10, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
+            m_RihardsTest->Write32(536871532, currentPeriod);
+        }
         ImGui::Text("");
+        ImGui::BeginChild("Terminal");
         ImGui::Text(m_RihardsTest ? m_RihardsTest->GetTerminalText() : "Waiting for debug session");
         ImGui::SetScrollHereY(1.0f);
         ImGui::EndChild();
 
         ImGui::End();
-
-        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
     }
 
     void HWD_Application::OnEvent() {
