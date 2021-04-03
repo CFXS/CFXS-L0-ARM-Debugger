@@ -2,3 +2,4 @@ out/
 .vs/
 HWD.log
 **/_Sources.cmake
+**/imgui.ini
