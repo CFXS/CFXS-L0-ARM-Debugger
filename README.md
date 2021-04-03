@@ -19,7 +19,7 @@
 - Some type of VSCode integration somehow? (at least "Open current file in VSCode")
  
 # Debug Probe Support
-- `Segger J-Link`
+- `SEGGER J-Link`
 - `Other probes too... some time next year maybe?`
 
 ---
