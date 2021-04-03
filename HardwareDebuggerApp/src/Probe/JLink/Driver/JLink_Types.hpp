@@ -232,42 +232,42 @@ namespace HWD::Probe::Driver::JLink_Types {
         static constexpr uint32_t HSS        = 1 << 15;
     } // namespace CPU_Capacilities
 
-    namespace EmulatorCapabilities {
-        static constexpr uint32_t RESERVED           = 1 << 0;
-        static constexpr uint32_t GET_HW_VERSION     = 1 << 1;
-        static constexpr uint32_t WRITE_DCC          = 1 << 2;
-        static constexpr uint32_t ADAPTIVE_CLOCKING  = 1 << 3;
-        static constexpr uint32_t READ_CONFIG        = 1 << 4;
-        static constexpr uint32_t WRITE_CONFIG       = 1 << 5;
-        static constexpr uint32_t TRACE_ARM79        = 1 << 6;
-        static constexpr uint32_t WRITE_MEM          = 1 << 7;
-        static constexpr uint32_t READ_MEM           = 1 << 8;
-        static constexpr uint32_t SPEED_INFO         = 1 << 9;
-        static constexpr uint32_t EXEC_CODE          = 1 << 10;
-        static constexpr uint32_t GET_MAX_BLOCK_SIZE = 1 << 11;
-        static constexpr uint32_t GET_HW_INFO        = 1 << 12;
-        static constexpr uint32_t SET_KS_POWER       = 1 << 13;
-        static constexpr uint32_t RESET_STOP_TIMED   = 1 << 14;
-        static constexpr uint32_t GET_LICENSE_INFO   = 1 << 15;
-        static constexpr uint32_t MEASURE_RTCK_REACT = 1 << 16;
-        static constexpr uint32_t SELECT_IF          = 1 << 17;
-        static constexpr uint32_t RW_MEM_ARM79       = 1 << 18;
-        static constexpr uint32_t GET_COUNTERS       = 1 << 19;
-        static constexpr uint32_t READ_DCC           = 1 << 20;
-        static constexpr uint32_t GET_CPU_CAPS       = 1 << 21;
-        static constexpr uint32_t EXEC_CPU_CMD       = 1 << 22;
-        static constexpr uint32_t SWO                = 1 << 23;
-        static constexpr uint32_t WRITE_DCC_EX       = 1 << 24;
-        static constexpr uint32_t UPDATE_FIRMWARE_EX = 1 << 25;
-        static constexpr uint32_t FILE_IO            = 1 << 26;
-        static constexpr uint32_t REGISTER           = 1 << 27;
-        static constexpr uint32_t INDICATORS         = 1 << 28;
-        static constexpr uint32_t TEST_NET_SPEED     = 1 << 29;
-        static constexpr uint32_t RAWTRACE           = 1 << 30;
-        static constexpr uint32_t GET_CAPS_EX        = 1ul << 31;
-    } // namespace EmulatorCapabilities
+    enum class EmulatorCapabilities : uint32_t {
+        RESERVED           = 1 << 0,
+        GET_HW_VERSION     = 1 << 1,
+        WRITE_DCC          = 1 << 2,
+        ADAPTIVE_CLOCKING  = 1 << 3,
+        READ_CONFIG        = 1 << 4,
+        WRITE_CONFIG       = 1 << 5,
+        TRACE_ARM79        = 1 << 6,
+        WRITE_MEM          = 1 << 7,
+        READ_MEM           = 1 << 8,
+        SPEED_INFO         = 1 << 9,
+        EXEC_CODE          = 1 << 10,
+        GET_MAX_BLOCK_SIZE = 1 << 11,
+        GET_HW_INFO        = 1 << 12,
+        SET_KS_POWER       = 1 << 13,
+        RESET_STOP_TIMED   = 1 << 14,
+        GET_LICENSE_INFO   = 1 << 15,
+        MEASURE_RTCK_REACT = 1 << 16,
+        SELECT_IF          = 1 << 17,
+        RW_MEM_ARM79       = 1 << 18,
+        GET_COUNTERS       = 1 << 19,
+        READ_DCC           = 1 << 20,
+        GET_CPU_CAPS       = 1 << 21,
+        EXEC_CPU_CMD       = 1 << 22,
+        SWO                = 1 << 23,
+        WRITE_DCC_EX       = 1 << 24,
+        UPDATE_FIRMWARE_EX = 1 << 25,
+        FILE_IO            = 1 << 26,
+        REGISTER           = 1 << 27,
+        INDICATORS         = 1 << 28,
+        TEST_NET_SPEED     = 1 << 29,
+        RAWTRACE           = 1 << 30,
+        GET_CAPS_EX        = 1ul << 31,
+    };
 
-    enum class EmulatorExtendedCapabilities {
+    enum class EmulatorExtendedCapabilities : uint8_t {
         RESERVED                  = 0,
         GET_HW_VERSION            = 1,
         WRITE_DCC                 = 2,
@@ -719,7 +719,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         uint64_t execCount;
     };
 
-    enum class STRACE_InstCounters {
+    enum class STRACE_InstCounters : uint32_t {
         FETCHED                  = 0,
         EXECUTED                 = 1,
         SKIPPED                  = 2,
@@ -733,7 +733,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         FETCHED_EXECUTED_SKIPPED = 11,
     };
 
-    enum class DebugInfoIndex {
+    enum class DebugInfoIndex : uint32_t {
         ROM_TABLE_ADDRESS         = 0x100,
         ETM_ADDR                  = 0x101,
         MTB_ADDR                  = 0x102,
@@ -1020,10 +1020,10 @@ namespace HWD::Probe::Driver::JLink_Types {
         uint32_t _[5];
     };
 
-    enum class TraceSource {
-        ETB,
-        ETM,
-        MTB,
+    enum class TraceSource : int {
+        ETB = 0,
+        ETM = 1,
+        MTB = 2,
     };
 
     enum class TraceCommands {
@@ -1087,7 +1087,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         GETSTAT   = 4,
     };
 
-    enum class SWO_Command {
+    enum class SWO_Command : uint32_t {
         START               = 0,
         STOP                = 1,
         FLUSH               = 2,

@@ -24,8 +24,8 @@ namespace HWD::Probe {
         if (driver->IsLoaded()) {
             ProbeInfo probeInfoBuffer[MAX_DISCOVERABLE_PROBE_COUNT]; // limit max discoverable probes to MAX_DISCOVERABLE_PROBE_COUNT
 
-            auto connectedProbeCount =
-                driver->GetProbeList(HostInterfaceType::USB | HostInterfaceType::ETHERNET, probeInfoBuffer, MAX_DISCOVERABLE_PROBE_COUNT);
+            auto connectedProbeCount = driver->probe_GetDeviceList(
+                HostInterfaceType::USB | HostInterfaceType::ETHERNET, probeInfoBuffer, MAX_DISCOVERABLE_PROBE_COUNT);
 
             for (int i = 0; i < connectedProbeCount; i++) {
                 // add if not already in vector
