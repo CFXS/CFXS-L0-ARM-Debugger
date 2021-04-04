@@ -10,7 +10,7 @@ namespace HWD {
         uint32_t Width;
         uint32_t Height;
 
-        WindowProps(const std::string& title, uint32_t width = 640, uint32_t height = 480) : Title(title), Width(width), Height(height) {
+        WindowProps(const std::string& title, uint32_t width = 1600, uint32_t height = 900) : Title(title), Width(width), Height(height) {
         }
     };
 
