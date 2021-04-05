@@ -53,6 +53,7 @@ namespace HWD {
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, {0.0f, 0.4f, 1.0f, 1.0f});
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {8.0, 8.0});
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {8.0, 8.0});
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {4.0, 4.0});
     }
 
     void HWD_Application::OnDestroy() {
@@ -66,6 +67,7 @@ namespace HWD {
     float val[4] = {0, 0, 0, 0};
     void HWD_Application::OnImGuiRender() {
         ImGuiWindowClass window_class;
+        // flags to remove dropdown at left side of docked tab bar
         window_class.DockNodeFlagsOverrideSet   = 1 << 14;
         window_class.DockNodeFlagsOverrideClear = 1 << 12;
 
