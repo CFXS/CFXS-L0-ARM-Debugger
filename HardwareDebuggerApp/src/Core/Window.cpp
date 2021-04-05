@@ -30,6 +30,8 @@ namespace HWD {
         }
 
         m_Context = std::make_unique<OpenGL_Context>(m_Window);
+
+        SDL_GL_SetSwapInterval(-1);
     }
 
     Window::~Window() {
