@@ -32,7 +32,7 @@ namespace HWD {
 
         io.ConfigViewportsNoDecoration = false;
 
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{0.1f, 0.105f, 0.11f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{0.125f, 0.125f, 0.125f, 1.0f});
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{0.2f, 0.205f, 0.21f, 1.0f});
         ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4{0.3f, 0.305f, 0.31f, 1.0f});
         ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4{0.15f, 0.1505f, 0.151f, 1.0f});
@@ -115,6 +115,81 @@ namespace HWD {
         ImGui::End();
         ImGui::PopStyleColor();
 
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4{0.1f, 0.1f, 0.1f, 1.0f});
+        ImGui::SetNextWindowClass(&window_class);
+        ImGui::Begin("main.cpp", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
+        {
+            ImGui::PushFont(font_SCP);
+            ImGui::Text(R"(// [source]
+#include <CFXS/Base/Task.hpp>
+
+using CFXS::Task;
+
+static constexpr uint32_t TASK_MAINLOOP = 0;
+
+const size_t CFXS::CPU::CLOCK_FREQ = 120e6;
+CFXS::Time_t CFXS::Time::ms        = 0;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static constexpr uint32_t Ports[] = {GPIO_PORTN_BASE, GPIO_PORTN_BASE, GPIO_PORTF_BASE, GPIO_PORTF_BASE};
+static constexpr uint32_t Pins[]  = {GPIO_PIN_1, GPIO_PIN_0, GPIO_PIN_4, GPIO_PIN_0};
+#define LED(id, state) GPIOPinWrite(Ports[id], Pins[id], (state) ? Pins[id] : 0)
+#define TOGGLE_LED(id) GPIOPinWrite(Ports[id], Pins[id], !GPIOPinRead(Ports[id], Pins[id]) ? Pins[id] : 0)
+
+volatile __attribute__((used)) uint32_t FLASH_PERIOD = 500;
+
+void InitializeSysTick() {
+    CFXS_println(" - Initialize SysTick");
+
+    ROM_SysTickEnable();
+    ROM_SysTickPeriodSet(CFXS::CPU::CLOCK_FREQ / 1000); // 1ms
+    SysTickIntRegister([]() {
+        CFXS::Time::ms++;
+        LED(3, (CFXS::Time::ms / FLASH_PERIOD) & 1);
+    });
+    ROM_SysTickIntEnable();
+}
+
+void InitializeLEDs() {
+    CFXS_println(" - Initialize LEDs");
+
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    while (!ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPION) || !ROM_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF)) {}
+    for (int i = 0; i < 4; i++) {
+        ROM_GPIOPinTypeGPIOOutput(Ports[i], Pins[i]);
+        LED(i, 0);
+    }
+
+    Task::Create(
+        TASK_MAINLOOP,
+        [](auto) {
+            TOGGLE_LED(0);
+            CFXS_println("Toggle LED - Timestamp: %llu", CFXS::Time::ms);
+        },
+        500)
+        ->Start();
+}
+
+int main() {
+    CFXS_println("[TestProject] main");
+
+    Task::AddGroup(TASK_MAINLOOP, 64);
+
+    InitializeSysTick();
+    InitializeLEDs();
+
+    Task::EnableProcessing();
+    while (1) {
+        Task::ProcessGroup(TASK_MAINLOOP);
+    }
+})");
+            ImGui::PopFont();
+        }
+        ImGui::End();
+        ImGui::PopStyleColor();
+
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
         ImGui::SetNextWindowClass(&window_class);
         ImGui::Begin("Symbols", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
@@ -143,7 +218,7 @@ namespace HWD {
         ImGui::SetNextWindowClass(&window_class);
         ImGui::Begin("Workspace", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
         {
-            if (ImGui::CollapsingHeader("DigiNet MK2")) {
+            if (ImGui::CollapsingHeader("TestProject")) {
             }
         }
         ImGui::End();
