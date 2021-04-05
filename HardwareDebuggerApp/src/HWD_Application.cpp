@@ -27,7 +27,7 @@ namespace HWD {
         }))->detach();
 
         auto& io = ImGui::GetIO();
-        font_SCP = io.Fonts->AddFontFromFileTTF("C:/CFXS/SourceCodePro-Regular.ttf", 24);
+        font_OS  = io.Fonts->AddFontFromFileTTF("C:/CFXS/OpenSans-Regular.ttf", 24);
         font_SCP = io.Fonts->AddFontFromFileTTF("C:/CFXS/SourceCodePro-Regular.ttf", 24);
 
         io.ConfigViewportsNoDecoration = false;
