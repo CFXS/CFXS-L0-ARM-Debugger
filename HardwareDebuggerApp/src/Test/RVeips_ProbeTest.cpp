@@ -35,6 +35,7 @@ namespace HWD::Test {
 
             auto thread = new std::thread([=]() {
                 while (1 < 2) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
                     probe->Process();
                 }
             });

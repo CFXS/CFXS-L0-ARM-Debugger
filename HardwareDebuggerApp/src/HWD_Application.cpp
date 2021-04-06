@@ -109,8 +109,8 @@ namespace HWD {
         ImGui::SetNextWindowClass(&window_class);
         ImGui::Begin("Terminal", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
         {
-            //ImGui::Text(m_RihardsTest ? m_RihardsTest->GetTerminalText() : "Waiting for debug session");
-            //ImGui::SetScrollHereY(1.0f);
+            ImGui::Text(m_RihardsTest ? m_RihardsTest->GetTerminalText() : "Waiting for debug session");
+            ImGui::SetScrollHereY(1.0f);
         }
         ImGui::End();
         ImGui::PopStyleColor();
@@ -199,7 +199,7 @@ int main() {
                 ImGui::TableSetupColumn("Location");
                 ImGui::TableSetupColumn("Data Type");
                 ImGui::TableHeadersRow();
-                for (int i = 0; i < 64; i++) {
+                for (int i = 0; i < 1000; i++) {
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
                     ImGui::Text("sym %d", i);

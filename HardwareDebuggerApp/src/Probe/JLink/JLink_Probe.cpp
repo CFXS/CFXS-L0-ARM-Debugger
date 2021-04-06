@@ -307,8 +307,8 @@ namespace HWD::Probe {
         return true;
     }
 
-    // TODO: Implement error reason callback for higher level callers
     bool JLink_Probe::Target_StartTerminal(void* params) {
+        // TODO: Implement error reason callback for higher level callers
         if (!Probe_IsConnected()) {
             HWDLOG_PROBE_ERROR("[JLink_Probe@{0}] Failed to start terminal - probe not connected", fmt::ptr(this));
             m_TerminalEnabled = false;
@@ -371,11 +371,9 @@ namespace HWD::Probe {
     void JLink_Probe::Process() {
         if (m_TerminalEnabled) {
             char str[1024];
-            while (1 < 2) {
-                int bytesRead = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
-                for (int i = 0; i < bytesRead; i++) {
-                    m_TerminalBuffer.push_back(str[i]);
-                }
+            int bytesRead = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
+            for (int i = 0; i < bytesRead; i++) {
+                m_TerminalBuffer.push_back(str[i]);
             }
         }
     }
