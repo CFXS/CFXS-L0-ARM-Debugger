@@ -1,9 +1,8 @@
 // [source]
 #include "Application.hpp"
 
-#include <backends/imgui_impl_sdl.h>
 #include <backends/imgui_impl_opengl3.h>
-
+#include <backends/imgui_impl_sdl.h>
 #include <imgui.h>
 
 namespace HWD {
@@ -63,7 +62,6 @@ namespace HWD {
     void Application::Close() {
         HWDLOG_CORE_INFO("Closing application");
         m_Running = false;
-        OnDestroy();
     }
 
     void Application::Run() {
@@ -97,6 +95,8 @@ namespace HWD {
             Window::OnUpdate();
             m_Window->SwapBuffers();
         }
+
+        OnDestroy();
     }
 
     void Application::OnSDLEvent(SDL_Event& e) {
