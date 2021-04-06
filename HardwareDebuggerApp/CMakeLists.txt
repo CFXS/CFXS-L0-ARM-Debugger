@@ -1,7 +1,10 @@
 set(EXE_NAME HardwareDebuggerApp)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
 
-exec_program(py ARGS "\"${CMAKE_SOURCE_DIR}/Tools/GenerateSources.py\" \"${ROOT_DIR}/src\" \"${ROOT_DIR}/_Sources.cmake\" \"// [source]\"")
+exec_program(
+  py ARGS
+  "\"${CMAKE_SOURCE_DIR}/Tools/GenerateSources.py\" \"${ROOT_DIR}/src\" \"${ROOT_DIR}/_Sources.cmake\" \"// [source]\""
+)
 include("_Sources.cmake")
 
 add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
@@ -11,7 +14,8 @@ add_compile_definitions("CFXS_HWD_WINDOW_TITLE_NO_PREFIX_TAG='`'")
 add_compile_definitions("CFXS_HWD_WINDOW_TITLE_PREFIX=\"[CFXS HWD] \"")
 
 add_compile_definitions("CFXS_HWD_VERSION_STRING=\"v0.1-dev\"")
-add_compile_definitions("CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_HWD_VERSION_STRING")
+add_compile_definitions(
+  "CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_HWD_VERSION_STRING")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui)
@@ -22,10 +26,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL)
 include("_GLEW_Options.cmake")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/GLEW)
 
-add_executable(${EXE_NAME} ${headers} ${sources}
+add_executable(
+  ${EXE_NAME}
+  ${headers} ${sources}
   "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui/backends/imgui_impl_sdl.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui/backends/imgui_impl_opengl3.cpp"
-)
+  "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui/backends/imgui_impl_opengl3.cpp")
 
 target_precompile_headers(
   ${EXE_NAME}
@@ -47,10 +52,9 @@ target_precompile_headers(
   "src/Compiler.hpp"
   "src/Assert.hpp"
   "src/Log/Log.hpp"
-  "src/Utils.hpp"
-)
+  "src/Utils.hpp")
 
-if (WIN32)
+if(WIN32)
   target_compile_definitions(${EXE_NAME} PRIVATE "HWD_PLATFORM_WINDOWS")
 elseif(UNIX)
   target_compile_definitions(${EXE_NAME} PRIVATE "HWD_PLATFORM_LINUX")
@@ -60,21 +64,30 @@ endif()
 
 target_include_directories(${EXE_NAME} PRIVATE src)
 target_include_directories(${EXE_NAME} SYSTEM PRIVATE vendor)
-target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
+target_include_directories(
+  ${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
 
 if(MSVC)
   target_compile_options(${EXE_NAME} PRIVATE "/MP")
 endif()
 
-target_link_libraries(${EXE_NAME} PRIVATE project_options project_warnings SDL2-static SDL2main Lua libglew_static ImGui)
+target_link_libraries(
+  ${EXE_NAME}
+  PRIVATE project_options
+          project_warnings
+          SDL2-static
+          SDL2main
+          Lua
+          libglew_static
+          ImGui)
 
+if(BUILD_PROFILER)
+  target_link_options(${EXE_NAME} PRIVATE "/PROFILE")
+endif()
 
 string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-# copy dlls
-#add_custom_command(
-#    TARGET ${EXE_NAME}
-#    POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#    "$<TARGET_FILE_DIR:${EXE_NAME}>/vendor/SDL/SDL2d.dll"
-#    "$<TARGET_FILE_DIR:${EXE_NAME}>"
-#)
+# copy dlls add_custom_command( TARGET ${EXE_NAME} POST_BUILD COMMAND
+# ${CMAKE_COMMAND} -E copy_if_different
+# "$<TARGET_FILE_DIR:${EXE_NAME}>/vendor/SDL/SDL2d.dll"
+# "$<TARGET_FILE_DIR:${EXE_NAME}>"
+# )
