@@ -1,9 +1,8 @@
 // [source]
 #include "Application.hpp"
 
-#include <backends/imgui_impl_sdl.h>
 #include <backends/imgui_impl_opengl3.h>
-
+#include <backends/imgui_impl_sdl.h>
 #include <imgui.h>
 
 namespace HWD {
@@ -25,12 +24,9 @@ namespace HWD {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // Enable Multi-Viewport / Platform Windows
-        //io.ConfigViewportsNoAutoMerge = true;
-        //io.ConfigViewportsNoTaskBarIcon = true;
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
-        //ImGui::StyleColorsClassic();
 
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         ImGuiStyle& style = ImGui::GetStyle();
@@ -63,7 +59,6 @@ namespace HWD {
     void Application::Close() {
         HWDLOG_CORE_INFO("Closing application");
         m_Running = false;
-        OnDestroy();
     }
 
     void Application::Run() {
@@ -97,6 +92,8 @@ namespace HWD {
             Window::OnUpdate();
             m_Window->SwapBuffers();
         }
+
+        OnDestroy();
     }
 
     void Application::OnSDLEvent(SDL_Event& e) {

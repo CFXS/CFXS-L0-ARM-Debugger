@@ -1,10 +1,11 @@
 // [source]
 #include "HWD_Application.hpp"
 
-#include "main.hpp"
-
 #include <GL/glew.h>
 #include <imgui.h>
+#include <imgui_internal.h>
+
+#include "main.hpp"
 
 namespace HWD {
     ///////////////////////////////////////////////////////////////////////////////// !Bodge alert! - SDL SetWindowTitle implementation "no prefix" tag
@@ -68,13 +69,12 @@ namespace HWD {
     void HWD_Application::OnImGuiRender() {
         ImGuiWindowClass window_class;
         // flags to remove dropdown at left side of docked tab bar
-        window_class.DockNodeFlagsOverrideSet   = 1 << 14;
-        window_class.DockNodeFlagsOverrideClear = 1 << 12;
+        window_class.DockNodeFlagsOverrideSet   = ImGuiDockNodeFlags_NoWindowMenuButton;
+        window_class.DockNodeFlagsOverrideClear = ImGuiDockNodeFlags_NoTabBar;
 
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-        ImGui::BeginMainMenuBar();
-        {
+        if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 ImGui::MenuItem("Exit");
                 ImGui::EndMenu();
@@ -83,9 +83,8 @@ namespace HWD {
                 ImGui::MenuItem("Select file");
                 ImGui::EndMenu();
             }
-            ImGui::EndMenuBar();
+            ImGui::EndMainMenuBar();
         }
-        ImGui::EndMainMenuBar();
 
         ImGui::SetNextWindowClass(&window_class);
         ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);

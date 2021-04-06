@@ -1,5 +1,6 @@
 // [source]
 #include "RVeips_ProbeTest.hpp"
+
 #include <Probe/JLink/JLink_Probe.hpp>
 
 #include "TestFirmware.h"
@@ -91,7 +92,7 @@ namespace HWD::Test {
 
     const char* RVeips_ProbeTest::GetTerminalText() {
         if (m_Probe)
-            m_Probe->Target_GetTerminalBuffer();
+            return m_Probe->Target_GetTerminalBuffer();
         else
             return "Waiting for target...";
     }

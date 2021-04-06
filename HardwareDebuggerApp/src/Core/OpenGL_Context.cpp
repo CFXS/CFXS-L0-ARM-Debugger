@@ -22,7 +22,7 @@ namespace HWD {
             HWD_DEBUGBREAK();
         }
 
-        SDL_GL_SetSwapInterval(0);
+        SDL_GL_SetSwapInterval(-1);
 
         HWDLOG_CORE_INFO("OpenGL version: {0}", glGetString(GL_VERSION));
     }
