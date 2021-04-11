@@ -30,8 +30,8 @@ namespace HWD::Test {
         }
 
     private:
-        Probe::IProbe* m_Probe;
-        bool m_Programming = false;
+        Probe::IProbe* m_Probe = nullptr;
+        bool m_Programming     = false;
     };
 
 } // namespace HWD::Test
