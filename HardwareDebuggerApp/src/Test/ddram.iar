@@ -1,0 +1,477 @@
+return [[
+__var __tempo_var;
+
+__var __mac_i;
+
+__var REG_CKGR_MOR;
+__var CKGR_MOR_MOSCXTEN;
+__var CKGR_MOR_MOSCXTBY;
+__var CKGR_MOR_MOSCRCEN;
+__var CKGR_MOR_MOSCSEL;
+__var REG_CKGR_MCFR;
+__var CKGR_MCFR_MAINFRDY;
+__var REG_PMC_SR;
+__var PMC_SR_MCKRDY;
+__var PMC_SR_LOCKA;
+__var PMC_PCK_CSS_MAIN_CLK;
+__var REG_CKGR_PLLAR;
+__var REG_PMC_PLLICPR;
+__var REG_PMC_MCKR;
+__var PMC_MCKR_PLLADIV2_DIV2;
+__var PMC_MCKR_PRES_Msk;
+__var PMC_MCKR_PRES_CLOCK;
+__var PMC_MCKR_MDIV_Msk;
+__var PMC_MCKR_MDIV_PCK_DIV4;
+__var PMC_MCKR_CSS_PLLA_CLK;
+__var PMC_SR_MOSCSELS;
+
+
+/*********************************************************************
+* execUserReset()
+*********************************************************************/
+execUserReset()
+{
+    __message "------------------------------ execUserReset ---------------------------------";
+
+    /* Reset Perihperals (using RSTC_CR) */
+    //__writeMemory32(0xA5000004, 0xFFFFFE00, "Memory");
+
+    /* Disable Watchdog (using WDT_MR) */
+    __writeMemory32(0x00008000, 0xFFFFFE44, "Memory");
+
+    /* Disable D-Cache, I-Cache and MMU */
+    __jtagCP15WriteReg(1, 0, 0, 0, 0x00C50078);
+
+    /* Disable all interrupts and go to supervisor mode */
+    #CPSR = 0xD3;
+
+    /* Zero registers (cannot reset core because it will disable JTAG) */
+    #SP_irq = 0;
+    #LR_irq = 0;
+    #SPSR_irq = 0;
+    #SP_abt = 0;
+    #LR_abt = 0;
+    #SPSR_abt = 0;
+    #SP_und = 0;
+    #LR_und = 0;
+    #SPSR_und = 0;
+    #SP_svc = 0;
+    #LR_svc = 0;
+    #SPSR_svc = 0;
+    #R0 = 0;
+    #R1 = 0;
+    #R2 = 0;
+    #R3 = 0;
+    #R4 = 0;
+    #R5 = 0;
+    #R6 = 0;
+    #R7 = 0;
+    #R8_usr = 0;
+    #R9_usr = 0;
+    #R10_usr = 0;
+    #R11_usr = 0;
+    #R12_usr = 0;
+    #SP_usr = 0;
+    #LR_usr = 0;
+
+    /* Initialize PC */
+    #PC = &__iar_program_start;
+
+}
+
+/*********************************************************************
+* execUserPreload()
+*********************************************************************/
+execUserPreload()
+{
+    __message "------------------------------ execUserPreload ---------------------------------";
+    
+
+    /* Reset peripherals (using RSTC_CR) */
+    __writeMemory32(0xA5000004, 0xFFFFFE00, "Memory");
+
+    /* Disable D-Cache, I-Cache and MMU */
+    __jtagCP15WriteReg(1, 0, 0, 0, 0x00C50078);
+
+    // Disable DDR clock
+    __var __temp_var;
+    __temp_var = __readMemory32(0xFFFFFD08,"Memory");
+    __temp_var |= 0x00020000;
+    __writeMemory32(__temp_var,0xFFFFFD04,"Memory");   // Enable MPDDR controller clock
+
+    __temp_var = __readMemory32(0xFFFFFC08,"Memory");
+    __temp_var |= 0x00000084;
+    __writeMemory32(__temp_var,0xFFFFFC04,"Memory");   // System Clock Enable Register : Enable DDR clock
+
+
+    PMC_SelectExt12M_Osc();
+    PMC_SwitchMck2Main();
+    PMC_SetMckPllaDiv();
+    PMC_SetPllA();
+    PMC_SetMckPrescaler();
+    PMC_SetMckDivider();
+    PMC_SwitchMck2Pll();
+    __message "------------ PLL set to 792 MHz, MCK set to 132 MHz ------------";
+
+    __initDDR2(0);                     //* Init DDR2 memory
+    __message "------------ DDR2 is initialized ------------";
+}
+
+
+/*********************************************************************
+*
+*       PMC_SelectExt12M_Osc()
+*
+* Function description
+*   Select external 12MHz oscillator
+*/
+PMC_SelectExt12M_Osc()
+{ 
+    REG_CKGR_MOR = 0xFFFFFC20;
+    CKGR_MOR_MOSCXTEN = (0x1 << 0);     /*(CKGR_MOR) Main Crystal Oscillator Enable */
+    CKGR_MOR_MOSCXTBY = (0x1 << 1);     /*(CKGR_MOR) Main Crystal Oscillator Bypass */
+    CKGR_MOR_MOSCRCEN = (0x1 << 3);     /*(CKGR_MOR) Main On-Chip RC Oscillator Enable */
+    CKGR_MOR_MOSCSEL = (0x1 << 24);     /*(CKGR_MOR) Main Oscillator Selection */
+    REG_CKGR_MCFR = 0xFFFFFC24;         /*(PMC) Main Clock Frequency Register */
+    CKGR_MCFR_MAINFRDY = (0x1 << 16);   /*(CKGR_MCFR) Main Clock Ready */
+    REG_PMC_SR = 0xFFFFFC68;            /*(PMC) Status Register */
+    PMC_SR_MOSCSELS = (0x1 << 16);      /*(PMC_SR) Main Oscillator Selection Status */
+    PMC_SR_MCKRDY = (0x1 << 3);         /*(PMC_SR) Master Clock Status */
+
+    /* enable external OSC 12 MHz  */
+    __tempo_var = __readMemory32(REG_CKGR_MOR,"Memory");
+    __tempo_var |= CKGR_MOR_MOSCXTEN | (0x37 << 16);
+    __writeMemory32(__tempo_var,REG_CKGR_MOR,"Memory");
+
+    /* wait Main CLK Ready */
+    while(!((__readMemory32(REG_CKGR_MCFR,"Memory")) & CKGR_MCFR_MAINFRDY));
+
+    /* disable external OSC 12 MHz bypass */
+    __tempo_var = __readMemory32(REG_CKGR_MOR,"Memory");
+    __tempo_var = (__tempo_var & ~CKGR_MOR_MOSCXTBY) | (0x37 << 16); 
+    __writeMemory32(__tempo_var,REG_CKGR_MOR,"Memory");
+
+    /* switch MAIN clock to external OSC 12 MHz*/
+    __tempo_var = __readMemory32(REG_CKGR_MOR,"Memory");
+    __tempo_var |= CKGR_MOR_MOSCSEL | (0x37 << 16); 
+    __writeMemory32(__tempo_var,REG_CKGR_MOR,"Memory");
+
+    /* wait MAIN clock status change for external OSC 12 MHz selection*/
+    while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_MOSCSELS));
+
+    /* in case when MCK is running on MAIN CLK */
+    while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_MCKRDY));
+
+    /* disable internal RC 12 MHz*/
+    //__tempo_var = __readMemory32(REG_CKGR_MOR,"Memory");
+    //__tempo_var = (__tempo_var & ~CKGR_MOR_MOSCRCEN) | (0x37 << 16);
+    //__writeMemory32(__tempo_var,REG_CKGR_MOR,"Memory");
+    //__mac_i=__readMemory32(REG_CKGR_MOR,"Memory");
+    __message " -------- PMC_SelectExt12M_Osc ---------- REG_CKGR_MOR  0x",__mac_i:%X;
+}
+
+/*********************************************************************
+*
+*       PMC_SwitchMck2Main()
+*
+* Function description
+*   Switch PMC from MCK to main clock.
+*/
+PMC_SwitchMck2Main()
+{
+    REG_PMC_MCKR = 0xFFFFFC30;          /*(PMC) Master Clock Register */
+    PMC_PCK_CSS_MAIN_CLK = (0x1 << 0);  /*(PMC_PCK[3]) Main Clock is selected */
+    PMC_SR_MCKRDY = (0x1 << 3);         /*(PMC_SR) Master Clock Status */
+    REG_PMC_SR = 0xFFFFFC68;            /*(PMC) Status Register */
+
+    /* Select Main Oscillator as input clock for PCK and MCK */
+    __tempo_var = __readMemory32(REG_PMC_MCKR,"Memory");
+    __tempo_var = (__tempo_var & ~0x03)| PMC_PCK_CSS_MAIN_CLK ;
+    __writeMemory32(__tempo_var, REG_PMC_MCKR,"Memory");
+    while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_MCKRDY));
+    __mac_i=__readMemory32(REG_PMC_MCKR,"Memory");
+    __message " --------- PMC_SwitchMck2Main ----------- REG_PMC_MCKR  0x",__mac_i:%X;
+}
+
+/*********************************************************************
+*
+*       PMC_SetPllA()
+*
+* Function description
+*   Configure PLLA Registe.
+*/
+
+PMC_SetPllA()
+{
+    REG_CKGR_PLLAR = 0xFFFFFC28;        /*(PMC) PLLA Register */
+    REG_PMC_PLLICPR = 0xFFFFFC80;       /*(PMC) PLL Charge Pump Current Register */
+    REG_PMC_SR = 0xFFFFFC68;            /*(PMC) Status Register */
+    PMC_SR_LOCKA = (0x1 << 1);          /*(PMC_SR) PLLA Lock Status */
+
+    __writeMemory32(((0x1 << 29) | (0x3F << 8) | ( 0 << 14) | (43 << 18) | 1 ), REG_CKGR_PLLAR,"Memory");
+    //__writeMemory32((0x03<<8), REG_PMC_PLLICPR,"Memory");
+    while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_LOCKA));
+    __mac_i=__readMemory32(REG_CKGR_PLLAR,"Memory");
+    __message " --------- PMC_SetPllA ---------------- REG_CKGR_PLLAR  0x",__mac_i:%X;
+}
+
+/*********************************************************************
+*
+*       PMC_SetMckPllaDiv()
+*
+* Function description
+*   Configure MCK PLLA divider.
+*/
+PMC_SetMckPllaDiv()
+{
+    REG_PMC_MCKR = 0xFFFFFC30;             /*(PMC) Master Clock Register */
+    PMC_MCKR_PLLADIV2_DIV2 = (0x1 << 12);  /*(PMC_MCKR) PLLA clock frequency is divided by 2. */
+
+    __tempo_var = __readMemory32(REG_PMC_MCKR,"Memory");
+
+    if ((__tempo_var & PMC_MCKR_PLLADIV2_DIV2) == PMC_MCKR_PLLADIV2_DIV2)
+    {
+        __tempo_var &= ~PMC_MCKR_PLLADIV2_DIV2;
+        __writeMemory32(__tempo_var, REG_PMC_MCKR,"Memory");
+        while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_MCKRDY));
+    }
+}
+
+/*********************************************************************
+*
+*       PMC_SetMckPrescaler()
+*
+* Function description
+*   Configure MCK Prescaler.
+*/
+PMC_SetMckPrescaler()
+{
+    REG_PMC_MCKR = 0xFFFFFC30;             /*(PMC) Master Clock Register */
+    PMC_MCKR_PRES_Msk = (0x7 << 4);        /*(PMC_MCKR) Master/Processor Clock Prescaler */
+    PMC_MCKR_PRES_CLOCK = (0x0 << 4);      /*(PMC_MCKR) Selected clock */
+
+    /* Change MCK Prescaler divider in PMC_MCKR register */
+    __tempo_var = __readMemory32(REG_PMC_MCKR,"Memory");
+    __tempo_var = (__tempo_var & ~PMC_MCKR_PRES_Msk) | PMC_MCKR_PRES_CLOCK;
+    __writeMemory32(__tempo_var, REG_PMC_MCKR,"Memory");
+    while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_MCKRDY));
+    __mac_i=__readMemory32(REG_PMC_MCKR,"Memory");
+    __message " --------- PMC_SetMckPrescaler -------------- REG_PMC_MCKR  0x",__mac_i:%X;
+}
+
+/*********************************************************************
+*
+*       PMC_SetMckDivider()
+*
+* Function description
+*   Configure MCK Divider.
+*/
+PMC_SetMckDivider()
+{
+    REG_PMC_MCKR = 0xFFFFFC30;             /*(PMC) Master Clock Register */
+    PMC_MCKR_MDIV_Msk = (0x3 << 8);        /*(PMC_MCKR) Master Clock Division */
+    PMC_MCKR_MDIV_PCK_DIV4 = (0x2u << 8);   /*(PMC_MCKR) Master Clock is Prescaler Output Clock divided by 3.SysClk DDR is equal to 2 x MCK. DDRCK is equal to MCK. */
+
+    /* change MCK Prescaler divider in PMC_MCKR register */
+    __tempo_var = __readMemory32(REG_PMC_MCKR,"Memory");
+    __tempo_var = (__tempo_var & ~PMC_MCKR_MDIV_Msk) | PMC_MCKR_MDIV_PCK_DIV4;
+    __writeMemory32(__tempo_var, REG_PMC_MCKR,"Memory");
+    while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_MCKRDY));
+    __mac_i=__readMemory32(REG_PMC_MCKR,"Memory");
+    __message " --------- PMC_SetMckDivider -------------- REG_PMC_MCKR  0x",__mac_i:%X;
+}
+
+/*********************************************************************
+*
+*       PMC_SwitchMck2Pll()
+*
+* Function description
+*   Switch PMC from MCK to PLL clock.
+*/
+PMC_SwitchMck2Pll()
+{
+    REG_PMC_MCKR = 0xFFFFFC30;             /*(PMC) Master Clock Register */
+    PMC_MCKR_CSS_PLLA_CLK = (0x2 << 0);    /*(PMC_MCKR) PLLACK/PLLADIV2 is selected */
+
+    /* Select PLL as input clock for PCK and MCK */
+    __tempo_var = __readMemory32(REG_PMC_MCKR,"Memory");
+    __tempo_var = (__tempo_var & ~0x03) | PMC_MCKR_CSS_PLLA_CLK;
+    __writeMemory32(__tempo_var, REG_PMC_MCKR,"Memory");
+    while(!((__readMemory32(REG_PMC_SR,"Memory")) & PMC_SR_MCKRDY));
+    __mac_i=__readMemory32(REG_PMC_MCKR,"Memory");
+    __message " --------- PMC_SwitchMck2Pll -------------- REG_PMC_MCKR  0x",__mac_i:%X;
+}
+
+
+
+// ---------------------------------------------------------------------------
+//  Function Name       : __initDDR2
+//  Object              : Set DDR2 memory for working at 133 Mhz
+// ---------------------------------------------------------------------------
+
+__initDDR2(type)
+{
+    
+// ------------------ DDR Controller Registers --------------
+
+
+//  0xFFFFEA00    Mode Register                       MPDDRC_MR                
+//  0xFFFFEA04    Refresh Timer Register              MPDDRC_RTR               
+//  0xFFFFEA08    Configuration Register              MPDDRC_CR                
+//  0xFFFFEA0C    Timing Parameter 0 Register         MPDDRC_TPR0              
+//  0xFFFFEA10    Timing Parameter 1 Register         MPDDRC_TPR1              
+//  0xFFFFEA14    Timing Parameter 2 Register         MPDDRC_TPR2              
+//  0xFFFFEA1C    Low-power Register                  MPDDRC_LPR               
+//  0xFFFFEA20    Memory Device Register              MPDDRC_MD                
+//  0xFFFFEA28    LPDDR2 Low-power Register           MPDDRC_LPDDR2_LPR        
+//  0xFFFFEA2C    LPDDR2 Calibration and MR4 Register MPDDRC_LPDDR2_CAL_MR4    
+//  0xFFFFEA30    LPDDR2 Timing Calibration Register  MPDDRC_LPDDR2_TIM_CAL    
+//  0xFFFFEA34    IO Calibration                      MPDDRC_IO_CALIBR         
+//  0xFFFFEA38    OCMS Register                       MPDDRC_OCMS              
+//  0xFFFFEA3C    OCMS KEY1 Register                  MPDDRC_OCMS_KEY1         Write-only
+//  0xFFFFEA40    OCMS KEY2 Register                  MPDDRC_OCMS_KEY2         Write-only
+//  0xFFFFEA74    DLL Master Offset Register          MPDDRC_DLL_MOR           
+//  0xFFFFEA78    DLL Slave Offset Register           MPDDRC_DLL_SOR           
+//  0xFFFFEA7C    DLL Master Status Register          MPDDRC_DLL_MSR           Read-only
+//  0xFFFFEA80    DLL Slave 0 Status Register         MPDDRC_DLL_S0SR          Read-only
+//  0xFFFFEA84    DLL Slave 1 Status Register         MPDDRC_DLL_S1SR          Read-only
+//  0xFFFFEAE4    Write Protect Control Register      MPDDRC_WPCR              
+//  0xFFFFEAE8    Write Protect Status Register       MPDDRC_WPSR              Read-only
+
+// -----------------------------------------------
+
+// ---------------- DDR2 Timings (133MHz) -----------------
+
+                         // -------- Configuration Register
+//  n_row      =  14 
+//  n_col      =  10
+//  n_bank     =  8 
+                         // -------- Refresh Timer Register
+//  t_refresh  =  520
+                         // -------- Timing 0 Register
+//  t_tras     =  TRAS   6
+//  t_trcd     =  TRCD   2
+//  t_twr      =  TWR    2
+//  t_trc      =  TRC    8
+//  t_trp      =  TRP    2
+//  t_trrd     =  TRRD   2
+//  t_twtr     =  TWTR   2
+//  t_tmrd     =  TMRD   2
+                         // -------- Timing 1 Register
+//  t_trfc     =  TRFC   26/14
+//  t_txsnr    =  TXSNR  28/16
+//  t_txsrd    =  TXSRD  208
+//  t_txp      =  TXP    2
+                         // -------- Timing 2 Register
+//  t_txard    =  TXARD  7
+//  t_tards    =  TXARDS 7
+//  t_trpa     =  TRPA   3
+//  t_trtp     =  TRTP   2
+//  t_tfaw     =  TFAW  10
+// -----------------------------------------------
+
+          __message " --------- Configure MT47H64M16 DDR2             <<<<<<  FIXED BY ______ on 27.04.2020 >>>>>>";
+
+    __delay(2);
+    __writeMemory32(0x00008000,0xFFFFFE44,"Memory");   // Disable Watchdog
+    __writeMemory32(0x10000,0xFFFFEA1C,"Memory");  
+    __writeMemory32(0x00020000,0xFFFFFD00,"Memory");   // Enable MPDDR controller clock
+    __writeMemory32(0x00000004,0xFFFFFC00,"Memory");   // System Clock Enable Register : Enable DDR clock
+    
+	
+    //__writeMemory32(0x01010101,0xFFFFEA78,"Memory");   // MPDDRC DLL Slave Offset Register : set DLL Slave x Delay Line Offset
+    //__writeMemory32(0xC5011F07,0xFFFFEA74,"Memory");   // MPDDRC DLL Master Offset Register : DLL Master Delay Line Offset + DLL CLK90 Delay Line Offset + DLL Offset Selection
+
+    //__writeMemory32(0x00870303,0xFFFFEA34,"Memory");   // MPDDRC I/O Calibration Register : set Resistor Divider + IO Calibration (delay between an IO Calibration Command and any Valid commands)    
+
+// ==================== START DDRAM INITIALIZATION ====================
+
+    __writeMemory32(0x00000006,0xFFFFEA20,"Memory");   // Memory Device Register  :  32bit mode - DDR2 mode
+
+	__writeMemory32(0x00B07039,0xFFFFEA08,"Memory");   // Configuration Register  :  row = 13, column(DDR) = 10, CAS 3, DLL reset disable, phase error correction is enabled / normal driver strength
+
+    __writeMemory32(0x22228326,0xFFFFEA0C,"Memory");   // Timing 0 Register : tras  | trcd  | twr   | trc  | trp | trrd | twtr | tmrd
+    __writeMemory32(0x02C81C1A,0xFFFFEA10,"Memory");   // Timing 1 Register : trfc  | txsnr | txsrd | txp
+    __writeMemory32(0x00072278,0xFFFFEA14,"Memory");   // Timing 2 Register : txard | tards | trpa  | trtp | tfaw
+    __writeMemory32(0x00000001,0xFFFFEA00,"Memory");   // Mode register : command  NOP --> ENABLE CLOCK output
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);   // wait 1 ms
+
+
+    __writeMemory32(0x00000001,0xFFFFEA00,"Memory");   // Mode register : command  NOP --> ENABLE CLOCK output
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+	
+    __writeMemory32(0x00000001,0xFFFFEA00,"Memory");   // Mode register : command  NOP --> ENABLE CLOCK output
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+
+    __writeMemory32(0x00000002,0xFFFFEA00,"Memory");   // Mode register : command  All Banks Precharge
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+
+    __writeMemory32(0x00000005,0xFFFFEA00,"Memory");   // Mode register : command  Extended Load Mode Register : Set EMR Ext Mode Reg EMSR2 BA0=0 BA1=1
+	__writeMemory32(0x00000000,0x24000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+
+    __writeMemory32(0x00000005,0xFFFFEA00,"Memory");   // Mode register : command  Extended Load Mode Register : Set EMR Ext Mode Reg EMSR3 BA0=1 BA1=1
+	__writeMemory32(0x00000000,0x26000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+
+  //__delay(1);
+    __writeMemory32(0x00000005,0xFFFFEA00,"Memory");   // Mode register : command  Extended Load Mode Register : Set EMR Ext Mode Reg EMSR1 BA0=1 BA1=0 ENABLE DLL
+	__writeMemory32(0x00000000,0x22000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+
+    __delay(1);
+    
+	__tempo_var = __readMemory32(0xFFFFEA08,"Memory");
+	__tempo_var |= 0x80;
+    __writeMemory32(__tempo_var, 0xFFFFEA08,"Memory");   // Configuration Register : Enable DLL reset
+
+    __writeMemory32(0x00000003,0xFFFFEA00,"Memory");   // Mode register : command  RESET DLL
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+    __writeMemory32(0x00000002,0xFFFFEA00,"Memory");   // Mode register : command  All Banks Precharge
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+    __writeMemory32(0x00000004,0xFFFFEA00,"Memory");   // Mode register : 2 * command  Auto-Refresh
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+    __writeMemory32(0x00000004,0xFFFFEA00,"Memory");   // Mode register : 
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+
+	__tempo_var = __readMemory32(0xFFFFEA08,"Memory");
+	__tempo_var &= ~0x80;
+    __writeMemory32(__tempo_var,0xFFFFEA08,"Memory");   // Configuration Register : disable DLL reset
+    
+    __writeMemory32(0x00000003,0xFFFFEA00,"Memory");   // Mode register :  MRS  initialize device operation (CAS latency, burst length and disable DLL reset)
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+
+	__tempo_var = __readMemory32(0xFFFFEA08,"Memory");
+	__tempo_var |= (0x7u << 12);
+	__writeMemory32(__tempo_var, 0xFFFFEA08,"Memory"); // Configuration Register : OCD default value
+    
+    __writeMemory32(0x00000005,0xFFFFEA00,"Memory");   // Mode register : EMRS1   OCD Default values
+	__writeMemory32(0x00000000,0x22000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+
+	__tempo_var = __readMemory32(0xFFFFEA08,"Memory");
+	__tempo_var &= ~(0x7u << 12);
+    __writeMemory32(__tempo_var,0xFFFFEA08,"Memory");   // Configuration Register : OCD exit
+    
+    __writeMemory32(0x00000005,0xFFFFEA00,"Memory");   // Mode register : EMRS1   OCD exit
+	__writeMemory32(0x00000000,0x22000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+
+    __delay(1);
+    __writeMemory32(0x00000000,0xFFFFEA00,"Memory");   // Mode register : command  Normal mode
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+	
+    __writeMemory32(0x00000000,0x20000000,"Memory");   // DDR2 memory : access memory to validate preeceeding command
+    __delay(1);
+
+    __writeMemory32(0x00300408,0xFFFFEA04,"Memory");   // Refresh Timer register : 520 for 133 MHz
+
+    __message "------------------------------- DDR2 memory init for 133 MHz ----------------------------------";
+}
+]]
