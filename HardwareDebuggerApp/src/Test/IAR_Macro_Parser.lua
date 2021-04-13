@@ -6,7 +6,7 @@ local functions = {}
 ---------------------------------------------------------------------------------------
 -- find all strings
 for k in script:gmatch("\".-[^\\]\"") do
-    k = k:gsub("([^%w])", "%%%1")
+    k = k:gsub("[%(%)%.%%%+%-%*%?%[%]%^%$]", "%%%0")
     table.insert(strings, k)
 end
 
@@ -17,20 +17,38 @@ end
 -- remove all comments and multiple newlines
 script = script:gsub("%s-//.-[\n$]", "\n") -- remove single line comments
 script = script:gsub("/%*.-%*/", "") -------- remove multi line comments
-script = script:gsub("\n", ""); ------------- remove all newlines
+-- script = script:gsub("\n", ""); ------------- remove all newlines
 script = script:gsub(";%s-(%S)", ";\n%1") --- remove spaces between ; and next non space char, replace with one newline
 ---------------------------------------------------------------------------------------
+-- replace "__var" with "local"
+script = script:gsub("%f[%w_]__var%f[^%w_]", "local")
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*+=", "%1 = %1 + ") ----- +=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*-=", "%1 = %1 - ") ----- -=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s**=", "%1 = %1 * ") ----- *=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*/=", "%1 = %1 / ") ----- /=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*%%=", "%1 = %1 %% ") --- %=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*%^=", "%1 = %1 ^ ") ---- ^=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*&=", "%1 = %1 & ") ----- &=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*|=", "%1 = %1 | ") ----- |=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*>>=", "%1 = %1 >> ") --- >>=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*<<=", "%1 = %1 << ") --- <<=
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*++", "%1 = %1 + 1") ---- ++
+script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*%-%-", "%1 = %1 - 1") -- --
+---------------------------------------------------------------------------------------
 -- find all functions
-for k in script:gmatch("[%s]-([%w_]-%s-%(.-%)[%s\n]-{.-})") do
+for k in script:gmatch("[%s]-[%w_]-%s-%(.-%)[%s\n]-%b{}") do
     local funcEntry = {
-        name = k:match("([%w_]+)%s-%(.-%)[%s\n]-{.-}"),
-        params = k:match("[%w_]-%s-%((.-)%)[%s\n]-{.-}"),
-        code = k:match("[%w_]-%s-%(.-%)[%s\n]-{(.-)}"):gsub("^%s*", "")
+        sourcePattern = k:gsub("[%(%)%.%%%+%-%*%?%[%]%^%$]", "%%%0"),
+        name = k:match("[%s]-([%w_]+)%s-%(.-%)[%s\n]-%b{}"),
+        params = k:match("[%s]-[%w_]-%s-%((.-)%)[%s\n]-%b{}"),
+        code = k:match("[%s]-[%w_]-%s-%(.-%)[%s\n]-(%b{})"):gsub("^%s*", "")
     }
     table.insert(functions, funcEntry)
+end
 
-    print("name:", funcEntry.name)
-    print("params:", funcEntry.params)
-    print("body:\n" .. funcEntry.body)
+for i, v in ipairs(functions) do
+    -- script = script:gsub(v.sourcePattern, "\n`FUNC_" .. i .. "`") --
 end
 ---------------------------------------------------------------------------------------
+
+print(script)
