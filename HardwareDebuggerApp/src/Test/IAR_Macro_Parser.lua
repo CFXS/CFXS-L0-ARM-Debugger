@@ -1,4 +1,4 @@
-local script = "\n" .. loadfile("test2.iar")()
+local script = "\n" .. loadfile("ddram.iar")()
 
 local strings = {}
 local functions = {}
@@ -25,27 +25,39 @@ script = script:gsub("(%s-)__message%s*(.-);", "%1__message(%2)")
 -- replace "__var" with "local"
 script = script:gsub("%f[%w_]__var%f[^%w_]", "local")
 -- replace +=/++ with x = x + y (Lua does not support +=/++)
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*+=", "%1 = %1 + ") ----- +=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*-=", "%1 = %1 - ") ----- -=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s**=", "%1 = %1 * ") ----- *=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*/=", "%1 = %1 / ") ----- /=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*%%=", "%1 = %1 %% ") --- %=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*%^=", "%1 = %1 ^ ") ---- ^=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*&=", "%1 = %1 & ") ----- &=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*|=", "%1 = %1 | ") ----- |=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*>>=", "%1 = %1 >> ") --- >>=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*<<=", "%1 = %1 << ") --- <<=
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*%+%+", "%1 = %1 + 1") -- ++
-script = script:gsub("%f[%w_](%w+)%f[^%w_]%s*%-%-", "%1 = %1 - 1") -- --
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*+=(.-);", "%1 = %1 + (%2);") ----- +=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*-=(.-);", "%1 = %1 - (%2);") ----- -=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s**=(.-);", "%1 = %1 * (%2);") ----- *=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*/=(.-);", "%1 = %1 / (%2);") ----- /=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*%%=(.-);", "%1 = %1 %% (%2);") --- %=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*%^=(.-);", "%1 = %1 ^ (%2);") ---- ^=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*&=(.-);", "%1 = %1 & (%2);") ----- &=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*|=(.-);", "%1 = %1 | (%2);") ----- |=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*>>=(.-);", "%1 = %1 >> (%2);") --- >>=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*<<=(.-);", "%1 = %1 << (%2);") --- <<=
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*%+%+", "%1 = %1 + 1") -- ++
+script = script:gsub("%f[%w_]([%w_]+)%f[^%w_]%s*%-%-", "%1 = %1 - 1") -- --
 --
 script = script:gsub("!=", "~=")
 script = script:gsub("&&", "and")
 script = script:gsub("||", "or")
-script = script:gsub("!(.-)%)", "((%1) == 0))")
+script = script:gsub("!(%b())", "((%1) == 0)")
 -- remove multiple spaces
 script = script:gsub(" +", " ")
 -- replace "else if" with "elseif"
 script = script:gsub("else if", "elseif")
+-- replace registers with get function calls
+script = script:gsub("#([%w_]*)", "__cpu_registers.%1")
+-- luaify while
+script = script:gsub("%f[%w_]while%s-(%b())%s-;", "while __is_true(%1) do end")
+script = script:gsub("%f[%w_]while%s-(%b())%s-(.-)[^{];",
+                     "while __is_true(%1) do %2 end")
+-- unsigned
+script = script:gsub("([%d%x]+)u([^%w_])", "%1%2")
+-- address
+script = script:gsub("&([%w_]+)", "__address_of(\"%1\")")
+-- uninitialized locals
+script = script:gsub("local ([%w_]-);", "local %1 = 0;")
 ---------------------------------------------------------------------------------------
 -- find all functions
 for k in script:gmatch("[%s]-[%w_]-%s-%(.-%)[%s\n]-%b{}") do
@@ -73,6 +85,7 @@ for k in script:gmatch("[%s]-[%w_]-%s-%(.-%)[%s\n]-%b{}") do
 
     for is, s in pairs(strings) do
         s = s:gsub("%%", "%%%%")
+        s = s:gsub(",", "__temp_com_temp__");
         funcEntry.code = funcEntry.code:gsub("`STRING_" .. is .. "`", s);
     end
 
@@ -87,10 +100,10 @@ for k in script:gmatch("[%s]-[%w_]-%s-%(.-%)[%s\n]-%b{}") do
 
             for arg in msgContent do
                 found = true
-                if arg:find("[%w_]+:%%%w+") then
+                if arg:find("[%w_%(%)].-:%%%w+") then
                     -- param
-                    local var = msg:match("([%w_]+):%%%w+")
-                    local disp = msg:match("[%w_]+:(%%%w+)")
+                    local var = arg:match("([%w_%(%)]-):%%%w+")
+                    local disp = arg:match("[%w_%(%)]-:(%%%w+)")
                     local fmt = "string.format(\"" .. disp .. "\", " .. var ..
                                     ")"
                     table.insert(content, fmt)
@@ -100,7 +113,7 @@ for k in script:gmatch("[%s]-[%w_]-%s-%(.-%)[%s\n]-%b{}") do
                 end
             end
 
-            local params = table.concat(content, ".. ")
+            local params = table.concat(content, "..")
             table.insert(messages, {
                 str = msg:gsub("[%(%)%.%%%+%-%*%?%[%]%^%$]", "%%%0"),
                 par = params:gsub("%%", "%%%%")
@@ -111,18 +124,19 @@ for k in script:gmatch("[%s]-[%w_]-%s-%(.-%)[%s\n]-%b{}") do
             funcEntry.code = funcEntry.code:gsub(m.str,
                                                  "__message(" .. m.par .. ")")
         end
-
-        print(funcEntry.code)
     end
 
-    -- print(funcEntry.code)
+    funcEntry.code = funcEntry.code:gsub("__temp_com_temp__", ",")
+    funcEntry.code = funcEntry.code:gsub("%%", "%%%%")
 
     table.insert(functions, funcEntry)
 end
 
 for i, v in ipairs(functions) do
-    -- script = script:gsub(v.sourcePattern, "\n`FUNC_" .. i .. "`") --
+    script = script:gsub(v.sourcePattern, v.code .. "\n\n") --
 end
 ---------------------------------------------------------------------------------------
 
--- print(script)
+script = script:gsub("%%%-", "-")
+script = script:gsub("%%%.", ".")
+print(script)
