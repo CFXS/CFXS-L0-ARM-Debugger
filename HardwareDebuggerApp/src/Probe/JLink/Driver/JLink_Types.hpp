@@ -262,6 +262,65 @@ namespace HWD::Probe::Driver::JLink_Types {
         CORTEX_A5      = 0x0F0000FF,
     };
 
+    inline const char* DeviceCoreToString(DeviceCore core) {
+        switch (core) {
+            case DeviceCore::NONE: return "None";
+            case DeviceCore::ANY: return "Any";
+            case DeviceCore::CORTEX_M1: return "Cortex M1";
+            case DeviceCore::COLDFIRE: return "ColdFire";
+            case DeviceCore::CORTEX_M3: return "Cortex M3";
+            case DeviceCore::CORTEX_M3_R1P0: return "Cortex M3 r1p0";
+            case DeviceCore::CORTEX_M3_R1P1: return "Cortex M3 r1p1";
+            case DeviceCore::CORTEX_M3_R2P0: return "Cortex M3 r2p0";
+            case DeviceCore::CORTEX_M3_R2P1: return "Cortex M3 r2p1";
+            case DeviceCore::SIM: return "Sim";
+            case DeviceCore::XSCALE: return "XScale";
+            case DeviceCore::CORTEX_M0: return "Cortex M0";
+            case DeviceCore::CORTEX_M23: return "Cortex M23";
+            case DeviceCore::ARM7: return "ARM7";
+            case DeviceCore::ARM7TDMI: return "ARM7TDMI";
+            case DeviceCore::ARM7TDMI_R3: return "ARM7TDMI R3";
+            case DeviceCore::ARM7TDMI_R4: return "ARM7TDMI R4";
+            case DeviceCore::ARM7TDMI_S: return "ARM7TDMI S";
+            case DeviceCore::ARM7TDMI_S_R3: return "ARM7TDMI S R3";
+            case DeviceCore::ARM7TDMI_S_R4: return "ARM7TDMI S R4";
+            case DeviceCore::CORTEX_A8: return "Cortex A8";
+            case DeviceCore::CORTEX_A7: return "Cortex A7";
+            case DeviceCore::CORTEX_A9: return "Cortex A9";
+            case DeviceCore::CORTEX_A12: return "Cortex A12";
+            case DeviceCore::CORTEX_A15: return "Cortex A15";
+            case DeviceCore::CORTEX_A17: return "Cortex A17";
+            case DeviceCore::ARM9: return "ARM9";
+            case DeviceCore::ARM9TDMI_S: return "ARM9TDMIS";
+            case DeviceCore::ARM920T: return "ARM920T";
+            case DeviceCore::ARM922T: return "ARM922T";
+            case DeviceCore::ARM926EJ_S: return "ARM926EJ S";
+            case DeviceCore::ARM946E_S: return "ARM946E S";
+            case DeviceCore::ARM966E_S: return "ARM966E S";
+            case DeviceCore::ARM968E_S: return "ARM968E S";
+            case DeviceCore::ARM11: return "ARM11";
+            case DeviceCore::ARM1136: return "ARM1136";
+            case DeviceCore::ARM1136J: return "ARM1136J";
+            case DeviceCore::ARM1136J_S: return "ARM1136J S";
+            case DeviceCore::ARM1136JF: return "ARM1136JF";
+            case DeviceCore::ARM1136JF_S: return "ARM1136JF S";
+            case DeviceCore::ARM1156: return "ARM1156";
+            case DeviceCore::ARM1176: return "ARM1176";
+            case DeviceCore::ARM1176J: return "ARM1176J";
+            case DeviceCore::ARM1176J_S: return "ARM1176J S";
+            case DeviceCore::ARM1176JF: return "ARM1176JF";
+            case DeviceCore::ARM1176JF_S: return "ARM1176JF S";
+            case DeviceCore::CORTEX_R4: return "Cortex R4";
+            case DeviceCore::CORTEX_R5: return "Cortex R5";
+            case DeviceCore::CORTEX_R8: return "Cortex R8";
+            case DeviceCore::CORTEX_M4: return "Cortex M4";
+            case DeviceCore::CORTEX_M7: return "Cortex M7";
+            case DeviceCore::CORTEX_M33: return "Cortex M33";
+            case DeviceCore::CORTEX_A5: return "Cortex A5";
+            default: return "Unknown";
+        }
+    }
+
     namespace CPU_Capacilities {
         static constexpr uint32_t RESERVED   = 1 << 0;
         static constexpr uint32_t READ_MEM   = 1 << 1;
@@ -280,38 +339,20 @@ namespace HWD::Probe::Driver::JLink_Types {
     } // namespace CPU_Capacilities
 
     enum class ProbeCapabilities : uint32_t {
-        RESERVED           = 1 << 0,
-        GET_HW_VERSION     = 1 << 1,
-        WRITE_DCC          = 1 << 2,
-        ADAPTIVE_CLOCKING  = 1 << 3,
-        READ_CONFIG        = 1 << 4,
-        WRITE_CONFIG       = 1 << 5,
-        TRACE_ARM79        = 1 << 6,
-        WRITE_MEM          = 1 << 7,
-        READ_MEM           = 1 << 8,
-        SPEED_INFO         = 1 << 9,
-        EXEC_CODE          = 1 << 10,
-        GET_MAX_BLOCK_SIZE = 1 << 11,
-        GET_HW_INFO        = 1 << 12,
-        SET_KS_POWER       = 1 << 13,
-        RESET_STOP_TIMED   = 1 << 14,
-        GET_LICENSE_INFO   = 1 << 15,
-        MEASURE_RTCK_REACT = 1 << 16,
-        SELECT_IF          = 1 << 17,
-        RW_MEM_ARM79       = 1 << 18,
-        GET_COUNTERS       = 1 << 19,
-        READ_DCC           = 1 << 20,
-        GET_CPU_CAPS       = 1 << 21,
-        EXEC_CPU_CMD       = 1 << 22,
-        SWO                = 1 << 23,
-        WRITE_DCC_EX       = 1 << 24,
-        UPDATE_FIRMWARE_EX = 1 << 25,
-        FILE_IO            = 1 << 26,
-        REGISTER           = 1 << 27,
-        INDICATORS         = 1 << 28,
-        TEST_NET_SPEED     = 1 << 29,
-        RAWTRACE           = 1 << 30,
-        GET_CAPS_EX        = 1ul << 31,
+        RESERVED          = 1 << 0,
+        GET_HW_VERSION    = 1 << 1,    // can get hardware version from host
+        ADAPTIVE_CLOCKING = 1 << 3,    // adaptive clock mode
+        TRACE_ARM79       = 1 << 6,    // supports ARM7/9 trace
+        WRITE_MEM_ARM79   = 1 << 7,    // can auto write ARM7/9 memory
+        READ_MEM_ARM79    = 1 << 8,    // can auto read ARM7/9 memory
+        SPEED_INFO        = 1 << 9,    // can get target supported speeds
+        RESET_STOP_TIMED  = 1 << 14,   // can reset and halt
+        GET_LICENSE_INFO  = 1 << 15,   // can get license info
+        SELECT_IF         = 1 << 17,   // can select target interface
+        RW_MEM_ARM79      = 1 << 18,   // can auto read/write ARM7/9 memory
+        SWO               = 1 << 23,   // supports SWO
+        RAWTRACE          = 1 << 30,   // supports rawtrace
+        GET_CAPS_EX       = 1ul << 31, // has extended capabilities
     };
     HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(ProbeCapabilities, uint32_t)
 

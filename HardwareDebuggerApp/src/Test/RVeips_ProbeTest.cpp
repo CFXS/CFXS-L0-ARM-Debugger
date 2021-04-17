@@ -1,7 +1,7 @@
 // [source]
 #include "RVeips_ProbeTest.hpp"
 
-#include <Probe/JLink/JLink_Probe.hpp>
+#include <Probe/JLink/JLink.hpp>
 
 #include "TestFirmware.h"
 
@@ -14,7 +14,7 @@ namespace HWD::Test {
         TargetDevices::LoadSupportedDevices();
         auto& testDevice = TargetDevices::GetSupportedDevices().at("TM4C1294NC");
 
-        auto connectedProbes = JLink_Probe::s_GetConnectedProbes();
+        auto connectedProbes = JLink::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
             probe->Probe_Connect();
 
@@ -45,7 +45,7 @@ namespace HWD::Test {
     }
 
     RVeips_ProbeTest::~RVeips_ProbeTest() {
-        auto connectedProbes = JLink_Probe::s_GetConnectedProbes();
+        auto connectedProbes = JLink::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
             delete probe;
         }

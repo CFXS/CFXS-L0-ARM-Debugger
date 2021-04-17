@@ -9,6 +9,7 @@ if len(sys.argv) <= 2:
 
 param_RootPath = sys.argv[1].replace('\\', '/')
 param_OutputPath = sys.argv[2].replace('\\', '/')
+
 if len(sys.argv) == 4:
     param_SourceIdentifier = sys.argv[3]
 else:

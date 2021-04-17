@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Generate Sources",
+            "type": "shell",
+            "command": "py \"${workspaceFolder}/Tools/GenerateSources.py\" \"${workspaceFolder}/HardwareDebuggerApp/src\" \"${workspaceFolder}/HardwareDebuggerApp/_Sources.cmake\" \"// [source]\"",
+            "group": "test"
+        }
+    ]
+}

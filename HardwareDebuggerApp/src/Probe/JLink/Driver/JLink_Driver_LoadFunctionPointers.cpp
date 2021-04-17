@@ -114,7 +114,7 @@ namespace HWD::Probe::Driver {
         target_WriteMemoryZonedEx      = m_Library->GetFunction<decltype(target_WriteMemoryZonedEx)>("JLINK_WriteMemZonedEx");
         target_WriteVectorCatch        = m_Library->GetFunction<decltype(target_WriteVectorCatch)>("JLINKARM_WriteVectorCatch");
         target_WriteVerifyMemory       = m_Library->GetFunction<decltype(target_WriteVerifyMemory)>("JLINKARM_WriteVerifyMem");
-        target_GetCore                 = m_Library->GetFunction<decltype(target_GetCore)>("JLINKARM_CORE_GetFound");
+        target_GetDeviceCore           = m_Library->GetFunction<decltype(target_GetDeviceCore)>("JLINKARM_CORE_GetFound");
         target_CoreSight_Configure     = m_Library->GetFunction<decltype(target_CoreSight_Configure)>("JLINKARM_CORESIGHT_Configure");
         target_CoreSight_ReadAPDPReg   = m_Library->GetFunction<decltype(target_CoreSight_ReadAPDPReg)>("JLINKARM_CORESIGHT_ReadAPDPReg");
         target_CoreSight_WriteAPDP     = m_Library->GetFunction<decltype(target_CoreSight_WriteAPDP)>("JLINKARM_CORESIGHT_WriteAPDPReg");

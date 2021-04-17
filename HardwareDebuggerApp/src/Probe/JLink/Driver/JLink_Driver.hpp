@@ -138,10 +138,10 @@ namespace HWD::Probe::Driver {
         int (*target_WriteMemoryZonedEx)(uint32_t Addr, uint32_t NumBytes, const void* p, uint32_t Flags, const char* sZone)      = nullptr;
         int (*target_WriteVectorCatch)(uint32_t Value)                                                                            = nullptr;
         int (*target_WriteVerifyMemory)(uint32_t Addr, uint32_t NumBytes, const void* p, uint32_t Flags)                          = nullptr;
-        uint32_t (*target_GetCore)(void)                                                                                          = nullptr;
-        int (*target_CoreSight_Configure)(const char* sConfig)                                                                    = nullptr;
-        int (*target_CoreSight_ReadAPDPReg)(uint8_t RegIndex, uint8_t APnDP, uint32_t* pData)                                     = nullptr;
-        int (*target_CoreSight_WriteAPDP)(uint8_t RegIndex, uint8_t APnDP, uint32_t Data)                                         = nullptr;
+        JLink_Types::DeviceCore (*target_GetDeviceCore)(void)                                                                     = nullptr;
+        JLink_Types::ErrorCode (*target_CoreSight_Configure)(const char* sConfig)                                                 = nullptr;
+        JLink_Types::ErrorCode (*target_CoreSight_ReadAPDPReg)(uint8_t RegIndex, uint8_t APnDP, uint32_t* pData)                  = nullptr;
+        JLink_Types::ErrorCode (*target_CoreSight_WriteAPDP)(uint8_t RegIndex, uint8_t APnDP, uint32_t Data)                      = nullptr;
         int (*target_CP15_IsPresent)(void)                                                                                        = nullptr;
         int (*target_CP15_ReadEx)(uint8_t CRn, uint8_t CRm, uint8_t op1, uint8_t op2, uint32_t* pData)                            = nullptr;
         int (*target_CP15_ReadRegister)(uint32_t RegIndex, uint32_t* pData)                                                       = nullptr;

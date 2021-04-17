@@ -1,6 +1,6 @@
 [submodule "HardwareDebuggerApp/vendor/spdlog"]
 	path = HardwareDebuggerApp/vendor/spdlog
-	url = https://github.com/gabime/spdlog.git
+	url = https://github.com/CFXS/spdlog.git
 [submodule "HardwareDebuggerApp/vendor/ImGui"]
 	path = HardwareDebuggerApp/vendor/ImGui
 	url = https://github.com/CFXS/imgui.git

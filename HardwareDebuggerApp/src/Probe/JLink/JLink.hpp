@@ -5,7 +5,7 @@
 
 namespace HWD::Probe {
 
-    class JLink_Probe final : public IProbe {
+    class JLink final : public IProbe {
         friend struct ProbeCallbackEntry;
 
         using MessageCallback       = Driver::JLink_Types::LogCallback;
@@ -16,7 +16,7 @@ namespace HWD::Probe {
         static constexpr auto MAX_DISCOVERABLE_PROBE_COUNT = 8; // limit max discoverable probe count
 
     public:
-        virtual ~JLink_Probe();
+        virtual ~JLink();
 
         /////////////////////////////////////////
         void Process() override;
@@ -27,11 +27,11 @@ namespace HWD::Probe {
         bool Probe_Disconnect() override;
         bool Probe_IsConnected() const override;
 
-        const std::string& JLink_Probe::GetModelName() const override {
+        const std::string& JLink::GetModelName() const override {
             return m_ModelName;
         }
 
-        const std::string& JLink_Probe::GetSerialNumberString() const override {
+        const std::string& JLink::GetSerialNumberString() const override {
             return m_SerialNumberString;
         }
         /////////////////////////////////////////
@@ -55,7 +55,7 @@ namespace HWD::Probe {
         /////////////////////////////////////////
 
     public:
-        static std::vector<JLink_Probe*> s_GetConnectedProbes();
+        static std::vector<JLink*> s_GetConnectedProbes();
 
     private:
         static void s_InitializeProbeCallbackArray();
@@ -63,13 +63,13 @@ namespace HWD::Probe {
     private:
         /// \param probeInfo probe data
         /// \param probeIndex index to use for mapping callbacks (probe index in s_Probes)
-        JLink_Probe(const Driver::JLink_Types::ProbeInfo& probeInfo, int probeIndex);
+        JLink(const Driver::JLink_Types::ProbeInfo& probeInfo, int probeIndex);
 
-        std::shared_ptr<Driver::JLink_Driver> JLink_Probe::GetDriver() const {
+        std::shared_ptr<Driver::JLink_Driver> JLink::GetDriver() const {
             return m_Driver;
         }
 
-        uint32_t JLink_Probe::GetRawSerialNumber() const {
+        uint32_t JLink::GetRawSerialNumber() const {
             return m_RawSerialNumber;
         }
 
@@ -82,9 +82,16 @@ namespace HWD::Probe {
         // specific config
         void Probe_DisableFlashProgressPopup();
 
+        // Private probe stuff
+        void UpdateProbeInfo();
+
+        // Private target stuff
+        void PrepareTarget();
+        void UpdateTargetInfo();
+
     private:
         // An array is used instead of a vector to be able to set error/warning/log handlers for each instance safely (because of threads)
-        static std::array<JLink_Probe*, MAX_DISCOVERABLE_PROBE_COUNT> s_Probes; // list of all JLink probes
+        static std::array<JLink*, MAX_DISCOVERABLE_PROBE_COUNT> s_Probes; // list of all JLink probes
 
     private:
         std::shared_ptr<Driver::JLink_Driver> m_Driver;
@@ -96,6 +103,9 @@ namespace HWD::Probe {
 
         // flash
         float m_FlashProgress = 0;
+
+        // probe
+        Driver::JLink_Types::ProbeCapabilities m_ProbeCapabilities = {}; // initialize to 0
 
     private: // generic properties
         uint32_t m_RawSerialNumber       = 0;
