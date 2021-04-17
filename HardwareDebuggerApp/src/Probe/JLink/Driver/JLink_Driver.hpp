@@ -41,8 +41,8 @@ namespace HWD::Probe::Driver {
         JLink_Types::ErrorCode (*probe_ExecuteCommand)(const char* inputBuffer, char* outputBuffer, int outputBufferSize) = nullptr;
         int (*target_FindBreakpoint)(uint32_t address)                                                                    = nullptr;
         uint32_t (*target_GetBreakpointInfo)(int handle)                                                                  = nullptr;
-        int (*target_GetBreakpointInfoEx)(int index, JLink_Types::BreakpointInfo* pInfo)                                  = nullptr;
-        int (*target_GetDebugInfo)(JLink_Types::DebugInfoIndex Index, uint32_t* pInfo)                                    = nullptr;
+        JLink_Types::ErrorCode (*target_GetBreakpointInfoEx)(int index, JLink_Types::BreakpointInfo* pInfo)               = nullptr;
+        JLink_Types::ErrorCode (*target_GetDebugInfo)(JLink_Types::DebugInfoIndex Index, uint32_t* pInfo)                 = nullptr;
         JLink_Types::DeviceFamily (*target_GetDeviceFamily)(void)                                                         = nullptr;
         uint32_t (*library_GetVersion)(void)                                                                              = nullptr;
         JLink_Types::ProbeCapabilities (*probe_GetCapabilities)(void)                                                     = nullptr;
@@ -50,8 +50,8 @@ namespace HWD::Probe::Driver {
         void (*probe_GetFeatureString)(char* buffer_256)                                                                  = nullptr;
         void (*probe_GetFirmwareString)(char* buffer, int bufferSize)                                                     = nullptr;
         int (*probe_GetHardwareVersion)(void)                                                                             = nullptr;
-        int (*target_GetHardwareInfo)(uint32_t BitMask, uint32_t* pHWInfo)                                                = nullptr;
-        int (*target_GetHardwareStatus)(JLink_Types::HardwareStatus* pStat)                                               = nullptr;
+        JLink_Types::ErrorCode (*target_GetHardwareInfo)(uint32_t BitMask, uint32_t* pHWInfo)                             = nullptr;
+        JLink_Types::ErrorCode (*target_GetHardwareStatus)(JLink_Types::HardwareStatus* pStat)                            = nullptr;
         uint32_t (*target_Get_CPU_ID)(void)                                                                               = nullptr;
         int (*target_GetDebugEntryReason)(JLink_Types::MOE_Info* pInfo, int MaxNumMOEs)                                   = nullptr;
         uint32_t (*probe_GetBreakpointCount)(void)                                                                        = nullptr;

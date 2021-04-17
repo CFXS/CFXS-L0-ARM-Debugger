@@ -7,7 +7,7 @@ namespace HWD::Probe {
     class IProbe {
     public:
         enum class DebugInterface { SWD };
-        inline const char* TargetInterfaceToString(DebugInterface interface) {
+        static const char* DebugInterfaceToString(DebugInterface interface) {
             if (interface == DebugInterface::SWD)
                 return "SWD";
             else
@@ -98,3 +98,16 @@ namespace HWD::Probe {
     };
 
 } // namespace HWD::Probe
+
+template<>
+struct fmt::formatter<HWD::Probe::IProbe::DebugInterface> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(HWD::Probe::IProbe::DebugInterface const& ifc, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::IProbe::DebugInterfaceToString(ifc));
+    }
+};

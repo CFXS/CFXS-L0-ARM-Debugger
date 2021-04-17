@@ -70,7 +70,7 @@ namespace HWD::Probe {
         m_RawSerialNumber    = probeInfo.serialNumber;
 
         if (!m_Driver->IsLoaded()) {
-            HWDLOG_PROBE_CRITICAL("[JLink@{0}] Driver library not loaded", fmt::ptr(this));
+            HWDLOG_PROBE_CRITICAL("Driver library not loaded");
         }
     }
 
@@ -134,7 +134,7 @@ namespace HWD::Probe {
 
         ErrorCode ec = m_Driver->probe_SelectBySerialNumber_USB(GetRawSerialNumber());
         if (ec != ErrorCode::OK) {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number - {1}", fmt::ptr(this), ErrorCodeToString(ec));
+            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number - {1}", fmt::ptr(this), ec);
             return false;
         }
 
@@ -190,12 +190,12 @@ namespace HWD::Probe {
         char resp[256];
         ErrorCode ec = m_Driver->probe_ExecuteCommand(fmt::format("Device = {0}\n", device.GetName()).c_str(), resp, 256);
 
+        HWDLOG_PROBE_TRACE("[JLink@{0}]:", fmt::ptr(this));
         if (ec == ErrorCode::OK) {
-            HWDLOG_PROBE_TRACE("[JLink@{0}] Selected target device \"{1}\"", fmt::ptr(this), device.GetName());
-            HWDLOG_PROBE_TRACE("[JLink@{0}] Target memory regions:", fmt::ptr(this));
+            HWDLOG_PROBE_TRACE("Selected target device \"{0}\"", device.GetName());
+            HWDLOG_PROBE_TRACE("Target memory regions:");
             for (auto& reg : device.GetMemoryRegions()) {
-                HWDLOG_PROBE_TRACE("[JLink@{0}] - {1}\t{2:6}\t0x{3:08X} - 0x{4:08X}",
-                                   fmt::ptr(this),
+                HWDLOG_PROBE_TRACE(" - {0}\t{1:6}\t0x{2:08X} - 0x{3:08X}",
                                    To_C_String(reg.GetAccessPermissions()),
                                    reg.GetName(),
                                    reg.GetAddress(),
@@ -203,8 +203,7 @@ namespace HWD::Probe {
             }
             return true;
         } else {
-            HWDLOG_PROBE_ERROR(
-                "[JLink@{0}] Failed to select target device \"{1}\" - {2}", fmt::ptr(this), device.GetName(), ErrorCodeToString(ec));
+            HWDLOG_PROBE_ERROR("Failed to select target device \"{0}\" - {1}", device.GetName(), ec);
             return false;
         }
     }
@@ -226,9 +225,7 @@ namespace HWD::Probe {
                 }
             }
             default:
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"{1}\" - unknown interface",
-                                   fmt::ptr(this),
-                                   IProbe::TargetInterfaceToString(interface));
+                HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"{1}\" - unknown interface", fmt::ptr(this), interface);
                 return false;
         }
     }
@@ -249,7 +246,7 @@ namespace HWD::Probe {
             if ((int)ec == -1) { // Unspecified error
                 HWDLOG_PROBE_ERROR("[JLink@{0}] Could not connect to target - unspecified error", fmt::ptr(this));
             } else { // ErrorCode
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Could not connect to target - {1}", fmt::ptr(this), ErrorCodeToString(ec));
+                HWDLOG_PROBE_ERROR("[JLink@{0}] Could not connect to target - {1}", fmt::ptr(this), ec);
             }
 
             return false;
@@ -264,7 +261,7 @@ namespace HWD::Probe {
             HWDLOG_PROBE_TRACE("[JLink@{0}] Target program erased", fmt::ptr(this));
             return true;
         } else {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to erase target program - {1}", fmt::ptr(this), ErrorCodeToString(ec));
+            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to erase target program - {1}", fmt::ptr(this), ec);
             return false;
         }
     }
@@ -293,7 +290,7 @@ namespace HWD::Probe {
                 return false;
             }
         } else {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to program target - {1}", fmt::ptr(this), ErrorCodeToString(ret));
+            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to program target - {1}", fmt::ptr(this), ret);
             return false;
         }
     }
@@ -306,7 +303,7 @@ namespace HWD::Probe {
             if (m_ProbeCapabilities & ProbeCapabilities::RESET_STOP_TIMED) { // can halt immediately after reset
                 ec = m_Driver->target_Reset();
                 if (ec != ErrorCode::OK) {
-                    HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to reset target - {1}", fmt::ptr(this), ErrorCodeToString(ec));
+                    HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to reset target - {1}", fmt::ptr(this), ec);
                 }
             } else {
                 HWDLOG_PROBE_WARN("[JLink@{0}] Immediate reset and halt not supported - resetting and halting seperately", fmt::ptr(this));
@@ -340,7 +337,7 @@ namespace HWD::Probe {
                 m_TerminalBuffer.reserve(1024 * 1024 * 16);
                 return true;
             } else {
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to start terminal - {1}", fmt::ptr(this), ErrorCodeToString(ec));
+                HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to start terminal - {1}", fmt::ptr(this), ec);
 
                 m_TerminalEnabled = false;
                 return true;

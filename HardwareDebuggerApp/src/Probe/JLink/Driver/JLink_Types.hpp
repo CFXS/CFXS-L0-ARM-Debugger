@@ -1187,3 +1187,29 @@ namespace HWD::Probe::Driver::JLink_Types {
     };
 
 } // namespace HWD::Probe::Driver::JLink_Types
+
+template<>
+struct fmt::formatter<HWD::Probe::Driver::JLink_Types::ErrorCode> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(HWD::Probe::Driver::JLink_Types::ErrorCode const& ec, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::Driver::JLink_Types::ErrorCodeToString(ec));
+    }
+};
+
+template<>
+struct fmt::formatter<HWD::Probe::Driver::JLink_Types::DeviceCore> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(HWD::Probe::Driver::JLink_Types::DeviceCore const& core, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::Driver::JLink_Types::DeviceCoreToString(core));
+    }
+};
