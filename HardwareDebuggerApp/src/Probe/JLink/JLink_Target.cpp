@@ -38,14 +38,19 @@ namespace HWD::Probe {
         HWDLOG_PROBE_TRACE("\tSW FLASH: {0}", avail_sw_flash_breakpoints);
         HWDLOG_PROBE_TRACE("\tHW:       {0}", avail_hw_breakpoints);
 
-        uint32_t maxSpeed;
-        if (m_Driver->target_SWO_GetCompatibleSpeeds(120000000, 0, &maxSpeed, 1) < 0) {
+        uint32_t maxSpeeds[64];
+        uint32_t maxSpeedCount = m_Driver->target_SWO_GetCompatibleSpeeds(120000000, 0, maxSpeeds, 64);
+
+        if (maxSpeedCount < 0) {
             HWDLOG_PROBE_ERROR("Failed to get SWO speeds");
         } else {
-            HWDLOG_PROBE_TRACE("Max SWO speed: {0}", maxSpeed);
+            for (int i = 0; i < maxSpeedCount; i++) {
+                HWDLOG_PROBE_INFO("supported speed: {0}", maxSpeeds[i]);
+            }
+            HWDLOG_PROBE_TRACE("Max SWO speed: {0}", maxSpeeds[0]);
         }
 
-        if (m_Driver->target_SWO_Enable(120000000, maxSpeed, SWO_Interface::UART, 0xFFFFFFFF) != ErrorCode::OK) {
+        if (m_Driver->target_SWO_Enable(120000000, 4000000, SWO_Interface::MANCHESTER, 0x00000001) != ErrorCode::OK) {
             HWDLOG_PROBE_ERROR("Failed to enable SWO");
         } else {
             HWDLOG_PROBE_TRACE("SWO enabled");

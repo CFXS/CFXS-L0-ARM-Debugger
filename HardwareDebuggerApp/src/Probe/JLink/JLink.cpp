@@ -440,7 +440,17 @@ namespace HWD::Probe {
         m_Driver->target_SWO_Read(swoBuf, 0, &bytesRead);
         if (bytesRead) {
             m_Driver->target_SWO_Control(SWO_Command::FLUSH, &bytesRead); // flush this many bytes
-            HWDLOG_PROBE_TRACE("SWO Read {0} bytes", bytesRead);
+            if (bytesRead < 300) {
+                char str[1024];
+                str[0] = 0;
+                HWDLOG_PROBE_TRACE("SWO Read {0}", bytesRead);
+                for (int i = 0; i < bytesRead; i++) {
+                    char v[16];
+                    snprintf(v, 16, "0x%X, ", swoBuf[i]);
+                    strcat(str, v);
+                }
+                HWDLOG_PROBE_TRACE("\tData: {0}", str);
+            }
         }
 
         if (m_TerminalEnabled) {

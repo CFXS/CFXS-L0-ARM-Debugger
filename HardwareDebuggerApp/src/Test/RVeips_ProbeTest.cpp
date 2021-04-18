@@ -160,11 +160,17 @@ namespace HWD::Test {
 
                             // Configure TPIU
                             tpiu_apcr.Set_Prescaler(120000000 / 4000000 - 1);
-                            tpiu_sspr.Set_Interface(TPIU::REG_SPPR::Interface::SWO_NRZ);
+                            tpiu_sspr.Set_Interface(TPIU::REG_SPPR::Interface::SWO_MANCHESTER);
+
+                            if (probe->Target_WriteMemory_32(rtOffsets.TPIU + TPIU::OFFSET_CSPSR, 1)) { // port size = 1bit
+                                HWDLOG_PROBE_TRACE("Configured CSPSR");
+                            } else {
+                                HWDLOG_PROBE_ERROR("Failed to configure CSPSR");
+                            }
 
                             dwt_ctrl.Set_Cycle_Counter_Enabled(true);
                             dwt_ctrl.Set_Sampling_Divider(sampleRateDivider);
-                            dwt_ctrl.Set_PC_Sampling_Enabled(true);
+                            dwt_ctrl.Set_PC_Sampling_Enabled(false);
                             dwt_ctrl.Set_Exception_Trace_Enabled(true);
                             dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::SLOW);
                             HWDLOG_PROBE_TRACE("DWT_CTRL = {0:#X}", dwt_ctrl.GetRaw());
@@ -176,7 +182,7 @@ namespace HWD::Test {
                                        (1 << ITM::REG_TCR::SHIFT_TXENA) |        //
                                        (1 << ITM::REG_TCR::SHIFT_SYNCENA) |      //
                                        (1 << ITM::REG_TCR::SHIFT_ITMENA) |       //
-                                       (1 << ITM::REG_TCR::SHIFT_SWOENA));       //
+                                       (0 << ITM::REG_TCR::SHIFT_SWOENA));       //
 
                             HWDLOG_PROBE_TRACE("ITM_TCR = {0:#X}", itm_tcr.GetRaw());
 
@@ -189,9 +195,9 @@ namespace HWD::Test {
                             }
 
                             if (probe->Target_WriteMemory_32(rtOffsets.TPIU + 0x304, 0x100)) {
-                                HWDLOG_PROBE_TRACE("Configured TPIU frame");
+                                HWDLOG_PROBE_TRACE("Configured TPIU FFCR");
                             } else {
-                                HWDLOG_PROBE_ERROR("Failed to configure TPIU frame");
+                                HWDLOG_PROBE_ERROR("Failed to configure TPIU FFCR");
                             }
                         }
                     } else {
