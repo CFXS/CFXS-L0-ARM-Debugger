@@ -54,19 +54,21 @@ namespace HWD::Test {
     //
 
     uint64_t RVeips_ProbeTest::ReadMilliseconds() {
-        uint64_t var = 0;
+        /*uint64_t var = 0;
 
         if (m_Probe) {
-            bool ret = m_Probe->Target_ReadMemory_64(536874024, &var);
+            bool ret;
+            var = m_Probe->Target_ReadMemory_64(536874024, &ret);
             if (!ret)
                 var = 0;
         }
 
-        return var;
+        return var;*/
+        return 0;
     }
 
     uint32_t RVeips_ProbeTest::Read32(uint32_t addr, bool halt) {
-        uint32_t var = 0;
+        /*uint32_t var = 0;
 
         if (m_Probe) {
             if (halt)
@@ -78,11 +80,12 @@ namespace HWD::Test {
                 var = 0;
         }
 
-        return var;
+        return var;*/
+        return 0;
     }
 
     uint32_t RVeips_ProbeTest::Write32(uint32_t addr, uint32_t value) {
-        m_Probe->Target_WriteMemory_32(addr, value);
+        //m_Probe->Target_WriteMemory_32(addr, value);
         return 0;
     }
 

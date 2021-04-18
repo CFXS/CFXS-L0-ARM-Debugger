@@ -89,10 +89,10 @@ namespace HWD::Probe::Driver {
         int (*target_ReadMemoryEx)(uint32_t Addr, uint32_t NumBytes, void* pData, uint32_t Flags)                         = nullptr;
         int (*target_ReadMemoryImmediate)(uint32_t Addr, uint32_t Count, void* pData)                                     = nullptr;
         int (*target_ReadMemoryIndirect)(uint32_t Addr, uint32_t NumBytes, void* pData)                                   = nullptr;
-        int (*target_ReadMemory_8)(uint32_t Addr, uint32_t NumItems, uint8_t* pData, uint8_t* pStatus)                    = nullptr;
-        int (*target_ReadMemory_16)(uint32_t Addr, uint32_t NumItems, uint16_t* pData, uint8_t* pStatus)                  = nullptr;
-        int (*target_ReadMemory_32)(uint32_t Addr, uint32_t NumItems, uint32_t* pData, uint8_t* pStatus)                  = nullptr;
-        int (*target_ReadMemory_64)(uint32_t Addr, uint32_t NumItems, uint64_t* pData, uint8_t* pStatus)                  = nullptr;
+        int (*target_ReadMemory_8)(uint32_t Addr, uint32_t NumItems, void* pData, uint8_t* pStatus)                       = nullptr;
+        int (*target_ReadMemory_16)(uint32_t Addr, uint32_t NumItems, void* pData, uint8_t* pStatus)                      = nullptr;
+        int (*target_ReadMemory_32)(uint32_t Addr, uint32_t NumItems, void* pData, uint8_t* pStatus)                      = nullptr;
+        int (*target_ReadMemory_64)(uint32_t Addr, uint32_t NumItems, void* pData, uint8_t* pStatus)                      = nullptr;
         int (*target_ReadMemoryZonedEx)(uint32_t Addr, uint32_t NumBytes, void* pData, uint32_t Flags, const char* sZone) = nullptr;
         uint32_t (*target_ReadRegister)(JLink_Types::CPU_Registers::ARM RegIndex)                                         = nullptr;
         JLink_Types::ErrorCode (*target_ReadRegisters)(const uint32_t* paRegIndex,

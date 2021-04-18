@@ -345,16 +345,56 @@ namespace HWD::Probe {
         }
     }
 
-    bool JLink::Target_ReadMemory_32(uint32_t address, uint32_t* readTo) {
-        return m_Driver->target_ReadMemory_32(address, 1, readTo, nullptr) == 1;
+    //bool JLink::Target_WriteMemory_32(uint32_t address, uint32_t value) {
+    //    return m_Driver->target_WriteMemory_32(address, value) == 0;
+    //}
+
+    uint8_t JLink::Target_ReadMemory_8(uint32_t address, bool* success) {
+        uint8_t tmp;
+
+        if (success) {
+            *success = m_Driver->target_ReadMemory_8(address, 1, &tmp, nullptr) == 1;
+        } else {
+            m_Driver->target_ReadMemory_8(address, 1, &tmp, nullptr);
+        }
+
+        return tmp;
     }
 
-    bool JLink::Target_ReadMemory_64(uint32_t address, uint64_t* readTo) {
-        return m_Driver->target_ReadMemory_64(address, 1, readTo, nullptr) == 1;
+    uint16_t JLink::Target_ReadMemory_16(uint32_t address, bool* success) {
+        uint32_t tmp;
+
+        if (success) {
+            *success = m_Driver->target_ReadMemory_16(address, 1, &tmp, nullptr) == 1;
+        } else {
+            m_Driver->target_ReadMemory_16(address, 1, &tmp, nullptr);
+        }
+
+        return tmp;
     }
 
-    bool JLink::Target_WriteMemory_32(uint32_t address, uint32_t value) {
-        return m_Driver->target_WriteMemory_32(address, value) == 0;
+    uint32_t JLink::Target_ReadMemory_32(uint32_t address, bool* success) {
+        uint32_t tmp;
+
+        if (success) {
+            *success = m_Driver->target_ReadMemory_32(address, 1, &tmp, nullptr) == 1;
+        } else {
+            m_Driver->target_ReadMemory_32(address, 1, &tmp, nullptr);
+        }
+
+        return tmp;
+    }
+
+    uint64_t JLink::Target_ReadMemory_64(uint32_t address, bool* success) {
+        uint64_t tmp;
+
+        if (success) {
+            *success = m_Driver->target_ReadMemory_64(address, 1, &tmp, nullptr) == 1;
+        } else {
+            m_Driver->target_ReadMemory_64(address, 1, &tmp, nullptr);
+        }
+
+        return tmp;
     }
 
     bool JLink::Target_Halt() {

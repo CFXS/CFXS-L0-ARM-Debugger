@@ -80,14 +80,17 @@ namespace HWD::Probe {
         /// Get terminal buffer
         virtual const char* Target_GetTerminalBuffer() = 0;
 
+        /// Read 8bit value from address
+        virtual uint8_t Target_ReadMemory_8(uint32_t address, bool* success = nullptr) = 0;
+
+        /// Read 16bit value from address
+        virtual uint16_t Target_ReadMemory_16(uint32_t address, bool* success = nullptr) = 0;
+
         /// Read 32bit value from address
-        virtual bool Target_ReadMemory_32(uint32_t address, uint32_t* readTo) = 0;
+        virtual uint32_t Target_ReadMemory_32(uint32_t address, bool* success = nullptr) = 0;
 
         /// Read 64bit value from address
-        virtual bool Target_ReadMemory_64(uint32_t address, uint64_t* readTo) = 0;
-
-        /// Write 32bit value from address
-        virtual bool Target_WriteMemory_32(uint32_t address, uint32_t value) = 0;
+        virtual uint64_t Target_ReadMemory_64(uint32_t address, bool* success = nullptr) = 0;
 
         virtual bool Target_Halt()              = 0;
         virtual bool Target_Run()               = 0;
