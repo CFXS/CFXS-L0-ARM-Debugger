@@ -103,8 +103,8 @@ namespace HWD::Probe {
         int m_ProbeIndex;
 
         // terminal
-        bool m_TerminalEnabled             = true;
-        std::vector<char> m_TerminalBuffer = {0};
+        bool m_TerminalEnabled = true;
+        std::vector<char> m_TerminalBuffer;
 
         // flash
         float m_FlashProgress = 0;

@@ -425,7 +425,7 @@ namespace HWD::Probe {
     }
 
     const char* JLink::Target_GetTerminalBuffer() {
-        return m_TerminalBuffer.data();
+        return m_TerminalBuffer.empty() ? "Waiting for data..." : m_TerminalBuffer.data();
     }
 
     float JLink::Target_GetFlashProgress() {
@@ -446,7 +446,6 @@ namespace HWD::Probe {
         if (m_TerminalEnabled) {
             char str[1024];
             int readCount = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
-            HWDLOG_PROBE_TRACE("br {0}", readCount);
             for (int i = 0; i < readCount; i++) {
                 m_TerminalBuffer.push_back(str[i]);
             }

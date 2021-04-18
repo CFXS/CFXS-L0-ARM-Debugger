@@ -52,7 +52,7 @@ namespace HWD::Test {
                     HWDLOG_PROBE_CRITICAL("\tROM Table: @ {0:#X}", rom_table_address);
                 }
 
-                if (rom_table_address && 1 > 2) {
+                if (rom_table_address) {
                     // ROM TABLE /////////////////////////////////////////////////////////////
                     // [ARM Debug Interface v5 Architecture Specification]
                     // - ROM Tables > ROM Table Overview > "A ROM Table always occupies 4kB of memory" (4000 or 4096?)
