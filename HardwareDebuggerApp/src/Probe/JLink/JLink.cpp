@@ -6,7 +6,7 @@
 namespace HWD::Probe {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    static constexpr bool LOG_ENABLED       = true;
+    static constexpr bool LOG_ENABLED       = false;
     static constexpr bool WARN_LOG_ENABLED  = true;
     static constexpr bool ERROR_LOG_ENABLED = true;
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -435,20 +435,21 @@ namespace HWD::Probe {
     ////////////////////////////////////////////////////////////////////////////////
     // Process
     void JLink::Process() {
-        if (m_TerminalEnabled) {
-            char str[1024];
-            int bytesRead = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
-            for (int i = 0; i < bytesRead; i++) {
-                m_TerminalBuffer.push_back(str[i]);
-            }
-        }
-
         uint8_t swoBuf[4096];
-        uint32_t bytesRead;
+        uint32_t bytesRead = sizeof(swoBuf);
         m_Driver->target_SWO_Read(swoBuf, 0, &bytesRead);
         if (bytesRead) {
             m_Driver->target_SWO_Control(SWO_Command::FLUSH, &bytesRead); // flush this many bytes
             HWDLOG_PROBE_TRACE("SWO Read {0} bytes", bytesRead);
+        }
+
+        if (m_TerminalEnabled) {
+            char str[1024];
+            int readCount = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
+            HWDLOG_PROBE_TRACE("br {0}", readCount);
+            for (int i = 0; i < readCount; i++) {
+                m_TerminalBuffer.push_back(str[i]);
+            }
         }
     }
 

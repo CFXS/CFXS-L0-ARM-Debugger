@@ -45,7 +45,7 @@ namespace HWD::Probe {
             HWDLOG_PROBE_TRACE("Max SWO speed: {0}", maxSpeed);
         }
 
-        if (m_Driver->target_SWO_Enable(120000000, maxSpeed, SWO_Interface::UART, 0x00000000) != ErrorCode::OK) {
+        if (m_Driver->target_SWO_Enable(120000000, maxSpeed, SWO_Interface::UART, 0xFFFFFFFF) != ErrorCode::OK) {
             HWDLOG_PROBE_ERROR("Failed to enable SWO");
         } else {
             HWDLOG_PROBE_TRACE("SWO enabled");

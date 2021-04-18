@@ -5,6 +5,11 @@
 namespace HWD::Probe {
 
     class IProbe {
+        static IProbe*& GetCurrentProbeRef() {
+            static IProbe* s_CurrentProbe = nullptr;
+            return s_CurrentProbe;
+        }
+
     public:
         enum class AccessWidth { _1 = 1, _2 = 2, _4 = 4 };
 
@@ -14,6 +19,15 @@ namespace HWD::Probe {
                 return "SWD";
             else
                 return "Unknown";
+        }
+
+        static IProbe* GetCurrentProbe() {
+            return GetCurrentProbeRef();
+        }
+
+        static void SetCurrentProbe(IProbe* probe) {
+            HWDLOG_PROBE_INFO("Set current probe to {0} from thread {1}", fmt::ptr(probe), std::this_thread::get_id());
+            GetCurrentProbeRef() = probe;
         }
 
     public:

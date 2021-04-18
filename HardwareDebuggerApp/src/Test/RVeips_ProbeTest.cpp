@@ -5,12 +5,15 @@
 #include <Target/Cortex/ROM_Table.hpp>
 #include <Target/Cortex/DWT_Registers.hpp>
 #include <Target/Cortex/ITM_Registers.hpp>
+#include <Target/Cortex/TPIU_Registers.hpp>
 
 #include "TestFirmware.h"
 
 namespace HWD::Test {
 
+    using namespace Cortex::M4;
     using namespace Probe;
+
     RVeips_ProbeTest* m_RV = nullptr;
 
     RVeips_ProbeTest::RVeips_ProbeTest() {
@@ -19,6 +22,8 @@ namespace HWD::Test {
 
         auto connectedProbes = JLink::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
+            IProbe::SetCurrentProbe(probe);
+
             probe->Probe_Connect();
 
             probe->Target_SelectDebugInterface(IProbe::DebugInterface::SWD);
@@ -47,7 +52,7 @@ namespace HWD::Test {
                     HWDLOG_PROBE_CRITICAL("\tROM Table: @ {0:#X}", rom_table_address);
                 }
 
-                if (rom_table_address) {
+                if (rom_table_address && 1 > 2) {
                     // ROM TABLE /////////////////////////////////////////////////////////////
                     // [ARM Debug Interface v5 Architecture Specification]
                     // - ROM Tables > ROM Table Overview > "A ROM Table always occupies 4kB of memory" (4000 or 4096?)
@@ -102,6 +107,14 @@ namespace HWD::Test {
                             entryIndex++;
                         } while (!rtEntry->IsTableEndMarker());
 
+                        if (rtOffsets.SCS) {
+                            if (probe->Target_WriteMemory_32(rtOffsets.SCS + Cortex::CoreSight::OFFSET_LOCK_ACCESS,
+                                                             Cortex::CoreSight::VAL_UNLOCK_KEY)) {
+                                HWDLOG_PROBE_TRACE("Unlocked SCS");
+                            } else {
+                                HWDLOG_PROBE_ERROR("Failed to unlock SCS");
+                            }
+                        }
                         if (rtOffsets.DWT) {
                             if (probe->Target_WriteMemory_32(rtOffsets.DWT + Cortex::CoreSight::OFFSET_LOCK_ACCESS,
                                                              Cortex::CoreSight::VAL_UNLOCK_KEY)) {
@@ -127,16 +140,59 @@ namespace HWD::Test {
                             }
                         }
 
-                        if (rtOffsets.DWT) {
-                            // configure pc sampling
-                            auto srate = Cortex::M4::DWT::REG_CTRL::SampleRateDivider::_15360;
-                            Cortex::M4::DWT::REG_CTRL dwtReg(probe, rtOffsets.DWT);
+                        if (rtOffsets.SCS && rtOffsets.DWT && rtOffsets.ITM && rtOffsets.TPIU) {
+                            // enable Trace/DWT/ITM
+                            // CoreDebug offset = 0xDF0
 
-                            HWDLOG_PROBE_WARN("DWT: {0:#X}", dwtReg.GetRaw());
-                            HWDLOG_PROBE_TRACE("Enable PC Sampling");
-                            dwtReg.Enable_PC_Sampling(srate);
-                            HWDLOG_PROBE_TRACE("Sampling frequency: {0}kHz", decltype(dwtReg)::SampleRateDividerToSampleRate(120e6, srate));
-                            HWDLOG_PROBE_WARN("DWT: {0:#X}", dwtReg.GetRaw());
+                            if (probe->Target_WriteMemory_32(rtOffsets.SCS + 0xDF0 + 0x00C, (1 << 24))) {
+                                HWDLOG_PROBE_TRACE("Enabled trace");
+                            } else {
+                                HWDLOG_PROBE_ERROR("Failed to enable trace");
+                            }
+
+                            // configure pc sampling
+                            auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_16384;
+                            DWT::REG_CTRL dwt_ctrl(rtOffsets.DWT + DWT::OFFSET_CTRL);
+                            ITM::REG_TER itm_ter(rtOffsets.ITM + ITM::OFFSET_TER(0));
+                            ITM::REG_TCR itm_tcr(rtOffsets.ITM + ITM::OFFSET_TCR);
+                            TPIU::REG_ACPR tpiu_apcr(rtOffsets.TPIU + TPIU::OFFSET_ACPR);
+                            TPIU::REG_SPPR tpiu_sspr(rtOffsets.TPIU + TPIU::OFFSET_SPPR);
+
+                            // Configure TPIU
+                            tpiu_apcr.Set_Prescaler(120000000 / 4000000 - 1);
+                            tpiu_sspr.Set_Interface(TPIU::REG_SPPR::Interface::SWO_NRZ);
+
+                            dwt_ctrl.Set_Cycle_Counter_Enabled(true);
+                            dwt_ctrl.Set_Sampling_Divider(sampleRateDivider);
+                            dwt_ctrl.Set_PC_Sampling_Enabled(true);
+                            dwt_ctrl.Set_Exception_Trace_Enabled(true);
+                            dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::SLOW);
+                            HWDLOG_PROBE_TRACE("DWT_CTRL = {0:#X}", dwt_ctrl.GetRaw());
+
+                            HWDLOG_PROBE_TRACE("Sampling frequency: {0}kHz",
+                                               decltype(dwt_ctrl)::SampleRateDividerToSampleRate(120e6, sampleRateDivider));
+
+                            itm_tcr = ((1 << ITM::REG_TCR::SHIFT_TRACE_BUS_ID) | //
+                                       (1 << ITM::REG_TCR::SHIFT_TXENA) |        //
+                                       (1 << ITM::REG_TCR::SHIFT_SYNCENA) |      //
+                                       (1 << ITM::REG_TCR::SHIFT_ITMENA) |       //
+                                       (1 << ITM::REG_TCR::SHIFT_SWOENA));       //
+
+                            HWDLOG_PROBE_TRACE("ITM_TCR = {0:#X}", itm_tcr.GetRaw());
+
+                            itm_ter.Set_Enabled(0x00000001, true); // enable all stimulus ports
+
+                            if (probe->Target_WriteMemory_32(rtOffsets.TPIU + 0xE40, 0x0F)) {
+                                HWDLOG_PROBE_TRACE("Configured TPIU TPR");
+                            } else {
+                                HWDLOG_PROBE_ERROR("Failed to configure TPIU TPR");
+                            }
+
+                            if (probe->Target_WriteMemory_32(rtOffsets.TPIU + 0x304, 0x100)) {
+                                HWDLOG_PROBE_TRACE("Configured TPIU frame");
+                            } else {
+                                HWDLOG_PROBE_ERROR("Failed to configure TPIU frame");
+                            }
                         }
                     } else {
                         HWDLOG_PROBE_CRITICAL("Failed to read ROM Table");
@@ -145,8 +201,8 @@ namespace HWD::Test {
 
                 //////////////////////////////////////////////////////////////////////////////////
 
-                probe->Target_Run();
                 probe->Target_StartTerminal();
+                probe->Target_Run();
             }
 
             auto thread = new std::thread([=]() {

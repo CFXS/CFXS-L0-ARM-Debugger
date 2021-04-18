@@ -1115,7 +1115,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         MTB = 2,
     };
 
-    enum class TraceCommands {
+    enum class TraceCommand : uint32_t {
         START               = 0,
         STOP                = 1,
         FLUSH               = 2,

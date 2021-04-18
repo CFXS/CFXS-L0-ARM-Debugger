@@ -205,8 +205,8 @@ namespace HWD::Probe::Driver {
         int (*target_SWO_ReadStimulus)(int Port, uint8_t* pData, uint32_t NumBytes)                                               = nullptr;
         void (*target_GetAvailableInterfaces)(JLink_Types::TargetInterfaceMask* pMask)                                            = nullptr;
         JLink_Types::ErrorCode (*target_SelectInterface)(JLink_Types::TargetInterface targetIf)                                   = nullptr;
-        uint32_t (*target_Trace_Control)(uint32_t Cmd, uint32_t* p)                                                               = nullptr;
-        uint32_t (*target_Trace_Read)(JLink_Types::TraceData* pData, uint32_t Off, uint32_t* pNumItems)                           = nullptr;
+        JLink_Types::ErrorCode (*target_Trace_Control)(JLink_Types::TraceCommand Cmd, uint32_t* p)                                = nullptr;
+        JLink_Types::ErrorCode (*target_Trace_Read)(JLink_Types::TraceData* pData, uint32_t Off, uint32_t* pNumItems)             = nullptr;
         void (*probe_SetFlashProgProgressCallback)(JLink_Types::FlashProgressCallback pfOnFlashProgess)                           = nullptr;
     };
 
