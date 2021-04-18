@@ -36,7 +36,7 @@ namespace HWD::Probe {
         }
         /////////////////////////////////////////
         // Probe target overrides
-        virtual bool Target_SelectDevice(const TargetDeviceDescription& device) override;
+        virtual bool Target_SelectDevice(const Target::DeviceDescription& device) override;
         virtual bool Target_SelectDebugInterface(DebugInterface interface) override;
         virtual bool Target_IsConnected() const override;
         virtual bool Target_Connect() override;
@@ -50,7 +50,9 @@ namespace HWD::Probe {
         uint16_t Target_ReadMemory_16(uint32_t address, bool* success = nullptr) override;
         uint32_t Target_ReadMemory_32(uint32_t address, bool* success = nullptr) override;
         uint64_t Target_ReadMemory_64(uint32_t address, bool* success = nullptr) override;
-
+        int Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) override;
+        bool Target_WriteMemory_32(uint32_t address, uint32_t val) override;
+        uint32_t Target_Get_ROM_Table_Address() override;
         virtual bool Target_Halt() override;
         virtual bool Target_Run() override;
         virtual bool Target_IsRunning() override;

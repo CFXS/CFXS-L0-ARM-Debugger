@@ -1,11 +1,13 @@
 #pragma once
 
-#include <Target/TargetDevices.hpp>
+#include <Target/SupportedDevices.hpp>
 
 namespace HWD::Probe {
 
     class IProbe {
     public:
+        enum class AccessWidth { _1 = 1, _2 = 2, _4 = 4 };
+
         enum class DebugInterface { SWD };
         static const char* DebugInterfaceToString(DebugInterface interface) {
             if (interface == DebugInterface::SWD)
@@ -47,7 +49,7 @@ namespace HWD::Probe {
 
         /// Select target device
         /// \return true if selected/supported
-        virtual bool Target_SelectDevice(const TargetDeviceDescription& device) = 0;
+        virtual bool Target_SelectDevice(const Target::DeviceDescription& device) = 0;
 
         /// Select probe-target interface
         /// \return true if selected successfully
@@ -91,6 +93,17 @@ namespace HWD::Probe {
 
         /// Read 64bit value from address
         virtual uint64_t Target_ReadMemory_64(uint32_t address, bool* success = nullptr) = 0;
+
+        /// Read multiple values to address
+        /// \return bytes read
+        virtual int Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) = 0;
+
+        /// Write 32bit value to address
+        /// \return true on success
+        virtual bool Target_WriteMemory_32(uint32_t address, uint32_t val) = 0;
+
+        /// Get base address of ROM Table
+        virtual uint32_t Target_Get_ROM_Table_Address() = 0;
 
         virtual bool Target_Halt()              = 0;
         virtual bool Target_Run()               = 0;

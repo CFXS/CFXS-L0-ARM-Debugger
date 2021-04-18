@@ -195,8 +195,11 @@ namespace HWD::Probe::Driver {
         void (*target_SWD_SyncBits)(void)                                                                                         = nullptr;
         void (*target_SWD_SyncBytes)(void)                                                                                        = nullptr;
         int (*target_SWO_Control)(JLink_Types::SWO_Command Cmd, void* pData)                                                      = nullptr;
-        int (*target_SWO_Disable)(uint32_t PortMask)                                                                              = nullptr;
-        int (*target_SWO_Enable)(uint32_t CPUSpeed, uint32_t SWOSpeed, int Mode, uint32_t PortMask)                               = nullptr;
+        JLink_Types::ErrorCode (*target_SWO_Disable)(uint32_t PortMask)                                                           = nullptr;
+        JLink_Types::ErrorCode (*target_SWO_Enable)(uint32_t CPUSpeed,
+                                                    uint32_t SWOSpeed,
+                                                    JLink_Types::SWO_Interface Mode,
+                                                    uint32_t PortMask)                                                            = nullptr;
         int (*target_SWO_GetCompatibleSpeeds)(uint32_t CPUSpeed, uint32_t MaxSWOSpeed, uint32_t* paSWOSpeed, uint32_t NumEntries) = nullptr;
         void (*target_SWO_Read)(uint8_t* pData, uint32_t Offset, uint32_t* pNumBytes)                                             = nullptr;
         int (*target_SWO_ReadStimulus)(int Port, uint8_t* pData, uint32_t NumBytes)                                               = nullptr;

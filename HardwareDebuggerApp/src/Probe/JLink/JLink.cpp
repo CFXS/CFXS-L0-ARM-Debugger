@@ -6,7 +6,7 @@
 namespace HWD::Probe {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    static constexpr bool LOG_ENABLED       = false;
+    static constexpr bool LOG_ENABLED       = true;
     static constexpr bool WARN_LOG_ENABLED  = true;
     static constexpr bool ERROR_LOG_ENABLED = true;
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +186,7 @@ namespace HWD::Probe {
     // Target
 
     // TODO: Implement error reason callback for higher level callers
-    bool JLink::Target_SelectDevice(const TargetDeviceDescription& device) {
+    bool JLink::Target_SelectDevice(const Target::DeviceDescription& device) {
         char resp[256];
         ErrorCode ec = m_Driver->probe_ExecuteCommand(fmt::format("Device = {0}\n", device.GetName()).c_str(), resp, 256);
 
@@ -345,10 +345,6 @@ namespace HWD::Probe {
         }
     }
 
-    //bool JLink::Target_WriteMemory_32(uint32_t address, uint32_t value) {
-    //    return m_Driver->target_WriteMemory_32(address, value) == 0;
-    //}
-
     uint8_t JLink::Target_ReadMemory_8(uint32_t address, bool* success) {
         uint8_t tmp;
 
@@ -362,7 +358,7 @@ namespace HWD::Probe {
     }
 
     uint16_t JLink::Target_ReadMemory_16(uint32_t address, bool* success) {
-        uint32_t tmp;
+        uint16_t tmp;
 
         if (success) {
             *success = m_Driver->target_ReadMemory_16(address, 1, &tmp, nullptr) == 1;
@@ -397,6 +393,26 @@ namespace HWD::Probe {
         return tmp;
     }
 
+    int JLink::Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) {
+        return m_Driver->target_ReadMemoryEx(address, bytesToRead, to, (int)accessWidth);
+    }
+
+    bool JLink::Target_WriteMemory_32(uint32_t address, uint32_t value) {
+        return m_Driver->target_WriteMemory_32(address, value) == 0;
+    }
+
+    uint32_t JLink::Target_Get_ROM_Table_Address() {
+        uint32_t rom_table_address;
+
+        ErrorCode ec = m_Driver->target_GetDebugInfo(DebugInfoIndex::ROM_TABLE_ADDRESS, &rom_table_address); // ROM Table
+        if (ec != ErrorCode::OK) {
+            rom_table_address = 0;
+            HWDLOG_PROBE_CRITICAL("Failed to get ROM table address - {0}", ec);
+        }
+
+        return rom_table_address;
+    }
+
     bool JLink::Target_Halt() {
         return m_Driver->target_Halt();
     }
@@ -425,6 +441,14 @@ namespace HWD::Probe {
             for (int i = 0; i < bytesRead; i++) {
                 m_TerminalBuffer.push_back(str[i]);
             }
+        }
+
+        uint8_t swoBuf[4096];
+        uint32_t bytesRead;
+        m_Driver->target_SWO_Read(swoBuf, 0, &bytesRead);
+        if (bytesRead) {
+            m_Driver->target_SWO_Control(SWO_Command::FLUSH, &bytesRead); // flush this many bytes
+            HWDLOG_PROBE_TRACE("SWO Read {0} bytes", bytesRead);
         }
     }
 
