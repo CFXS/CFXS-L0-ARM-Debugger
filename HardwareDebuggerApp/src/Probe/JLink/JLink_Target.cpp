@@ -132,7 +132,7 @@ namespace HWD::Probe {
             // - ROM Tables > ROM Table Overview > "A ROM Table always occupies 4kB of memory" (4000 or 4096?)
             uint8_t rom_table_data[4096];
             ARM_ROM_Table_Offsets rtOffsets;
-            memset(rtOffsets, 0, sizeof(rtOffsets));
+            memset(&rtOffsets, 0, sizeof(rtOffsets));
 
             bytesRead = m_Driver->target_ReadMemoryEx(rom_table_address, sizeof(rom_table_data), rom_table_data, 4); // access width 4
             HWDLOG_PROBE_INFO("rom table read {0} bytes", bytesRead);
