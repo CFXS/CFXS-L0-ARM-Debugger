@@ -39,12 +39,12 @@ namespace HWD::Probe {
         HWDLOG_PROBE_TRACE("\tHW:       {0}", avail_hw_breakpoints);
 
         uint32_t maxSpeeds[64];
-        uint32_t maxSpeedCount = m_Driver->target_SWO_GetCompatibleSpeeds(120000000, 0, maxSpeeds, 64);
+        auto maxSpeedCount = m_Driver->target_SWO_GetCompatibleSpeeds(120000000, 0, maxSpeeds, 64);
 
         if (maxSpeedCount < 0) {
             HWDLOG_PROBE_ERROR("Failed to get SWO speeds");
         } else {
-            for (int i = 0; i < maxSpeedCount; i++) {
+            for (auto i = 0; i < maxSpeedCount; i++) {
                 HWDLOG_PROBE_INFO("supported speed: {0}", maxSpeeds[i]);
             }
             HWDLOG_PROBE_TRACE("Max SWO speed: {0}", maxSpeeds[0]);
