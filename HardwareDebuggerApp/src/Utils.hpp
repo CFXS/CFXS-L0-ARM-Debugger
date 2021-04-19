@@ -19,8 +19,6 @@
 #define DEF_REG_CONSTRUCTOR(name)                 \
     name(uint32_t regAddr) : m_Address(regAddr) { \
     }                                             \
-    name(const name& other) = delete;             \
-    name(name&& other)      = delete;             \
     constexpr void SetAddress(uint32_t addr) {    \
         m_Address = addr;                         \
     }

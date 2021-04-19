@@ -435,60 +435,21 @@ namespace HWD::Probe {
     ////////////////////////////////////////////////////////////////////////////////
     // Process
 
-    static constexpr uint8_t MCODE_START = 0b10;
-    static constexpr uint8_t MCODE_STOP  = 0b00;
-    static constexpr uint8_t MCODE_0     = 0b01;
-    static constexpr uint8_t MCODE_1     = 0b10;
-    uint8_t code_buf[1024];
-    int decPos = 0;
+    int zeroCount = 0;
+    static void SWO_Push(uint8_t val) {
+        //HWDLOG_PROBE_ERROR("{0:#X}", val);
+        if (val == 0x80 && zeroCount == 5) {
+            HWDLOG_PROBE_WARN("SWO SYNC");
+        }
 
-    static void SWO_Feed(uint8_t code) {
-        code_buf[decPos++] = code;
-
-        bool foundStart = false;
-        int startIndex  = 0;
-        for (int i = 0; i < decPos; i++) {
-            if (!foundStart) {
-                if (code_buf[i] == MCODE_START) {
-                    foundStart = true;
-                    startIndex = i + 1;
-                }
-            } else {
-                if (code_buf[i] == MCODE_STOP) {
-                    uint8_t val     = 0;
-                    uint8_t valSize = (i - startIndex);
-                    for (int d = 0; d < valSize; d++) {
-                        if (code_buf[startIndex + d] == MCODE_1) {
-                            val |= (1 << (valSize - 1 - d));
-                            //val |= (1 << d);
-                        }
-                    }
-                    HWDLOG_PROBE_TRACE("{0} bit data [{1:#X}]", valSize, val);
-                    decPos = 0;
-                    break;
-                }
-            }
+        if (val == 0) {
+            zeroCount++;
+        } else {
+            zeroCount = 0;
         }
     }
 
     void JLink::Process() {
-        static bool x = false;
-        if (!x) {
-            x = true;
-            for (int i = 0; i <= 8; i++) {
-                SWO_Feed(MCODE_START);
-                SWO_Feed(MCODE_0);
-                SWO_Feed(MCODE_1);
-                SWO_Feed(MCODE_1);
-                SWO_Feed(MCODE_0);
-                SWO_Feed(MCODE_0);
-                SWO_Feed(MCODE_1);
-                SWO_Feed(MCODE_0);
-                SWO_Feed(MCODE_1);
-                SWO_Feed(MCODE_STOP);
-            }
-        }
-
         uint8_t swoBuf[4096];
         uint32_t bytesRead = sizeof(swoBuf);
         m_Driver->target_SWO_Read(swoBuf, 0, &bytesRead);
@@ -496,11 +457,7 @@ namespace HWD::Probe {
             m_Driver->target_SWO_Control(SWO_Command::FLUSH, &bytesRead); // flush this many bytes
             for (uint32_t i = 0; i < bytesRead; i++) {
                 uint8_t val = swoBuf[i];
-                HWDLOG_PROBE_WARN("SWO Read {0:#X}", val);
-                //SWO_Feed((val >> 6) & 0b11);
-                //SWO_Feed((val >> 4) & 0b11);
-                //SWO_Feed((val >> 2) & 0b11);
-                //SWO_Feed(val & 0b11);
+                SWO_Push(val);
             }
         }
 

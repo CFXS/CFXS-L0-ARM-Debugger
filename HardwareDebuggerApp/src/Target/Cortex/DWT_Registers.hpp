@@ -60,9 +60,9 @@ namespace HWD::Cortex {
             DEF_REG_FIELD(CYCCNTENA, 0, 0);        // Enables CYCCNT
 
             static constexpr uint8_t VAL_SYNCTAP_DISABLED  = 0b00; // Disabled - no Synchronization packets
-            static constexpr uint8_t VAL_SYNCTAP_CYCCNT_24 = 0b01; // Synchronization counter tap at CYCCNT[24] every 8388608 cycles
-            static constexpr uint8_t VAL_SYNCTAP_CYCCNT_26 = 0b10; // Synchronization counter tap at CYCCNT[26] every 33554432 cycles
-            static constexpr uint8_t VAL_SYNCTAP_CYCCNT_28 = 0b11; // Synchronization counter tap at CYCCNT[28] every 134217728 cycles
+            static constexpr uint8_t VAL_SYNCTAP_CYCCNT_24 = 0b01; // Synchronization counter tap at CYCCNT[24]
+            static constexpr uint8_t VAL_SYNCTAP_CYCCNT_26 = 0b10; // Synchronization counter tap at CYCCNT[26]
+            static constexpr uint8_t VAL_SYNCTAP_CYCCNT_28 = 0b11; // Synchronization counter tap at CYCCNT[28]
             static constexpr uint8_t VAL_CYCTAP_CYCCNT_6   = 0;    // POSTCNT tap at CYCCNT[6]
             static constexpr uint8_t VAL_CYCTAP_CYCCNT_10  = 1;    // POSTCNT tap at CYCCNT[10]
 

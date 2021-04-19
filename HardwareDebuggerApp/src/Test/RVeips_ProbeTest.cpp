@@ -161,9 +161,11 @@ namespace HWD::Test {
                             itm_tcr  = 0;
                             dwt_ctrl = 0;
 
-                            // Configure TPIU
-                            tpiu_sspr.Set_Interface(TPIU::REG_SPPR::Interface::SWO_MANCHESTER);
-                            tpiu_acpr.Set_Prescaler(((int)(120000000.0 / (4000000.0 * 2) + 0.5)) - 1);
+                            // Configure TPIU [ do not configure manually - setting the prescaler does something weird and the probe cant receive data properly ]
+                            //                  - setting prescaler while core halted... weird stuff
+                            // TODO: check with logic analyzer - what happens to SWO data when setting prescaler
+                            //tpiu_sspr.Set_Interface(TPIU::REG_SPPR::Interface::SWO_MANCHESTER);
+                            //tpiu_acpr.Set_Prescaler(((int)(120000000.0 / (4000000.0 * 2) + 0.5)) - 1);
 
                             if (probe->Target_WriteMemory_32(rtOffsets.TPIU + TPIU::OFFSET_CSPSR, 1)) { // port size = 1bit
                                 HWDLOG_PROBE_TRACE("Configured CSPSR");
@@ -183,11 +185,11 @@ namespace HWD::Test {
                                 HWDLOG_PROBE_ERROR("Failed to configure TPIU TPR");
                             }
 
-                            dwt_ctrl.Set_Cycle_Counter_Enabled(true);
                             dwt_ctrl.Set_Sampling_Divider(sampleRateDivider);
                             dwt_ctrl.Set_PC_Sampling_Enabled(true);
                             dwt_ctrl.Set_Exception_Trace_Enabled(true);
-                            dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::SLOW);
+                            dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::FAST);
+                            dwt_ctrl.Set_Cycle_Counter_Enabled(true);
                             HWDLOG_PROBE_TRACE("DWT_CTRL = {0:#X}", dwt_ctrl.GetRaw());
 
                             HWDLOG_PROBE_TRACE("Sampling frequency: {0}kHz",
