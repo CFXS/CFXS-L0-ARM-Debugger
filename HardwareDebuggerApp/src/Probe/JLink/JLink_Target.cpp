@@ -52,7 +52,7 @@ namespace HWD::Probe {
 
         int cps = 120000000; //m_Driver->target_Measure_CPU_Speed(0x20000000, true);
         HWDLOG_CORE_CRITICAL("CPU SPEED {0}", cps);
-        if (m_Driver->target_SWO_Enable(cps, 4000000, SWO_Interface::UART, 0x00000000) != ErrorCode::OK) {
+        if (m_Driver->target_SWO_Enable(cps, 4000000, SWO_Interface::MANCHESTER, 0x00000000) != ErrorCode::OK) {
             HWDLOG_PROBE_ERROR("Failed to enable SWO");
         } else {
             HWDLOG_PROBE_TRACE("SWO enabled");

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Probe/IProbe.hpp>
+
 #include "CoreSight.hpp"
 
 namespace HWD::Cortex {
@@ -62,10 +63,10 @@ namespace HWD::Cortex {
             static constexpr uint8_t VAL_GTSFREQ_8192_CYCLES  = 0b10; // Approximately every 8192 cycles
             static constexpr uint8_t VAL_GTSFREQ_EVERY_PACKET = 0b11; // Timestamp after every packet, if the output FIFO empty
 
-            static constexpr uint8_t VAL_TSPRESCALE_DISABLED = 0b00; // No prescaling
-            static constexpr uint8_t VAL_TSPRESCALE_4        = 0b01; // div 4
-            static constexpr uint8_t VAL_TSPRESCALE_16       = 0b10; // div 16
-            static constexpr uint8_t VAL_TSPRESCALE_64       = 0b11; // div 64
+            static constexpr uint8_t VAL_TSPRESCALE_1  = 0b00; // No prescaling
+            static constexpr uint8_t VAL_TSPRESCALE_4  = 0b01; // div 4
+            static constexpr uint8_t VAL_TSPRESCALE_16 = 0b10; // div 16
+            static constexpr uint8_t VAL_TSPRESCALE_64 = 0b11; // div 64
 
             enum class GlobalTimestampFrequency : uint8_t {
                 DISABLED          = VAL_GTSFREQ_DISABLED,
@@ -75,10 +76,10 @@ namespace HWD::Cortex {
             };
 
             enum class LocalTimestampPrescaler : uint8_t {
-                DISABLED = VAL_TSPRESCALE_DISABLED,
-                DIV_4    = VAL_TSPRESCALE_4,
-                DIV_16   = VAL_TSPRESCALE_16,
-                DIV_64   = VAL_TSPRESCALE_64,
+                DIV_1  = VAL_TSPRESCALE_1,
+                DIV_4  = VAL_TSPRESCALE_4,
+                DIV_16 = VAL_TSPRESCALE_16,
+                DIV_64 = VAL_TSPRESCALE_64,
             };
 
         private:
