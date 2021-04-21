@@ -45,7 +45,7 @@ namespace HWD::Test {
 
         auto connectedProbes = JLink::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
-            if (probe->GetModelName() == "J-Link EDU") {
+            if (probe->GetModelName() != "SAM-ICE") {
                 IProbe::SetCurrentProbe(probe);
 
                 probe->Probe_Connect();
@@ -204,11 +204,11 @@ namespace HWD::Test {
                                     HWDLOG_PROBE_ERROR("Failed to configure TPIU FFCR");
                                 }
 
-                                //if (probe->Target_WriteMemory_32(rtOffsets.TPIU + 0xE40, 0x0F)) {
-                                //    HWDLOG_PROBE_TRACE("Configured TPIU TPR");
-                                //} else {
-                                //    HWDLOG_PROBE_ERROR("Failed to configure TPIU TPR");
-                                //}
+                                if (probe->Target_WriteMemory_32(rtOffsets.TPIU + 0xE40, 0x0F)) {
+                                    HWDLOG_PROBE_TRACE("Configured TPIU TPR");
+                                } else {
+                                    HWDLOG_PROBE_ERROR("Failed to configure TPIU TPR");
+                                }
 
                                 auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_8192;
                                 dwt_ctrl.Set_Cycle_Counter_Enabled(true);
@@ -226,11 +226,11 @@ namespace HWD::Test {
                                            (1 << ITM::REG_TCR::SHIFT_TSENA) |                                   //
                                            (1 << ITM::REG_TCR::SHIFT_SYNCENA) |                                 //
                                            (1 << ITM::REG_TCR::SHIFT_ITMENA) |                                  //
-                                           (ITM::REG_TCR::VAL_TSPRESCALE_4 << ITM::REG_TCR::SHIFT_TSPRESCALE)); //
+                                           (ITM::REG_TCR::VAL_TSPRESCALE_1 << ITM::REG_TCR::SHIFT_TSPRESCALE)); //
 
                                 HWDLOG_PROBE_TRACE("ITM_TCR = {0:#X}", itm_tcr.GetRaw());
 
-                                itm_ter.Set_Enabled(0xFFFFFFFF, true); // enable all stimulus ports
+                                itm_ter.Set_Enabled(0xFFFFFFFF, true);
                                 probe->Target_WriteMemory_32(rtOffsets.ITM + ITM::OFFSET_TPR, 0xFFFFFFFF);
                             }
                         } else {
