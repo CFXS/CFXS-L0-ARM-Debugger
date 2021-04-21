@@ -2,6 +2,7 @@
 #pragma once
 
 #include "JLink.hpp"
+
 #include <set>
 
 namespace HWD::Probe {
@@ -459,7 +460,7 @@ namespace HWD::Probe {
     };
     ///////////////////////////////////////////////////////////////////
     static int s_Sync_ZeroCount         = 0;
-    static bool s_Synced                = false;
+    static bool s_Synced                = true;
     static bool s_DecodingPacket        = false;
     static bool s_LastPacketWasOverflow = false;
     static SWO_PacketType s_PacketTypeToDecode;
@@ -493,7 +494,7 @@ namespace HWD::Probe {
         switch (type) {
             case SWO_PacketType::OVER_FLOW:
                 s_SWO_Stats.Counters.Overflow++; //
-                HWDLOG_PROBE_TRACE("[SWO Packet] OVERFLOW");
+                //HWDLOG_PROBE_TRACE("[SWO Packet] OVERFLOW");
                 break;
             case SWO_PacketType::TIMESTAMP:
                 s_SWO_Stats.Counters.Timestamp++; //
@@ -652,7 +653,7 @@ namespace HWD::Probe {
                     // Regular SWO decoding
                     if (val == 0b01110000) { // [Overflow] CoreSight Components PDF Table 12-3
                         // no payload - don't set decoding to true
-                        HWDLOG_PROBE_TRACE("SWO OVERFLOW");
+                        //HWDLOG_PROBE_TRACE("SWO OVERFLOW");
                         SWO_ProcessPacket(SWO_PacketType::OVER_FLOW);
                     } else if ((val & 0b00001111) == 0) { // [Timestamp] CoreSight Components PDF Table 12-4
                         bool continuation             = val & 0b10000000;
@@ -711,6 +712,14 @@ namespace HWD::Probe {
                             s_DecodingPacket     = true;
                         } else {
                             SWO_ProcessPacket(SWO_PacketType::RESERVED);
+                        }
+                    } else if (val & 0b00001000) {
+                        // Extension Packet [Need to find documentation for this. No idea what it is]
+                        if (!(val & 0x84)) {
+                            SWO_ProcessPacket(SWO_PacketType::RESERVED);
+                        } else {
+                            s_PacketTypeToDecode = SWO_PacketType::RESERVED;
+                            s_DecodingPacket     = true;
                         }
                     } else {
                         HWDLOG_PROBE_CRITICAL("UNKNOWN SWO HEADER {0:#X}", val);

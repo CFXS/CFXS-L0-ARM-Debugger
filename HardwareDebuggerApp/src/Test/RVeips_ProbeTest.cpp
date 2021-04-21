@@ -2,9 +2,9 @@
 #include "RVeips_ProbeTest.hpp"
 
 #include <Probe/JLink/JLink.hpp>
-#include <Target/Cortex/ROM_Table.hpp>
 #include <Target/Cortex/DWT_Registers.hpp>
 #include <Target/Cortex/ITM_Registers.hpp>
+#include <Target/Cortex/ROM_Table.hpp>
 #include <Target/Cortex/TPIU_Registers.hpp>
 
 #include "TestFirmware.h"
@@ -151,7 +151,7 @@ namespace HWD::Test {
                             }
 
                             // configure pc sampling
-                            auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_8192;
+                            auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_64;
                             DWT::REG_CTRL dwt_ctrl(rtOffsets.DWT + DWT::OFFSET_CTRL);
                             ITM::REG_TER itm_ter(rtOffsets.ITM + ITM::OFFSET_TER(0));
                             ITM::REG_TCR itm_tcr(rtOffsets.ITM + ITM::OFFSET_TCR);
