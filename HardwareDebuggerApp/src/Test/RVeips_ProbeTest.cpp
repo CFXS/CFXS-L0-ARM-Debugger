@@ -151,7 +151,7 @@ namespace HWD::Test {
                             }
 
                             // configure pc sampling
-                            auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_1024;
+                            auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_8192;
                             DWT::REG_CTRL dwt_ctrl(rtOffsets.DWT + DWT::OFFSET_CTRL);
                             ITM::REG_TER itm_ter(rtOffsets.ITM + ITM::OFFSET_TER(0));
                             ITM::REG_TCR itm_tcr(rtOffsets.ITM + ITM::OFFSET_TCR);
@@ -187,7 +187,7 @@ namespace HWD::Test {
 
                             dwt_ctrl.Set_Sampling_Divider(sampleRateDivider);
                             dwt_ctrl.Set_PC_Sampling_Enabled(true);
-                            dwt_ctrl.Set_Exception_Trace_Enabled(true);
+                            dwt_ctrl.Set_Exception_Trace_Enabled(false);
                             dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::FAST);
                             dwt_ctrl.Set_Cycle_Counter_Enabled(true);
                             HWDLOG_PROBE_TRACE("DWT_CTRL = {0:#X}", dwt_ctrl.GetRaw());

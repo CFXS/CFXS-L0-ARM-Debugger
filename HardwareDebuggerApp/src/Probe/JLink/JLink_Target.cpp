@@ -50,7 +50,7 @@ namespace HWD::Probe {
             HWDLOG_PROBE_TRACE("Max SWO speed: {0}", maxSpeeds[0]);
         }
 
-        int cps = m_Driver->target_Measure_CPU_Speed(0x20000000, true);
+        int cps = 120000000; //m_Driver->target_Measure_CPU_Speed(0x20000000, true);
         HWDLOG_CORE_CRITICAL("CPU SPEED {0}", cps);
         if (m_Driver->target_SWO_Enable(cps, 4000000, SWO_Interface::UART, 0x00000000) != ErrorCode::OK) {
             HWDLOG_PROBE_ERROR("Failed to enable SWO");

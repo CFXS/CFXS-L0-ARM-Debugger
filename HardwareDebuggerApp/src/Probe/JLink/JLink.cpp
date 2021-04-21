@@ -2,6 +2,7 @@
 #pragma once
 
 #include "JLink.hpp"
+#include <set>
 
 namespace HWD::Probe {
 
@@ -435,30 +436,433 @@ namespace HWD::Probe {
     ////////////////////////////////////////////////////////////////////////////////
     // Process
 
-    int zeroCount = 0;
-    static void SWO_Push(uint8_t val) {
-        //HWDLOG_PROBE_ERROR("{0:#X}", val);
-        if (val == 0x80 && zeroCount == 5) {
-            HWDLOG_PROBE_WARN("SWO SYNC");
+    ///////////////////////////////////////////////////////////////////
+    struct {
+        struct {
+            uint64_t Overflow;
+            uint64_t Timestamp;
+            uint64_t Reserved;
+            uint64_t SWIT;
+        } Counters;
+    } s_SWO_Stats;
+
+    enum class SWO_PacketType : uint8_t {
+        OVER_FLOW, // underscore because "OVERFLOW" is a Windows define somewhere
+        TIMESTAMP,
+        RESERVED,
+        SWIT,
+
+        EVENT_COUNTER,   // ARMv7-M
+        EXCEPTION_TRACE, // ARMv7-M
+        PC_SAMPLE,       // ARMv7-M
+        PC_SAMPLE_SLEEP, // ARMv7-M
+    };
+    ///////////////////////////////////////////////////////////////////
+    static int s_Sync_ZeroCount         = 0;
+    static bool s_Synced                = false;
+    static bool s_DecodingPacket        = false;
+    static bool s_LastPacketWasOverflow = false;
+    static SWO_PacketType s_PacketTypeToDecode;
+
+    ///////////////////////////////////////////////////////////////////
+    // SWO Timestamp
+    enum class SWO_Timestamp_Type : uint8_t {
+        TIMESTAMP_EMITTED_SYNCHRONOUS_TO_ITM,
+        TIMESTAMP_EMITTED_DELAYED_TO_ITM,
+        PACKET_EMITTED_DELAYED,
+        PACKET_AND_TIMESTAMP_EMITTED_DELAYED,
+        OVERFLOW_ITM,
+        RESERVED,
+    };
+    SWO_Timestamp_Type s_SWO_Current_Timestamp_Type;
+    uint32_t s_SWO_Current_Timestamp_Value;
+    static int s_SWO_Packet_Timestamp_ContinuationCount;
+    static constexpr uint32_t MAX_SWO_TIMESTAMP_CONTINUATIONS = 4;
+    ///////////////////////////////////////////////////////////////////
+    // SWO SWIT
+    uint32_t s_SWO_SWIT_Payload;
+    uint8_t s_SWO_SWIT_PADDRDBG;
+    uint8_t s_SWO_SWIT_PayloadLength;
+    uint8_t s_SWO_SWIT_RemainingBytes;
+    ///////////////////////////////////////////////////////////////////
+    static void SWO_ResetDecodeState() {
+        s_DecodingPacket = false;
+    }
+
+    static void SWO_ProcessPacket(SWO_PacketType type) {
+        switch (type) {
+            case SWO_PacketType::OVER_FLOW:
+                s_SWO_Stats.Counters.Overflow++; //
+                HWDLOG_PROBE_TRACE("[SWO Packet] OVERFLOW");
+                break;
+            case SWO_PacketType::TIMESTAMP:
+                s_SWO_Stats.Counters.Timestamp++; //
+                HWDLOG_PROBE_TRACE(
+                    "[SWO Packet] TIMESTAMP: {0} C = {1}", s_SWO_Current_Timestamp_Value, s_SWO_Packet_Timestamp_ContinuationCount);
+                break;
+            case SWO_PacketType::RESERVED:
+                s_SWO_Stats.Counters.Reserved++; //
+                HWDLOG_PROBE_TRACE("[SWO Packet] RESERVED");
+                break;
+            case SWO_PacketType::SWIT:
+                s_SWO_Stats.Counters.SWIT++; //
+                HWDLOG_PROBE_TRACE("[SWO Packet] SWIT {0:#X} [{1} bytes] - PADDRDBG {2:#X}",
+                                   s_SWO_SWIT_Payload,
+                                   s_SWO_SWIT_PayloadLength,
+                                   s_SWO_SWIT_PADDRDBG);
+                break;
         }
 
-        if (val == 0) {
-            zeroCount++;
-        } else {
-            zeroCount = 0;
+        SWO_ResetDecodeState();
+    }
+
+////////////////////////////////////////////////////////////////////////////////////
+// Exception Trace
+#define ARMv7M_EXCEPTION_TRACE_GET_EXCEPTION_NUMBER(x) (x & 0x1FF)
+#define ARMv7M_EXCEPTION_TRACE_GET_FUNCTION(x)         ((x >> 12) & 0b11)
+    uint16_t s_SWO_ARMv7M_ExceptionTraceData;
+    uint8_t s_SWO_ARMv7M_ExceptionTraceData_ReadPos;
+    // PC Sample
+    uint32_t s_SWO_ARMv7M_ProgramCounter;
+    uint8_t s_SWO_ARMv7M_ProgramCounter_ReadPos;
+    bool s_SWO_ARMv7M_ProgramCounterSleep_PayloadRead;
+    ////////////////////////////////////////////////////////////////////////////////////
+    static void SWO_ARMv7M_InitializeDecode(SWO_PacketType type) {
+        switch (type) {
+            case SWO_PacketType::EXCEPTION_TRACE: {
+                s_SWO_ARMv7M_ExceptionTraceData         = 0;
+                s_SWO_ARMv7M_ExceptionTraceData_ReadPos = 0;
+                break;
+            }
+            case SWO_PacketType::PC_SAMPLE: {
+                s_SWO_ARMv7M_ProgramCounter         = 0;
+                s_SWO_ARMv7M_ProgramCounter_ReadPos = 0;
+                break;
+            }
+            case SWO_PacketType::PC_SAMPLE_SLEEP: {
+                s_SWO_ARMv7M_ProgramCounterSleep_PayloadRead = false;
+                break;
+            }
         }
     }
 
-    void JLink::Process() {
-        uint8_t swoBuf[4096];
-        uint32_t bytesRead = sizeof(swoBuf);
-        m_Driver->target_SWO_Read(swoBuf, 0, &bytesRead);
-        if (bytesRead) {
-            m_Driver->target_SWO_Control(SWO_Command::FLUSH, &bytesRead); // flush this many bytes
-            for (uint32_t i = 0; i < bytesRead; i++) {
-                uint8_t val = swoBuf[i];
-                SWO_Push(val);
+    std::map<uint32_t, uint64_t> s_PC_Map;
+    static void SWO_ARMv7M_ProcessData(SWO_PacketType type, uint8_t val) {
+        switch (type) {
+            case SWO_PacketType::EVENT_COUNTER: { // no payload
+                HWDLOG_PROBE_TRACE("[SWO ARMv7-M Packet] EVENT_COUNTER {0:#X}", val);
+                SWO_ResetDecodeState(); // packet processed
+                break;
             }
+            case SWO_PacketType::EXCEPTION_TRACE: { // 2 byte payload
+                s_SWO_ARMv7M_ExceptionTraceData |= val << s_SWO_ARMv7M_ExceptionTraceData_ReadPos * 8;
+
+                s_SWO_ARMv7M_ExceptionTraceData_ReadPos++;
+                if (s_SWO_ARMv7M_ExceptionTraceData_ReadPos == 2) {
+                    auto decodeFunc = [](uint8_t f) {
+                        switch (f) {
+                            case 0b01: return "Enter";
+                            case 0b10: return "Exit";
+                            case 0b11: return "Return to";
+                            default: return "[Reserved]";
+                        }
+                    };
+
+                    auto exNum = ARMv7M_EXCEPTION_TRACE_GET_EXCEPTION_NUMBER(s_SWO_ARMv7M_ExceptionTraceData);
+                    char exDec[16];
+                    if (exNum == 0) {
+                        snprintf(exDec, 16, "MainLoop");
+                    } else if (exNum == 15) {
+                        snprintf(exDec, 16, "SysTick");
+                    } else {
+                        snprintf(exDec, 16, "%u", exNum);
+                    }
+
+                    HWDLOG_PROBE_ERROR("[SWO ARMv7-M Packet] EXCEPTION_TRACE {1} {0}",
+                                       exDec,
+                                       decodeFunc(ARMv7M_EXCEPTION_TRACE_GET_FUNCTION(s_SWO_ARMv7M_ExceptionTraceData)));
+                    SWO_ResetDecodeState(); // packet processed
+                }
+                break;
+            }
+            case SWO_PacketType::PC_SAMPLE: { // 4 byte payload
+                s_SWO_ARMv7M_ProgramCounter |= val << s_SWO_ARMv7M_ProgramCounter_ReadPos * 8;
+
+                s_SWO_ARMv7M_ProgramCounter_ReadPos++;
+                if (s_SWO_ARMv7M_ProgramCounter_ReadPos == 4) {
+                    char pcs[16];
+                    snprintf(pcs, 16, "0x%08X", s_SWO_ARMv7M_ProgramCounter);
+                    s_PC_Map[s_SWO_ARMv7M_ProgramCounter]++;
+                    //HWDLOG_PROBE_WARN("[SWO ARMv7-M Packet] PC_SAMPLE PC = {0}", pcs);
+                    SWO_ResetDecodeState(); // packet processed
+                }
+                break;
+            }
+            case SWO_PacketType::PC_SAMPLE_SLEEP: { // 1 byte payload (ignore)
+                if (s_SWO_ARMv7M_ProgramCounterSleep_PayloadRead == false) {
+                    s_SWO_ARMv7M_ProgramCounterSleep_PayloadRead = true;
+                } else {
+                    HWDLOG_PROBE_TRACE("[SWO ARMv7-M Packet] PC_SAMPLE_SLEEP");
+                    SWO_ResetDecodeState(); // packet processed
+                }
+                break;
+            }
+            default: HWDLOG_PROBE_ERROR("UNKNOWN ARMv7 PACKET TYPE");
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////////////////
+    static bool s_StopProcess = false;
+    static void SWO_Process(uint8_t* buf, uint32_t byteCount) {
+        if (s_StopProcess)
+            return;
+
+        for (uint32_t b = 0; b < byteCount; b++) {
+            auto val = buf[b];
+
+            if (s_Synced) {
+                if (!s_DecodingPacket) { /////////////////////// HEADER PROCESSING
+                    // check headers
+                    if (val == 0 || val == 0x80) // probably sync
+                        continue;
+
+                    // ARMv7-M trace packet decoding
+                    // need to check if this is compatible with ARMv6 and ARMv8
+                    if (1 < 2) {
+                        if (val == 0b00010111) { // Periodic PC sample packets, discriminator ID2 [ARMv7-M Reference Manual D.3.3]
+                            s_PacketTypeToDecode = SWO_PacketType::PC_SAMPLE;
+                            s_DecodingPacket     = true;
+                        } else if (val == 0b00001110) { // Exception trace packets, discriminator ID1 [ARMv7-M Reference Manual D.3.2]
+                            s_PacketTypeToDecode = SWO_PacketType::EXCEPTION_TRACE;
+                            s_DecodingPacket     = true;
+                        } else if (val == 0b00000101) { // Event counter packet, discriminator ID0 [ARMv7-M Reference Manual D.3.1]
+                            s_PacketTypeToDecode = SWO_PacketType::EVENT_COUNTER;
+                            s_DecodingPacket     = true;
+                        } else if (val ==
+                                   0b00010101) { // Periodic PC sample sleep packets, discriminator ID2 [ARMv7-M Reference Manual D.3.3]
+                            s_PacketTypeToDecode = SWO_PacketType::PC_SAMPLE_SLEEP;
+                            s_DecodingPacket     = true;
+                        }
+                    }
+
+                    if (s_DecodingPacket) {
+                        SWO_ARMv7M_InitializeDecode(s_PacketTypeToDecode);
+                        continue;
+                    }
+
+                    // Regular SWO decoding
+                    if (val == 0b01110000) { // [Overflow] CoreSight Components PDF Table 12-3
+                        // no payload - don't set decoding to true
+                        HWDLOG_PROBE_TRACE("SWO OVERFLOW");
+                        SWO_ProcessPacket(SWO_PacketType::OVER_FLOW);
+                    } else if ((val & 0b00001111) == 0) { // [Timestamp] CoreSight Components PDF Table 12-4
+                        bool continuation             = val & 0b10000000;
+                        s_SWO_Current_Timestamp_Value = 0;
+                        if (continuation) {
+                            // [TC[2:0] field if C = 1] CoreSight Components PDF Table 12-4
+                            switch ((val >> 4) & 0b111) {
+                                case 0b100:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::TIMESTAMP_EMITTED_SYNCHRONOUS_TO_ITM; //
+                                    break;
+                                case 0b101:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::TIMESTAMP_EMITTED_DELAYED_TO_ITM; //
+                                    break;
+                                case 0b110:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::PACKET_EMITTED_DELAYED; //
+                                    break;
+                                case 0b111:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::PACKET_AND_TIMESTAMP_EMITTED_DELAYED; //
+                                    break;
+                                default:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::RESERVED; //
+                                    break;
+                            }
+
+                            s_SWO_Packet_Timestamp_ContinuationCount = 1;
+                            s_PacketTypeToDecode                     = SWO_PacketType::TIMESTAMP;
+                            s_DecodingPacket                         = true;
+                        } else {
+                            // [TC[2:0] field if C = 0] CoreSight Components PDF Table 12-4
+                            switch ((val >> 4) & 0b111) {
+                                case 0b000:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::RESERVED; //
+                                    break;
+                                case 0b111:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::OVERFLOW_ITM; //
+                                    break;
+                                default:
+                                    s_SWO_Current_Timestamp_Type = SWO_Timestamp_Type::TIMESTAMP_EMITTED_SYNCHRONOUS_TO_ITM; //
+                                    break;
+                            }
+
+                            s_SWO_Packet_Timestamp_ContinuationCount = 0;
+                            SWO_ProcessPacket(SWO_PacketType::TIMESTAMP);
+                        }
+                    } else if ((val & 0b11) && !(val & 0b100)) { // SWIT CoreSight Components PDF Table 12-5
+                        s_SWO_SWIT_PADDRDBG       = val >> 3;
+                        s_SWO_SWIT_PayloadLength  = 1 << ((val & 0b11) - 1); // number of bytes
+                        s_SWO_SWIT_RemainingBytes = s_SWO_SWIT_PayloadLength;
+                        s_SWO_SWIT_Payload        = 0;
+                        s_PacketTypeToDecode      = SWO_PacketType::SWIT;
+                        s_DecodingPacket          = true;
+                    } else if ((val & 0b00001111) == 0b0100) { // Reserved CoreSight Components PDF Table 12-1
+                        bool continuation = val & 0b10000000;
+                        if (continuation) {
+                            s_PacketTypeToDecode = SWO_PacketType::RESERVED;
+                            s_DecodingPacket     = true;
+                        } else {
+                            SWO_ProcessPacket(SWO_PacketType::RESERVED);
+                        }
+                    } else {
+                        HWDLOG_PROBE_CRITICAL("UNKNOWN SWO HEADER {0:#X}", val);
+                        s_StopProcess = true;
+                        break;
+                    }
+                } else { /////////////////////////////////// DATA PROCESSING
+                    switch (s_PacketTypeToDecode) {
+                        case SWO_PacketType::SWIT: {
+                            s_SWO_SWIT_Payload |= val << (s_SWO_SWIT_PayloadLength - s_SWO_SWIT_RemainingBytes) * 8;
+                            s_SWO_SWIT_RemainingBytes--;
+                            if (s_SWO_SWIT_RemainingBytes == 0) {
+                                SWO_ProcessPacket(SWO_PacketType::SWIT);
+                            }
+                            break;
+                        }
+                        case SWO_PacketType::TIMESTAMP: {
+                            bool continuation = val & 0b10000000;
+
+                            s_SWO_Current_Timestamp_Value |= ((val & 0b01111111)) << 7 * (s_SWO_Packet_Timestamp_ContinuationCount - 1);
+
+                            if (continuation) {
+                                if (s_SWO_Packet_Timestamp_ContinuationCount >= MAX_SWO_TIMESTAMP_CONTINUATIONS) {
+                                    HWDLOG_PROBE_ERROR("SWO too many timestamp continuations");
+                                    SWO_ResetDecodeState();
+                                } else {
+                                    s_SWO_Packet_Timestamp_ContinuationCount++;
+                                }
+                            } else {
+                                SWO_ProcessPacket(SWO_PacketType::TIMESTAMP);
+                            }
+                            break;
+                        }
+                        case SWO_PacketType::RESERVED: {
+                            // reserved packet is max 4 bytes of payload, ignore this for now
+                            bool continuation = val & 0b10000000;
+
+                            if (!continuation) {
+                                SWO_ProcessPacket(SWO_PacketType::RESERVED);
+                            }
+                            break;
+                        }
+                        default: {
+                            // ARMv7-M
+                            SWO_ARMv7M_ProcessData(s_PacketTypeToDecode, val);
+                        }
+                    }
+                }
+            }
+
+            // CoreSight Components PDF Table 12-1
+            // Sync packet - 0x800000000000
+            if (!s_Synced && val == 0x80 && s_Sync_ZeroCount == 5) {
+                HWDLOG_PROBE_WARN("SWO SYNC");
+                s_Synced = true;
+            }
+
+            if (val == 0) {
+                s_Sync_ZeroCount++;
+            } else {
+                s_Sync_ZeroCount = 0;
+            }
+        }
+    }
+
+    struct comp {
+        template<typename T>
+
+        // Comparator function
+        bool operator()(const T& l, const T& r) const {
+            if (l.second != r.second) {
+                return l.second > r.second;
+            }
+            return l.first > r.first;
+        }
+    };
+
+    void JLink::Process() {
+        static uint8_t s_SWO_Buffer[4096];
+        static bool s_FirstRead = true;
+
+        if (s_FirstRead) {
+            s_FirstRead = false;
+
+            (new std::thread([]() {
+                while (1 < 2) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                    HWDLOG_CORE_INFO("---- PC Samples ----");
+                    std::set<std::pair<uint32_t, uint64_t>, comp> sortedCalls(s_PC_Map.begin(), s_PC_Map.end());
+                    uint64_t tot = 0;
+                    for (auto [pc, count] : sortedCalls) {
+                        tot += count;
+                    }
+                    for (auto [pc, count] : sortedCalls) {
+                        char ff[24];
+                        char pcc[24];
+                        char cc[24];
+                        snprintf(ff, 24, "%.2f", 100.0f / tot * count);
+                        snprintf(pcc, 24, "0x%08X", pc);
+                        snprintf(cc, 24, "% 8llu", count);
+                        HWDLOG_CORE_TRACE("{0}\t{1}%\t{2} samples", pcc, ff, cc);
+                    }
+                    HWDLOG_CORE_TRACE("Total samples: {0}", tot);
+                }
+            }))->detach();
+
+            return;
+            uint8_t testStream[] = {
+                0b00000000,
+                0b00000000,
+                0b00000000,
+                0b00000000,
+                0b00000000,
+                0b10000000,
+                // SYNC
+
+                0b01110000,
+                // OVERFLOW
+                0b01110000,
+                // OVERFLOW
+                0b01110000,
+                // OVERFLOW
+
+                0b11111001,
+                0b11111111,
+                // SWIT, payload 0xFF
+
+                0b11111011,
+                0x50,
+                0xA5,
+                0xAD,
+                0xDE,
+                // SWIT, payload 0xDEADA550
+
+                0b10000001,
+                0b11111111,
+                // SWIT, payload 0xFF
+            };
+
+            SWO_Process(testStream, sizeof(testStream));
+        }
+
+        uint32_t bytesRead = sizeof(s_SWO_Buffer); // bytes to read
+        m_Driver->target_SWO_Read(s_SWO_Buffer, 0, &bytesRead);
+        // bytesRead now contains amount of bytes that were read
+
+        if (bytesRead) {
+            // have to manually flush SWO buffer - JLink DLL does not do this automatically
+            // flush [bytesRead] number of bytes from internal buffers
+            m_Driver->target_SWO_Control(SWO_Command::FLUSH, &bytesRead);
+
+            SWO_Process(s_SWO_Buffer, bytesRead);
         }
 
         if (m_TerminalEnabled) {
