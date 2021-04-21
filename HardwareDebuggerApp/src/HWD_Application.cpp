@@ -5,9 +5,41 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <set>
+
 #include "main.hpp"
 
 namespace HWD {
+    namespace Probe {
+        extern std::map<uint32_t, uint64_t> s_PC_Map;
+        extern std::map<uint32_t, uint64_t> s_ExecMap;
+    } // namespace Probe
+    using namespace Probe;
+
+    // TM4C
+    std::map<uint32_t, const char*> s_DecodeEx = {
+        {0, "MainLoop"},   //
+        {15, "SysTick"},   //
+        {16, "GPIO A"},    //
+        {21, "UART 0"},    //
+        {22, "UART 1"},    //
+        {39, "Timer 2A"},  //
+        {49, "UART 2"},    //
+        {51, "Timer 3A"},  //
+        {52, "Timer 3B"},  //
+        {72, "UART 3"},    //
+        {73, "UART 4"},    //
+        {74, "UART 5"},    //
+        {76, "UART 7"},    //
+        {79, "Timer 4A"},  //
+        {80, "Timer 4B"},  //
+        {81, "Timer 5A"},  //
+        {82, "Timer 5B"},  //
+        {114, "Timer 6A"}, //
+        {115, "Timer 6B"}, //
+        {116, "Timer 7A"}, //
+    };
+
     ///////////////////////////////////////////////////////////////////////////////// !Bodge alert! - SDL SetWindowTitle implementation "no prefix" tag
     HWD_Application::HWD_Application(int argc, char** argv) :
         Application(argc, argv, CFXS_HWD_WINDOW_TITLE_NO_PREFIX CFXS_HWD_PROGRAM_NAME) {
@@ -28,7 +60,7 @@ namespace HWD {
         }))->detach();
 
         auto& io = ImGui::GetIO();
-        font_OS  = io.Fonts->AddFontFromFileTTF("C:/CFXS/OpenSans-Regular.ttf", 24);
+        //font_OS  = io.Fonts->AddFontFromFileTTF("C:/CFXS/OpenSans-Regular.ttf", 24);
         font_SCP = io.Fonts->AddFontFromFileTTF("C:/CFXS/SourceCodePro-Regular.ttf", 24);
 
         io.ConfigViewportsNoDecoration = false;
@@ -64,6 +96,18 @@ namespace HWD {
         glClearColor(0.1f, 0.1f, 0.1f, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
+
+    struct comp {
+        template<typename T>
+
+        // Comparator function
+        bool operator()(const T& l, const T& r) const {
+            if (l.second != r.second) {
+                return l.second > r.second;
+            }
+            return l.first > r.first;
+        }
+    };
 
     float val[4] = {0, 0, 0, 0};
     void HWD_Application::OnImGuiRender() {
@@ -191,21 +235,52 @@ int main() {
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
         ImGui::SetNextWindowClass(&window_class);
-        ImGui::Begin("Symbols", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::Begin("PC Samples", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
         {
-            if (ImGui::BeginTable("Symbols", 3, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders)) {
-                ImGui::TableSetupColumn("Symbol Name");
-                ImGui::TableSetupColumn("Location");
-                ImGui::TableSetupColumn("Data Type");
+            if (ImGui::BeginTable("Function Profiler", 3, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders)) {
+                ImGui::TableSetupColumn("PC");
+                ImGui::TableSetupColumn("Samples");
+                ImGui::TableSetupColumn("Samples/Total %");
                 ImGui::TableHeadersRow();
-                for (int i = 0; i < 1000; i++) {
+
+                uint64_t tot = 0;
+                for (auto [pc, count] : s_PC_Map) {
+                    tot += count;
+                }
+
+                std::set<std::pair<uint32_t, uint64_t>, comp> sortedCalls(s_PC_Map.begin(), s_PC_Map.end());
+
+                for (auto [pc, count] : sortedCalls) {
                     ImGui::TableNextRow();
                     ImGui::TableNextColumn();
-                    ImGui::Text("sym %d", i);
+                    ImGui::Text("0x%08X", pc);
                     ImGui::TableNextColumn();
-                    ImGui::Text("0x%08X", i);
+                    ImGui::Text("%llu", count);
                     ImGui::TableNextColumn();
-                    ImGui::Text("uint32_t");
+                    ImGui::Text("%.3f%%", 100.0f / tot * count);
+                }
+
+                ImGui::EndTable();
+            }
+        }
+        ImGui::End();
+
+        ImGui::Begin("Exception Log", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar);
+        {
+            if (ImGui::BeginTable("Interrupt Entry Log", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders)) {
+                ImGui::TableSetupColumn("Interrupt Name [ID]");
+                ImGui::TableSetupColumn("Times Entered");
+                ImGui::TableHeadersRow();
+
+                std::set<std::pair<uint32_t, uint64_t>, comp> sortedExecs(s_ExecMap.begin(), s_ExecMap.end());
+                for (auto [num, count] : sortedExecs) {
+                    if (num) {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::Text("%s [%u]", s_DecodeEx[num], num);
+                        ImGui::TableNextColumn();
+                        ImGui::Text("%llu", count / 2);
+                    }
                 }
 
                 ImGui::EndTable();

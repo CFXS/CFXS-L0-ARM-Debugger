@@ -452,6 +452,7 @@ namespace HWD::Probe {
         TIMESTAMP,
         RESERVED,
         SWIT,
+        SYNC,
 
         EVENT_COUNTER,   // ARMv7-M
         EXCEPTION_TRACE, // ARMv7-M
@@ -498,8 +499,8 @@ namespace HWD::Probe {
                 break;
             case SWO_PacketType::TIMESTAMP:
                 s_SWO_Stats.Counters.Timestamp++; //
-                HWDLOG_PROBE_TRACE(
-                    "[SWO Packet] TIMESTAMP: {0} C = {1}", s_SWO_Current_Timestamp_Value, s_SWO_Packet_Timestamp_ContinuationCount);
+                //HWDLOG_PROBE_TRACE(
+                //    "[SWO Packet] TIMESTAMP: {0} C = {1}", s_SWO_Current_Timestamp_Value, s_SWO_Packet_Timestamp_ContinuationCount);
                 break;
             case SWO_PacketType::RESERVED:
                 s_SWO_Stats.Counters.Reserved++; //
@@ -548,6 +549,7 @@ namespace HWD::Probe {
     }
 
     std::map<uint32_t, uint64_t> s_PC_Map;
+    std::map<uint32_t, uint64_t> s_ExecMap;
     static void SWO_ARMv7M_ProcessData(SWO_PacketType type, uint8_t val) {
         switch (type) {
             case SWO_PacketType::EVENT_COUNTER: { // no payload
@@ -569,19 +571,21 @@ namespace HWD::Probe {
                         }
                     };
 
-                    auto exNum = ARMv7M_EXCEPTION_TRACE_GET_EXCEPTION_NUMBER(s_SWO_ARMv7M_ExceptionTraceData);
-                    char exDec[16];
-                    if (exNum == 0) {
-                        snprintf(exDec, 16, "MainLoop");
-                    } else if (exNum == 15) {
-                        snprintf(exDec, 16, "SysTick");
-                    } else {
-                        snprintf(exDec, 16, "%u", exNum);
-                    }
+                    s_ExecMap[ARMv7M_EXCEPTION_TRACE_GET_EXCEPTION_NUMBER(s_SWO_ARMv7M_ExceptionTraceData)]++;
 
-                    HWDLOG_PROBE_ERROR("[SWO ARMv7-M Packet] EXCEPTION_TRACE {1} {0}",
-                                       exDec,
-                                       decodeFunc(ARMv7M_EXCEPTION_TRACE_GET_FUNCTION(s_SWO_ARMv7M_ExceptionTraceData)));
+                    //auto exNum = ARMv7M_EXCEPTION_TRACE_GET_EXCEPTION_NUMBER(s_SWO_ARMv7M_ExceptionTraceData);
+                    //char exDec[16];
+                    //if (exNum == 0) {
+                    //    snprintf(exDec, 16, "MainLoop");
+                    //} else if (exNum == 15) {
+                    //    snprintf(exDec, 16, "SysTick");
+                    //} else {
+                    //    snprintf(exDec, 16, "%u", exNum);
+                    //}
+
+                    //HWDLOG_PROBE_ERROR("[SWO ARMv7-M Packet] EXCEPTION_TRACE {1} {0}",
+                    //                   exDec,
+                    //                  decodeFunc(ARMv7M_EXCEPTION_TRACE_GET_FUNCTION(s_SWO_ARMv7M_ExceptionTraceData)));
                     SWO_ResetDecodeState(); // packet processed
                 }
                 break;
@@ -591,8 +595,8 @@ namespace HWD::Probe {
 
                 s_SWO_ARMv7M_ProgramCounter_ReadPos++;
                 if (s_SWO_ARMv7M_ProgramCounter_ReadPos == 4) {
-                    char pcs[16];
-                    snprintf(pcs, 16, "0x%08X", s_SWO_ARMv7M_ProgramCounter);
+                    //char pcs[16];
+                    //snprintf(pcs, 16, "0x%08X", s_SWO_ARMv7M_ProgramCounter);
                     s_PC_Map[s_SWO_ARMv7M_ProgramCounter]++;
                     //HWDLOG_PROBE_WARN("[SWO ARMv7-M Packet] PC_SAMPLE PC = {0}", pcs);
                     SWO_ResetDecodeState(); // packet processed
@@ -623,8 +627,12 @@ namespace HWD::Probe {
             if (s_Synced) {
                 if (!s_DecodingPacket) { /////////////////////// HEADER PROCESSING
                     // check headers
-                    if (val == 0 || val == 0x80) // probably sync
+                    if (val == 0) {
+                        s_PacketTypeToDecode = SWO_PacketType::SYNC;
+                        s_DecodingPacket     = true;
+                        s_Sync_ZeroCount     = 0;
                         continue;
+                    }
 
                     // ARMv7-M trace packet decoding
                     // need to check if this is compatible with ARMv6 and ARMv8
@@ -728,6 +736,13 @@ namespace HWD::Probe {
                     }
                 } else { /////////////////////////////////// DATA PROCESSING
                     switch (s_PacketTypeToDecode) {
+                        case SWO_PacketType::SYNC: {
+                            s_Sync_ZeroCount++;
+                            if (val == 0x80) {
+                                SWO_ResetDecodeState();
+                            }
+                            break;
+                        }
                         case SWO_PacketType::SWIT: {
                             s_SWO_SWIT_Payload |= val << (s_SWO_SWIT_PayloadLength - s_SWO_SWIT_RemainingBytes) * 8;
                             s_SWO_SWIT_RemainingBytes--;
@@ -739,10 +754,10 @@ namespace HWD::Probe {
                         case SWO_PacketType::TIMESTAMP: {
                             bool continuation = val & 0b10000000;
 
-                            s_SWO_Current_Timestamp_Value |= ((val & 0b01111111)) << 7 * (s_SWO_Packet_Timestamp_ContinuationCount - 1);
+                            s_SWO_Current_Timestamp_Value |= ((val & 0b01111111)) << (7 * (s_SWO_Packet_Timestamp_ContinuationCount - 1));
 
                             if (continuation) {
-                                if (s_SWO_Packet_Timestamp_ContinuationCount >= MAX_SWO_TIMESTAMP_CONTINUATIONS) {
+                                if (s_SWO_Packet_Timestamp_ContinuationCount > MAX_SWO_TIMESTAMP_CONTINUATIONS) {
                                     HWDLOG_PROBE_ERROR("SWO too many timestamp continuations");
                                     SWO_ResetDecodeState();
                                 } else {
@@ -785,18 +800,6 @@ namespace HWD::Probe {
         }
     }
 
-    struct comp {
-        template<typename T>
-
-        // Comparator function
-        bool operator()(const T& l, const T& r) const {
-            if (l.second != r.second) {
-                return l.second > r.second;
-            }
-            return l.first > r.first;
-        }
-    };
-
     void JLink::Process() {
         static uint8_t s_SWO_Buffer[4096];
         static bool s_FirstRead = true;
@@ -804,29 +807,7 @@ namespace HWD::Probe {
         if (s_FirstRead) {
             s_FirstRead = false;
 
-            (new std::thread([]() {
-                while (1 < 2) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                    HWDLOG_CORE_INFO("---- PC Samples ----");
-                    std::set<std::pair<uint32_t, uint64_t>, comp> sortedCalls(s_PC_Map.begin(), s_PC_Map.end());
-                    uint64_t tot = 0;
-                    for (auto [pc, count] : sortedCalls) {
-                        tot += count;
-                    }
-                    for (auto [pc, count] : sortedCalls) {
-                        char ff[24];
-                        char pcc[24];
-                        char cc[24];
-                        snprintf(ff, 24, "%.2f", 100.0f / tot * count);
-                        snprintf(pcc, 24, "0x%08X", pc);
-                        snprintf(cc, 24, "% 8llu", count);
-                        HWDLOG_CORE_TRACE("{0}\t{1}%\t{2} samples", pcc, ff, cc);
-                    }
-                    HWDLOG_CORE_TRACE("Total samples: {0}", tot);
-                }
-            }))->detach();
-
-            return;
+            //return;
             uint8_t testStream[] = {
                 0b00000000,
                 0b00000000,
@@ -857,9 +838,25 @@ namespace HWD::Probe {
                 0b10000001,
                 0b11111111,
                 // SWIT, payload 0xFF
+
+                0b10000000,
+                0b11111111,
+                0b00000000,
+                // Timestamp
+
+                0b10000000,
+                // Timestamp
+
+                0b11110000,
+                0b11111111,
+                0b11111111,
+                0b11111111,
+                0b01111111,
+                // Timestamp
             };
 
             SWO_Process(testStream, sizeof(testStream));
+            HWDLOG_CORE_CRITICAL("--------------------------");
         }
 
         uint32_t bytesRead = sizeof(s_SWO_Buffer); // bytes to read
