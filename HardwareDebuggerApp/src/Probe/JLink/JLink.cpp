@@ -618,7 +618,6 @@ namespace HWD::Probe {
 
         for (uint32_t b = 0; b < byteCount; b++) {
             auto val = buf[b];
-
             if (s_Synced) {
                 if (!s_DecodingPacket) { /////////////////////// HEADER PROCESSING
                     // check headers
@@ -652,9 +651,8 @@ namespace HWD::Probe {
                     // Regular SWO decoding
                     if (val == 0b01110000) { // [Overflow] CoreSight Components PDF Table 12-3
                         // no payload - don't set decoding to true
-                        HWDLOG_PROBE_TRACE("SWO OVERFLOW");
                         SWO_ProcessPacket(SWO_PacketType::OVER_FLOW);
-                    } else if ((val & 0b00001111) == 0) { // [Timestamp] CoreSight Components PDF Table 12-4
+                    } else if ((val & 0b00001111) == 0 && (val & 0b01110000) != 0) { // [Timestamp] CoreSight Components PDF Table 12-4
                         bool continuation             = val & 0b10000000;
                         s_SWO_Current_Timestamp_Value = 0;
                         if (continuation) {
