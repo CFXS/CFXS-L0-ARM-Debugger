@@ -18,6 +18,11 @@ namespace HWD {
 
         void Close();
 
+        inline UI::MainWindow* GetMainWindow() {
+            return m_MainWindow.get();
+        }
+
+    public:
         static inline Application& Get() {
             return *s_Instance;
         }
