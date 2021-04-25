@@ -1,4 +1,3 @@
-// [source]
 #include "OpenGL_Context.hpp"
 
 #include <GL/glew.h>

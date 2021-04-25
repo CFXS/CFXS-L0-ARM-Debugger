@@ -19,19 +19,19 @@ add_compile_definitions(
   "CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_HWD_VERSION_STRING")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui)
 
-include("_SDL_Options.cmake")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/SDL)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
-include("_GLEW_Options.cmake")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/GLEW)
+find_package(Qt5 COMPONENTS Core Widgets Network Qml Quick Gui REQUIRED)
+
+
+set(UI_files "${ROOT_DIR}/src/UI/MainWindow/MainWindow.ui")
 
 add_executable(
-  ${EXE_NAME}
-  ${headers} ${sources}
-  "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui/backends/imgui_impl_sdl.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGui/backends/imgui_impl_opengl3.cpp")
+  ${EXE_NAME} ${headers} ${sources} ${UI_files})
+
 
 target_precompile_headers(
   ${EXE_NAME}
@@ -76,11 +76,13 @@ target_link_libraries(
   ${EXE_NAME}
   PRIVATE project_options
           project_warnings
-          SDL2-static
-          SDL2main
           Lua
-          libglew_static
-          ImGui)
+          Qt::Core
+          Qt::Widgets
+          Qt::Network
+          Qt::Qml
+          Qt::Quick
+          Qt::Gui)
 
 if(BUILD_PROFILER)
   target_link_options(${EXE_NAME} PRIVATE "/PROFILE")
@@ -92,3 +94,17 @@ string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # "$<TARGET_FILE_DIR:${EXE_NAME}>/vendor/SDL/SDL2d.dll"
 # "$<TARGET_FILE_DIR:${EXE_NAME}>"
 # )
+
+
+
+message("Creating file copy commands for required Qt libraries and binaries to output directory....")
+set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.2\\msvc2019_64")
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Core.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Cored.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Gui.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Guid.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Widgets.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Widgetsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\plugins\\platforms\\qwindows.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindows.dll)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\plugins\\platforms\\qwindowsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindowsd.dll)

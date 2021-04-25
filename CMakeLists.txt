@@ -13,6 +13,12 @@ endif()
 
 project(HardwareDebuggerProject CXX C)
 
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 include("CMake/Settings.cmake")
 
 # Link "library" to set C++ standard / compile options

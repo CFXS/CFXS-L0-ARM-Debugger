@@ -1,4 +1,5 @@
 // [source]
+
 #include "HWD_Application.hpp"
 #include "Log/Log.hpp"
 
@@ -11,8 +12,6 @@ int main(int argc, char** argv) {
 
     app->Run();
     delete app;
-
-    std::cin.get();
 
     return 0;
 }

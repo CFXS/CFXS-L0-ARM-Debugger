@@ -1,4 +1,3 @@
-// [source]
 #include "Window.hpp"
 
 #include "Application.hpp"
@@ -30,7 +29,6 @@ namespace HWD {
         }
 
         m_Context = std::make_unique<OpenGL_Context>(m_Window);
-
     }
 
     Window::~Window() {
