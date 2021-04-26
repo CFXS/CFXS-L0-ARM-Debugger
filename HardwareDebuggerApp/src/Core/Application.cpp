@@ -22,7 +22,7 @@ namespace HWD {
         SetQtAttributes();
         m_QtApplication = std::make_unique<QApplication>(argc, argv);
         m_QtApplication->setOrganizationName(QStringLiteral("CFXS"));
-        m_QtApplication->setApplicationName(QStringLiteral(CFXS_HWD_PROGRAM_NAME));
+        m_QtApplication->setApplicationName(QString::fromStdString(name));
         m_QtApplication->setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
 
         m_UpdateTimer = std::make_unique<QTimer>();

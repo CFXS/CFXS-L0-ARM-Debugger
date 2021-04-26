@@ -36,9 +36,7 @@ namespace HWD {
         {116, "Timer 7A"}, //
     };
 
-    ///////////////////////////////////////////////////////////////////////////////// !Bodge alert! - SDL SetWindowTitle implementation "no prefix" tag
-    HWD_Application::HWD_Application(int argc, char** argv) :
-        Application(argc, argv, CFXS_HWD_WINDOW_TITLE_NO_PREFIX CFXS_HWD_PROGRAM_NAME) {
+    HWD_Application::HWD_Application(int argc, char** argv) : Application(argc, argv, CFXS_HWD_PROGRAM_NAME) {
     }
 
     HWD_Application::~HWD_Application() {

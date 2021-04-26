@@ -10,13 +10,9 @@ include("_Sources.cmake")
 
 add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
 
-add_compile_definitions("CFXS_HWD_WINDOW_TITLE_NO_PREFIX=\"`\"")
-add_compile_definitions("CFXS_HWD_WINDOW_TITLE_NO_PREFIX_TAG='`'")
 add_compile_definitions("CFXS_HWD_WINDOW_TITLE_PREFIX=\"[CFXS HWD] \"")
-
 add_compile_definitions("CFXS_HWD_VERSION_STRING=\"v0.1-dev\"")
-add_compile_definitions(
-  "CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_HWD_VERSION_STRING")
+add_compile_definitions("CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_HWD_VERSION_STRING")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
 
@@ -31,8 +27,7 @@ find_package(Qt5 COMPONENTS Core Widgets Network Qml Quick Gui REQUIRED)
 
 set(UI_files )
 
-add_executable(
-  ${EXE_NAME} ${headers} ${sources} ${UI_files})
+add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files})
 
 
 target_precompile_headers(
@@ -67,8 +62,7 @@ endif()
 
 target_include_directories(${EXE_NAME} PRIVATE src)
 target_include_directories(${EXE_NAME} SYSTEM PRIVATE vendor)
-target_include_directories(
-  ${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
+target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
 
 if(MSVC)
   target_compile_options(${EXE_NAME} PRIVATE "/MP")
