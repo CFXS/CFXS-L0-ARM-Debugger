@@ -1,4 +1,3 @@
-// [source]
 #include "MainWindow.hpp"
 
 #include <QCloseEvent>

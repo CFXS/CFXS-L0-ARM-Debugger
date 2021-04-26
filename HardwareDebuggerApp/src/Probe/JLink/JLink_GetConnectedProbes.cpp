@@ -1,4 +1,3 @@
-// [source]
 #include "JLink.hpp"
 
 namespace HWD::Probe {

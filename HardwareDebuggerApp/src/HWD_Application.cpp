@@ -1,4 +1,3 @@
-// [source]
 #include "HWD_Application.hpp"
 
 #include <KDDockWidgets/DockWidget.h>

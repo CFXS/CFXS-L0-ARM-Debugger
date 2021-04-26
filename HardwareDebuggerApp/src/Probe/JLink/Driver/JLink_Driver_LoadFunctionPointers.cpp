@@ -1,4 +1,3 @@
-// [source]
 #include "JLink_Driver.hpp"
 
 namespace HWD::Probe::Driver {

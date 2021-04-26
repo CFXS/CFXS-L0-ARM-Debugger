@@ -25,9 +25,11 @@ def get_files_recursive(path, filter, identifier):
                 if firstLine.find(identifier) != -1:
                     files.append("    \"" + "${ROOT_DIR}/src" +
                                  filePath[len(path):].replace('\\', '/') + "\"")
+                    print("[GenerateSources] " + filePath[len(path):].replace('\\', '/') + "\"")
             else:
                 files.append("    \"" + "${ROOT_DIR}/src" +
                              filePath[len(path):].replace('\\', '/') + "\"")
+                print("[GenerateSources] " + filePath[len(path):].replace('\\', '/') + "\"")
     return files
 
 

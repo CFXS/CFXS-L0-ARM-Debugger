@@ -1,4 +1,3 @@
-// [source]
 #include "SupportedDevices.hpp"
 #include <Utils.hpp>
 

@@ -4,7 +4,7 @@
         {
             "label": "Generate Sources",
             "type": "shell",
-            "command": "py \"${workspaceFolder}/Tools/GenerateSources.py\" \"${workspaceFolder}/HardwareDebuggerApp/src\" \"${workspaceFolder}/HardwareDebuggerApp/_Sources.cmake\" \"// [source]\"",
+            "command": "py \"${workspaceFolder}/Tools/GenerateSources.py\" \"${workspaceFolder}/HardwareDebuggerApp/src\" \"${workspaceFolder}/HardwareDebuggerApp/_Sources.cmake\"",
             "group": "test"
         }
     ]

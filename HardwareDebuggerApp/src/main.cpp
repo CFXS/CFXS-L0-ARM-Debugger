@@ -1,5 +1,3 @@
-// [source]
-
 #include "HWD_Application.hpp"
 #include "Log/Log.hpp"
 

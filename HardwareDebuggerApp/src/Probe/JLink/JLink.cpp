@@ -1,4 +1,3 @@
-// [source]
 #pragma once
 
 #include "JLink.hpp"

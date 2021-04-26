@@ -1,4 +1,3 @@
-// [source]
 #include "RVeips_ProbeTest.hpp"
 
 #include <Probe/JLink/JLink.hpp>

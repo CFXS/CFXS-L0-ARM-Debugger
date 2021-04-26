@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include "UI/MainWindow/MainWindow.hpp"
+#include "UI/FunctionProfiler/FunctionProfilerWindow.hpp"
 
 int main(int argc, char** argv);
 

@@ -1,4 +1,3 @@
-// [source]
 #include "Application.hpp"
 
 #include <KDDockWidgets/Config.h>
@@ -34,6 +33,7 @@ namespace HWD {
         flags |= KDDockWidgets::Config::Flag_TabsHaveCloseButton;
         flags |= KDDockWidgets::Config::Flag_TitleBarHasMaximizeButton;
         flags |= KDDockWidgets::Config::Flag_AutoHideSupport;
+
         KDDockWidgets::Config::self().setFlags(flags);
 
         m_MainWindow = std::make_unique<UI::MainWindow>();
@@ -41,6 +41,9 @@ namespace HWD {
             Close();
         });
         m_MainWindow->show();
+
+        auto fpWindow = new UI::FunctionProfilerWindow;
+        fpWindow->show();
     }
 
     Application::~Application() {

@@ -3,7 +3,7 @@ set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
 
 exec_program(
   py ARGS
-  "\"${CMAKE_SOURCE_DIR}/Tools/GenerateSources.py\" \"${ROOT_DIR}/src\" \"${ROOT_DIR}/_Sources.cmake\" \"// [source]\""
+  "\"${CMAKE_SOURCE_DIR}/Tools/GenerateSources.py\" \"${ROOT_DIR}/src\" \"${ROOT_DIR}/_Sources.cmake\""
 )
 
 include("_Sources.cmake")
@@ -25,7 +25,7 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Core Widgets Network Qml Quick Gui REQUIRED)
 
-set(UI_files )
+set(UI_files "${ROOT_DIR}/src/UI/FunctionProfiler/FunctionProfilerWindow.ui")
 
 add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files})
 
