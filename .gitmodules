@@ -4,3 +4,6 @@
 [submodule "HardwareDebuggerApp/vendor/Lua"]
 	path = HardwareDebuggerApp/vendor/Lua
 	url = https://github.com/CFXS/lua.git
+[submodule "HardwareDebuggerApp/vendor/KDDockWidgets"]
+	path = HardwareDebuggerApp/vendor/KDDockWidgets
+	url = https://github.com/KDAB/KDDockWidgets.git
