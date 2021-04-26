@@ -32,6 +32,7 @@ namespace HWD {
 
     private:
         std::unique_ptr<QApplication> m_QtApplication;
+        std::unique_ptr<QTimer> m_UpdateTimer;
         std::unique_ptr<UI::MainWindow> m_MainWindow;
         bool m_Running        = true;
         bool m_Minimized      = false;

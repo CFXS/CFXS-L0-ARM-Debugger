@@ -4,6 +4,7 @@
 #include <KDDockWidgets/Config.h>
 
 #include <QStyleFactory>
+#include <QTimer>
 
 namespace HWD {
 
@@ -23,6 +24,9 @@ namespace HWD {
         m_QtApplication->setOrganizationName(QStringLiteral("CFXS"));
         m_QtApplication->setApplicationName(QStringLiteral(CFXS_HWD_PROGRAM_NAME));
         m_QtApplication->setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
+
+        m_UpdateTimer = std::make_unique<QTimer>();
+        m_UpdateTimer->start(1);
 
         auto flags = KDDockWidgets::Config::self().flags();
         flags |= KDDockWidgets::Config::Flag_NativeTitleBar;
@@ -53,7 +57,7 @@ namespace HWD {
 
         while (m_Running) {
             OnUpdate();
-            QApplication::processEvents();
+            QApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents | QEventLoop::EventLoopExec);
         }
 
         OnDestroy();

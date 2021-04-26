@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Core/Application.hpp"
 #include <Test/RVeips_ProbeTest.hpp>
+
+#include "Core/Application.hpp"
 
 namespace HWD {
 

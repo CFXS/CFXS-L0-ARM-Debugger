@@ -64,6 +64,7 @@ namespace HWD {
         HWDLOG_CORE_INFO("Destroying App");
     }
 
+    // This function is called every ms
     void HWD_Application::OnUpdate() {
     }
 
