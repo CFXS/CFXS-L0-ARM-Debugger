@@ -49,10 +49,12 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
+#ifdef RIHARDS_TEST
         (new std::thread([=]() {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
             m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
         }))->detach();
+#endif
     }
 
     void HWD_Application::OnDestroy() {

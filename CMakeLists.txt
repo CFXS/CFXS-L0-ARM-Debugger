@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.2.0)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
-
 # MSVC policy for static runtime
 cmake_policy(SET CMP0091 NEW)
+
 option(STATIC_RUNTIME "Build with static runtime" ON)
 option(BUILD_PROFILER "Build with msvc profiler flag" OFF)
 
@@ -12,7 +12,6 @@ if(STATIC_RUNTIME)
 endif()
 
 project(HardwareDebuggerProject CXX C)
-
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
