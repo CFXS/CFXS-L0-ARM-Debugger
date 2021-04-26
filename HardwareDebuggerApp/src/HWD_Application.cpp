@@ -1,9 +1,9 @@
 // [source]
 #include "HWD_Application.hpp"
 
-#include <set>
+#include <KDDockWidgets/DockWidget.h>
 
-#include "main.hpp"
+#include <set>
 
 namespace HWD {
     namespace Probe {
@@ -55,6 +55,9 @@ namespace HWD {
             m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
         }))->detach();
 #endif
+
+        auto testDock = new KDDockWidgets::DockWidget(QStringLiteral("TestDockWidget"));
+        GetMainWindow()->addDockWidgetAsTab(testDock);
     }
 
     void HWD_Application::OnDestroy() {

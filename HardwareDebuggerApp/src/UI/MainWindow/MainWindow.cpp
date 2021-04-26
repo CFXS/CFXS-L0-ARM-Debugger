@@ -1,17 +1,16 @@
 // [source]
 #include "MainWindow.hpp"
-#include "ui_MainWindow.h"
 
 #include <QCloseEvent>
 
 namespace HWD::UI {
 
-    MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-        ui->setupUi(this);
+    MainWindow::MainWindow(QWidget *parent) :
+        KDDockWidgets::MainWindow(QStringLiteral(CFXS_HWD_PROGRAM_NAME), KDDockWidgets::MainWindowOption_HasCentralFrame, parent) {
+        resize(640, 480);
     }
 
     MainWindow::~MainWindow() {
-        delete ui;
     }
 
     void MainWindow::closeEvent(QCloseEvent *event) {

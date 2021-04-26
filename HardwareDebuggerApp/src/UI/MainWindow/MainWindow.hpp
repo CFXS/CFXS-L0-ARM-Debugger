@@ -1,14 +1,10 @@
 #pragma once
 
-#include <QMainWindow>
-
-namespace Ui {
-    class MainWindow;
-}
+#include <KDDockWidgets/MainWindow.h>
 
 namespace HWD::UI {
 
-    class MainWindow : public QMainWindow {
+    class MainWindow : public KDDockWidgets::MainWindow {
         Q_OBJECT
 
     public:
@@ -20,9 +16,6 @@ namespace HWD::UI {
 
     protected:
         void closeEvent(QCloseEvent *event);
-
-    private:
-        Ui::MainWindow *ui;
     };
 
 } // namespace HWD::UI

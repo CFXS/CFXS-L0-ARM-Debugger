@@ -2,6 +2,9 @@
     "cmake.generator": "Ninja",
     "cmake.buildDirectory": "${workspaceFolder}/out/build",
     "files.associations": {
+        "unordered_map": "cpp",
+        "xstddef": "cpp",
+        "xhash": "cpp",
         "xiosbase": "cpp",
         "filesystem": "cpp",
         "vector": "cpp",
@@ -61,12 +64,10 @@
         "tuple": "cpp",
         "type_traits": "cpp",
         "typeinfo": "cpp",
-        "unordered_map": "cpp",
         "unordered_set": "cpp",
         "utility": "cpp",
         "variant": "cpp",
         "xfacet": "cpp",
-        "xhash": "cpp",
         "xlocale": "cpp",
         "xlocbuf": "cpp",
         "xlocinfo": "cpp",
@@ -75,12 +76,12 @@
         "xlocnum": "cpp",
         "xloctime": "cpp",
         "xmemory": "cpp",
-        "xstddef": "cpp",
         "xtr1common": "cpp",
         "xtree": "cpp",
         "*.rh": "cpp",
         "bit": "cpp",
         "charconv": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "qcloseevent": "cpp"
     }
 }

@@ -20,14 +20,16 @@ add_compile_definitions(
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
 
+include("_KDDockWidgets_Options.cmake")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/KDDockWidgets)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Core Widgets Network Qml Quick Gui REQUIRED)
 
-
-set(UI_files "${ROOT_DIR}/src/UI/MainWindow/MainWindow.ui")
+set(UI_files )
 
 add_executable(
   ${EXE_NAME} ${headers} ${sources} ${UI_files})
@@ -77,6 +79,7 @@ target_link_libraries(
   PRIVATE project_options
           project_warnings
           Lua
+          KDAB::kddockwidgets
           Qt::Core
           Qt::Widgets
           Qt::Network
