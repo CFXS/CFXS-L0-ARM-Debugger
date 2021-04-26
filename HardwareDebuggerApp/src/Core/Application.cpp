@@ -30,7 +30,6 @@ namespace HWD {
         flags |= KDDockWidgets::Config::Flag_TabsHaveCloseButton;
         flags |= KDDockWidgets::Config::Flag_TitleBarHasMaximizeButton;
         flags |= KDDockWidgets::Config::Flag_AutoHideSupport;
-        flags |= KDDockWidgets::Config::Flag_CloseOnlyCurrentTab;
         KDDockWidgets::Config::self().setFlags(flags);
 
         m_MainWindow = std::make_unique<UI::MainWindow>();
