@@ -26,7 +26,6 @@ namespace HWD {
 
         auto flags = KDDockWidgets::Config::self().flags();
         flags |= KDDockWidgets::Config::Flag_NativeTitleBar;
-        flags |= KDDockWidgets::Config::Flag_AlwaysShowTabs;
         flags |= KDDockWidgets::Config::Flag_AllowReorderTabs;
         flags |= KDDockWidgets::Config::Flag_TabsHaveCloseButton;
         flags |= KDDockWidgets::Config::Flag_TitleBarHasMaximizeButton;
