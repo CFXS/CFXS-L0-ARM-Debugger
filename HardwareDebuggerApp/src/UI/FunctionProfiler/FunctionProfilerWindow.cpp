@@ -101,7 +101,7 @@ namespace HWD::UI {
                         }
                         case 2: {
                             char str[24];
-                            snprintf(str, 24, "%.3f%%", 100.0f / totalSamples * sampleCount);
+                            snprintf(str, 24, "%.1f%%", 100.0f / totalSamples * sampleCount);
                             cell->setText(str);
                             break;
                         }
