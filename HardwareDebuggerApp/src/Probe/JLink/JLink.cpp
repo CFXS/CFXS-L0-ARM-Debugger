@@ -460,7 +460,7 @@ namespace HWD::Probe {
     };
     ///////////////////////////////////////////////////////////////////
     static int s_Sync_ZeroCount         = 0;
-    static bool s_Synced                = true;
+    static bool s_Synced                = false;
     static bool s_DecodingPacket        = false;
     static bool s_LastPacketWasOverflow = false;
     static SWO_PacketType s_PacketTypeToDecode;
@@ -729,7 +729,9 @@ namespace HWD::Probe {
                         }
                     } else {
                         HWDLOG_PROBE_CRITICAL("UNKNOWN SWO HEADER {0:#X}", val);
-                        s_StopProcess = true;
+                        //s_StopProcess = true;
+                        SWO_ResetDecodeState();
+                        s_Synced = false;
                         break;
                     }
                 } else { /////////////////////////////////// DATA PROCESSING
@@ -798,10 +800,9 @@ namespace HWD::Probe {
         }
     }
 
+    static uint8_t s_SWO_Buffer[4096];
+    static bool s_FirstRead = true;
     void JLink::Process() {
-        static uint8_t s_SWO_Buffer[4096];
-        static bool s_FirstRead = true;
-
         if (s_FirstRead) {
             s_FirstRead = false;
 

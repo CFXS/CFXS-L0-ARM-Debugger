@@ -59,7 +59,7 @@ namespace HWD::Test {
 
                     probe->Target_Erase();
 
-                    auto firmware = readFile(R"(C:\Users\User_1_196\Desktop\DN2MK2V2S.bin)");
+                    auto firmware = readFile(R"(X:\CPP\GCC_ARM_Cortex_M\Dev_TM4C1294\build\TestProject.bin)");
 
                     probe->Target_WriteProgram(firmware.data(), static_cast<uint32_t>(firmware.size()));
                     probe->Target_Reset(true);
@@ -244,7 +244,7 @@ namespace HWD::Test {
 
                 auto thread = new std::thread([=]() {
                     while (1 < 2) {
-                        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(1));
                         probe->Process();
                     }
                 });
