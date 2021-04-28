@@ -2,7 +2,7 @@
 ![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
 
 # Build/Development Requirements
-- `JLink_x64.dll` located in "C:\CFXS\JLink_x64.dll" (Temporary. DLL file can be found in the installation files of SEGGER Embedded Studio)
+- `JLink_x64.dll` located in "C:\CFXS\JLink_x64.dll" (Temporary. DLL file can be found in the installation files of `SEGGER Embedded Studio`/`JLink Tools`/`IAR Embedded Workbench`)
 - `VSCode` or `Visual Studio`
 - `ninja-build` (https://ninja-build.org/)
 - `Visual Studio (Windows MSVC Compiler)` (https://visualstudio.microsoft.com/)
