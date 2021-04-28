@@ -1,10 +1,6 @@
 #include "HWD_Application.hpp"
 
 #include <KDDockWidgets/DockWidget.h>
-#include <QStyleFactory>
-#include <UI/Test_StyleSheet.hpp>
-
-#include <set>
 
 namespace HWD {
 
@@ -19,9 +15,6 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
-        qApp->setStyle(QStyleFactory::create("Fusion"));
-        qApp->setStyleSheet(style_sheet);
-
 #define RIHARDS_TEST
 #ifdef RIHARDS_TEST
         (new std::thread([=]() {
@@ -29,16 +22,12 @@ namespace HWD {
         }))->detach();
 #endif
 
-        //auto testDock = new KDDockWidgets::DockWidget(QStringLiteral("TestDockWidget"));
-        //GetMainWindow()->addDockWidgetAsTab(testDock);
+        auto fpWindow = new UI::FunctionProfilerWindow;
+        fpWindow->show();
     }
 
     void HWD_Application::OnDestroy() {
         HWDLOG_CORE_INFO("Destroying App");
-    }
-
-    // This function is called every ms
-    void HWD_Application::OnUpdate() {
     }
 
 } // namespace HWD

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QApplication>
-#include "UI/MainWindow/MainWindow.hpp"
+
 #include "UI/FunctionProfiler/FunctionProfilerWindow.hpp"
+#include "UI/MainWindow/MainWindow.hpp"
 
 int main(int argc, char** argv);
 
@@ -15,7 +16,6 @@ namespace HWD {
 
         virtual void OnCreate()  = 0;
         virtual void OnDestroy() = 0;
-        virtual void OnUpdate()  = 0;
 
         void Close();
 
@@ -33,7 +33,6 @@ namespace HWD {
 
     private:
         std::unique_ptr<QApplication> m_QtApplication;
-        std::unique_ptr<QTimer> m_UpdateTimer;
         std::unique_ptr<UI::MainWindow> m_MainWindow;
         bool m_Running        = true;
         bool m_Minimized      = false;

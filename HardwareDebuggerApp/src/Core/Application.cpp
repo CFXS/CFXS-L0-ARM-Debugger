@@ -5,6 +5,8 @@
 #include <QStyleFactory>
 #include <QTimer>
 
+#include "UI/Test_StyleSheet.hpp"
+
 namespace HWD {
 
     Application* Application::s_Instance = nullptr;
@@ -23,9 +25,7 @@ namespace HWD {
         m_QtApplication->setOrganizationName(QStringLiteral("CFXS"));
         m_QtApplication->setApplicationName(QString::fromStdString(name));
         m_QtApplication->setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
-
-        m_UpdateTimer = std::make_unique<QTimer>();
-        m_UpdateTimer->start(1);
+        m_QtApplication->setStyleSheet(style_sheet);
 
         auto flags = KDDockWidgets::Config::self().flags();
         flags |= KDDockWidgets::Config::Flag_NativeTitleBar;
@@ -41,9 +41,6 @@ namespace HWD {
             Close();
         });
         m_MainWindow->show();
-
-        auto fpWindow = new UI::FunctionProfilerWindow;
-        fpWindow->show();
     }
 
     Application::~Application() {
@@ -59,7 +56,6 @@ namespace HWD {
         OnCreate();
 
         while (m_Running) {
-            OnUpdate();
             QApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents | QEventLoop::EventLoopExec);
         }
 

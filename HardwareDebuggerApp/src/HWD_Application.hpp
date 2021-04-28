@@ -13,7 +13,6 @@ namespace HWD {
 
         virtual void OnCreate() override;
         virtual void OnDestroy() override;
-        virtual void OnUpdate() override;
 
     private:
         std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
