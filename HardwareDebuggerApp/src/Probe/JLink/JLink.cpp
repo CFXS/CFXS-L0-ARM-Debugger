@@ -2,6 +2,7 @@
 
 #include "JLink.hpp"
 
+#include <QDateTime>
 #include <set>
 
 namespace HWD::Probe {
@@ -547,7 +548,11 @@ namespace HWD::Probe {
         }
     }
 
-    std::map<uint32_t, uint64_t> s_PC_Map;
+    struct pcentry {
+        uint64_t count;
+        qint64 time;
+    };
+    std::map<uint32_t, pcentry> s_PC_Map;
     std::map<uint32_t, uint64_t> s_ExecMap;
     static void SWO_ARMv7M_ProcessData(SWO_PacketType type, uint8_t val) {
         switch (type) {
@@ -596,7 +601,8 @@ namespace HWD::Probe {
                 if (s_SWO_ARMv7M_ProgramCounter_ReadPos == 4) {
                     //char pcs[16];
                     //snprintf(pcs, 16, "0x%08X", s_SWO_ARMv7M_ProgramCounter);
-                    s_PC_Map[s_SWO_ARMv7M_ProgramCounter]++;
+                    s_PC_Map[s_SWO_ARMv7M_ProgramCounter].count++;
+                    s_PC_Map[s_SWO_ARMv7M_ProgramCounter].time = QDateTime::currentMSecsSinceEpoch();
                     //HWDLOG_PROBE_WARN("[SWO ARMv7-M Packet] PC_SAMPLE PC = {0}", pcs);
                     SWO_ResetDecodeState(); // packet processed
                 }

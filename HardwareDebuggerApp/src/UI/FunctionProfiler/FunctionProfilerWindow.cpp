@@ -1,12 +1,19 @@
 #include "FunctionProfilerWindow.hpp"
-#include "ui_FunctionProfilerWindow.h"
+
 #include <QTimer>
 #include <set>
 
+#include "ui_FunctionProfilerWindow.h"
+
+extern uint64_t s_Time;
 namespace HWD {
 
     namespace Probe {
-        extern std::map<uint32_t, uint64_t> s_PC_Map;
+        struct pcentry {
+            uint64_t count;
+            qint64 time;
+        };
+        extern std::map<uint32_t, pcentry> s_PC_Map;
         extern std::map<uint32_t, uint64_t> s_ExecMap;
     } // namespace Probe
     using namespace Probe;
@@ -42,10 +49,7 @@ struct comp {
 
     // Comparator function
     bool operator()(const T& l, const T& r) const {
-        if (l.second != r.second) {
-            return l.second > r.second;
-        }
-        return l.first > r.first;
+        return l.second.time > r.second.time;
     }
 };
 
@@ -70,12 +74,16 @@ namespace HWD::UI {
                 ui->table_PC->setRowCount(static_cast<int>(s_PC_Map.size()));
             }
 
-            std::set<std::pair<uint32_t, uint64_t>, comp> sortedCalls(s_PC_Map.begin(), s_PC_Map.end());
+            std::set<std::pair<uint32_t, pcentry>, comp> sortedCalls(s_PC_Map.begin(), s_PC_Map.end());
 
             uint64_t totalSamples = 0;
             for (auto& [pc, sampleCount] : sortedCalls) {
-                totalSamples += sampleCount;
+                totalSamples += sampleCount.count;
             }
+
+            char st[64];
+            snprintf(st, 24, "%llu ms", s_Time);
+            setWindowTitle(st);
 
             int i = 0;
             for (auto& [pc, sampleCount] : sortedCalls) {
@@ -95,13 +103,13 @@ namespace HWD::UI {
                         }
                         case 1: {
                             char str[24];
-                            snprintf(str, 24, "%llu", sampleCount);
+                            snprintf(str, 24, "%llu", sampleCount.count);
                             cell->setText(str);
                             break;
                         }
                         case 2: {
                             char str[24];
-                            snprintf(str, 24, "%.1f%%", 100.0f / totalSamples * sampleCount);
+                            snprintf(str, 24, "%.1f%%", 100.0f / totalSamples * sampleCount.count);
                             cell->setText(str);
                             break;
                         }

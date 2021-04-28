@@ -7,6 +7,7 @@
 #include <Target/Cortex/TPIU_Registers.hpp>
 #include <fstream>
 
+uint64_t s_Time;
 namespace HWD::Test {
 
     using namespace Cortex::M4;
@@ -59,7 +60,7 @@ namespace HWD::Test {
 
                     probe->Target_Erase();
 
-                    auto firmware = readFile(R"(X:\CPP\GCC_ARM_Cortex_M\Dev_TM4C1294\build\TestProject.bin)");
+                    auto firmware = readFile(R"(C:\code\Gitlab\NAFTBoot\build\Bootloader\NAFTBoot.bin)");
 
                     probe->Target_WriteProgram(firmware.data(), static_cast<uint32_t>(firmware.size()));
                     probe->Target_Reset(true);
@@ -209,12 +210,12 @@ namespace HWD::Test {
                                     HWDLOG_PROBE_ERROR("Failed to configure TPIU TPR");
                                 }
 
-                                auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_8192;
+                                auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_64;
                                 dwt_ctrl.Set_Cycle_Counter_Enabled(true);
                                 dwt_ctrl.Set_Sampling_Divider(sampleRateDivider);
                                 dwt_ctrl.Set_PC_Sampling_Enabled(true);
-                                dwt_ctrl.Set_Exception_Trace_Enabled(true);
-                                dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::MEDIUM);
+                                dwt_ctrl.Set_Exception_Trace_Enabled(false);
+                                dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::FAST);
                                 HWDLOG_PROBE_TRACE("DWT_CTRL = {0:#X}", dwt_ctrl.GetRaw());
 
                                 HWDLOG_PROBE_TRACE("Sampling frequency: {0}kHz",
@@ -246,6 +247,7 @@ namespace HWD::Test {
                     while (1 < 2) {
                         std::this_thread::sleep_for(std::chrono::milliseconds(1));
                         probe->Process();
+                        s_Time = probe->Target_ReadMemory_64(0x20014100);
                     }
                 });
                 thread->detach();
