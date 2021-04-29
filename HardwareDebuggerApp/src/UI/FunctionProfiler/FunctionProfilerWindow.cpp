@@ -55,7 +55,7 @@ namespace HWD::UI {
 
     FunctionProfilerWindow::FunctionProfilerWindow() :
         KDDockWidgets::DockWidget(QStringLiteral("FunctionProfilerWindow"), KDDockWidgets::DockWidgetBase::Option_DeleteOnClose),
-        ui(new Ui::FunctionProfilerWindow) {
+        ui(std::make_unique<Ui::FunctionProfilerWindow>()) {
         ui->setupUi(this);
 
         ui->table_PC->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
@@ -117,7 +117,6 @@ namespace HWD::UI {
     }
 
     FunctionProfilerWindow::~FunctionProfilerWindow() {
-        delete ui;
     }
 
 } // namespace HWD::UI

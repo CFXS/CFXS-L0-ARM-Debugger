@@ -34,9 +34,7 @@ namespace HWD {
     private:
         std::unique_ptr<QApplication> m_QtApplication;
         std::unique_ptr<UI::MainWindow> m_MainWindow;
-        bool m_Running        = true;
-        bool m_Minimized      = false;
-        float m_LastFrameTime = 0.0f;
+        bool m_Running = true;
 
     private:
         static Application* s_Instance;

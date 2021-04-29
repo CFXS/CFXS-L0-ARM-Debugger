@@ -16,7 +16,7 @@ namespace HWD::UI {
         ~FunctionProfilerWindow();
 
     private:
-        Ui::FunctionProfilerWindow *ui;
+        std::unique_ptr<Ui::FunctionProfilerWindow> ui;
     };
 
 } // namespace HWD::UI
