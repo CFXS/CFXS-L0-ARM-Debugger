@@ -54,7 +54,8 @@ struct comp {
 namespace HWD::UI {
 
     FunctionProfilerWindow::FunctionProfilerWindow() :
-        KDDockWidgets::DockWidget(QStringLiteral("FunctionProfilerWindow")), ui(new Ui::FunctionProfilerWindow) {
+        KDDockWidgets::DockWidget(QStringLiteral("FunctionProfilerWindow"), KDDockWidgets::DockWidgetBase::Option_DeleteOnClose),
+        ui(new Ui::FunctionProfilerWindow) {
         ui->setupUi(this);
 
         ui->table_PC->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
