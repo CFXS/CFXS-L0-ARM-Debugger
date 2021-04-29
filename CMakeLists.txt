@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.0)
+cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 # MSVC policy for static runtime

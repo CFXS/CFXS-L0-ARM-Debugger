@@ -23,7 +23,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network Qml Quick Gui)
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui)
 
 set(UI_files "${ROOT_DIR}/src/UI/FunctionProfiler/FunctionProfilerWindow.ui")
 
@@ -79,6 +79,7 @@ target_link_libraries(
           Qt::Network
           Qt::Qml
           Qt::Quick
+          Qt::QuickControls2
           Qt::Gui)
 
 if(BUILD_PROFILER)
