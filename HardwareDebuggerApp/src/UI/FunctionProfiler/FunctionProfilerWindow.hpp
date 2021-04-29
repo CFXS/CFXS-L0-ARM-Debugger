@@ -1,5 +1,6 @@
 #pragma once
-#include <QDialog>
+
+#include <KDDockWidgets/DockWidget.h>
 
 namespace Ui {
     class FunctionProfilerWindow;
@@ -7,11 +8,11 @@ namespace Ui {
 
 namespace HWD::UI {
 
-    class FunctionProfilerWindow : public QDialog {
+    class FunctionProfilerWindow : public KDDockWidgets::DockWidget {
         Q_OBJECT
 
     public:
-        explicit FunctionProfilerWindow(QWidget *parent = nullptr);
+        FunctionProfilerWindow();
         ~FunctionProfilerWindow();
 
     private:

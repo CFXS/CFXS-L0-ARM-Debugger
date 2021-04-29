@@ -9,7 +9,7 @@ namespace HWD {
     class HWD_Application : public Application {
     public:
         HWD_Application(int argc, char** argv);
-        virtual ~HWD_Application();
+        virtual ~HWD_Application() = default;
 
         virtual void OnCreate() override;
         virtual void OnDestroy() override;

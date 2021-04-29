@@ -23,7 +23,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Core Widgets Network Qml Quick Gui REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network Qml Quick Gui)
 
 set(UI_files "${ROOT_DIR}/src/UI/FunctionProfiler/FunctionProfilerWindow.ui")
 
