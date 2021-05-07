@@ -7,3 +7,6 @@
 [submodule "HardwareDebuggerApp/vendor/KDDockWidgets"]
 	path = HardwareDebuggerApp/vendor/KDDockWidgets
 	url = https://github.com/KDAB/KDDockWidgets.git
+[submodule "HardwareDebuggerApp/vendor/elf-parser"]
+	path = HardwareDebuggerApp/vendor/elf-parser
+	url = https://github.com/CFXS/elf-parser.git
