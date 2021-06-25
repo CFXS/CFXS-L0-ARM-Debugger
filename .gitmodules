@@ -7,3 +7,6 @@
 [submodule "HardwareDebuggerApp/vendor/KDDockWidgets"]
 	path = HardwareDebuggerApp/vendor/KDDockWidgets
 	url = https://github.com/KDAB/KDDockWidgets.git
+[submodule "Docs"]
+	path = Docs
+	url = https://github.com/CFXS/HWD-Private-Docs.git
