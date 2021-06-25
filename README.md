@@ -27,6 +27,7 @@
 
 # Why this project exists
 The main reason is the existance of IAR
+
 At work we use IAR Embedded Workbench for our hardware related projects. It truly is a sad excuse for an IDE/Debugger.
 - Their compiler starts crashing in random cases when you start using C++ lambdas or initialize an STL container like `static std::array<int, 5> a{};` instead of '`static std::array<int, 5> a = {};`'
 - The code editor/project part of IAR is just tragic
