@@ -40,4 +40,5 @@ At work we use IAR Embedded Workbench for our hardware related projects. It trul
 - /r/softwaregore: `"Some things are better left unseen. You wouldn't be able to make a worse "IDE" even if you tried." (IAR)`
 
 Other debuggers probably are not as bad, but I have tried other debuggers and they are just not good enough for our debug flow (as fast and simple as possible with custom extendable functionality)
+
 Also other debuggers do not really support C++ good enough for our requirements. All of our ARM based projects are C++, so a debugger than can handle C++ data structure viewing is required (vector, map, list, other STL containers).
