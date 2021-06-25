@@ -13,6 +13,7 @@
 - Will not crash every 5-15 minutes
 - Dark theme enabled by default
 - Live variable/expression Watch
+- Option to translate values in a Stack View window to function names (match stack value to function code ranges to obtain possible function name from a value in the stack. This is useful when you are not able to obtain the call stack because of a corrupted stack or whatever else, so you have to go through the stack and manually find Link Register values)
 - STL container support in Watch window
 - User definable custom data structure decoding in Watch window
 - Macros and plugins for custom extended functionality (`Lua`)
@@ -25,6 +26,17 @@
 ---
 
 # Why this project exists
-When your embedded C/C++ IDE/Debugger crashes enough times a day and is just difficult to work with, you might just want to make your own debugger.  
-So this is it - my own debug tool.  
-The solution to all problems of IDEs/debuggers I have tested - a debugger with some IDE functionality that is actually easy to use and powerful enough for serious debugging (hopefully)
+The main reason is the existance of IAR
+At work we use IAR Embedded Workbench for our hardware related projects. It truly is a sad excuse for an IDE/Debugger.
+- Their compiler starts crashing in random cases when you start using C++ lambdas or initialize an STL container like `static std::array<int, 5> a{};` instead of '`static std::array<int, 5> a = {};`'
+- The code editor/project part of IAR is just tragic
+- The debugger is the laggiest thing you will ever experience in your entire lifetime
+- Hard to use, as it constantly crashes when you look at it the wrong way
+- Has cost us in total at least 6+ months of work time just from having to struggle with it being absolutely unusable with all the crashing and not showing some important debug data until the target CPU is hatled (so what do you do in cases where the target is in a state where it is not able to be halted? This happened at work one time - as HWD was in still in early development, I threw together a quick test build of HWD and was able to solve the problem using a live Program Counter log to see where the CPU locked up and find + fix the problem **in 2 minutes instead of struggling for 2 hours with no results**)
+- IAR crashes at least a few times/day + exactly when you are about to catch a hard to repeat bug
+- Reporting issues to IAR result in them telling us to update to the latest IAR release, which still does not fix anything
+- A custom debugger has to be developed so we can move from the IAR compiler to an actual proper functional compiler like GCC
+- /r/softwaregore: `"Some things are better left unseen. You wouldn't be able to make a worse "IDE" even if you tried." (IAR)`
+
+Other debuggers probably are not as bad, but I have tried other debuggers and they are just not good enough for our debug flow (as fast and simple as possible with custom extendable functionality)
+Also other debuggers do not really support C++ good enough for our requirements. All of our ARM based projects are C++, so a debugger than can handle C++ data structure viewing is required (vector, map, list, other STL containers).
