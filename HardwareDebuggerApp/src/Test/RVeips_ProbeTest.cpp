@@ -39,6 +39,8 @@ namespace HWD::Test {
     }
 
     RVeips_ProbeTest::RVeips_ProbeTest() {
+        HWDLOG_CORE_INFO("RVeips_ProbeTest()");
+
         SupportedDevices::LoadSupportedDevices();
         auto& testDevice = SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
 

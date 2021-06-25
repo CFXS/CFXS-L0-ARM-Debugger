@@ -29,7 +29,6 @@ set(UI_files "${ROOT_DIR}/src/UI/FunctionProfiler/FunctionProfilerWindow.ui")
 
 add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files})
 
-
 target_precompile_headers(
   ${EXE_NAME}
   PRIVATE
@@ -58,6 +57,10 @@ elseif(UNIX)
   target_compile_definitions(${EXE_NAME} PRIVATE "HWD_PLATFORM_LINUX")
 else()
   message(FATAL_ERROR "Unsupported platform")
+endif()
+
+if("$ENV{USERNAME}" STREQUAL "CFXS")
+  target_compile_definitions(${EXE_NAME} PRIVATE "DEV_PC_RIHARDS")
 endif()
 
 target_include_directories(${EXE_NAME} PRIVATE src)

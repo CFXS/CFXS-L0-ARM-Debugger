@@ -12,8 +12,7 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
-//#define RIHARDS_TEST
-#ifdef RIHARDS_TEST
+#ifdef DEV_PC_RIHARDS
         (new std::thread([=]() {
             m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
         }))->detach();
