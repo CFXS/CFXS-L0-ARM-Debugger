@@ -3,24 +3,6 @@
 #include <fstream>
 #include <llvm/Demangle/Demangle.h>
 
-static bool is_mangle_char_itanium(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$';
-}
-
-static bool is_mangle_char_win(char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || strchr("?_@$", c);
-}
-
-static bool is_plausible_itanium_prefix(char* s) {
-    // Itanium symbols start with 1-4 underscores followed by Z.
-    // strnstr() is BSD, so use a small local buffer and strstr().
-    const int N = 5; // == strlen("____Z")
-    char prefix[N + 1];
-    strncpy(prefix, s, N);
-    prefix[N] = '\0';
-    return strstr(prefix, "_Z");
-}
-
 namespace HWD::ELF {
 
     ELF_Reader::ELF_Reader(const std::string& path) : m_Path(path) {
@@ -239,8 +221,6 @@ namespace HWD::ELF {
                     0) {
                     firstSpace = "std::map<unsigned long, CFXS::TaskArrayEntry>::operator[](unsigned long const&)";
                 }
-
-                HWDLOG_CORE_TRACE(firstSpace);
 
                 symInfo.name         = firstSpace;
                 symInfo.address      = symbolEntry->value - 1;

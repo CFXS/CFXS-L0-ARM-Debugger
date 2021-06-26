@@ -247,6 +247,7 @@ namespace HWD::Test {
                         }
                     }
 
+                    //probe->Target_StartTerminal();
                     probe->Target_Run();
 
                     //////////////////////////////////////////////////////////////////////////////////

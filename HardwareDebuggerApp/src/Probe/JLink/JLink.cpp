@@ -3,6 +3,7 @@
 #include "JLink.hpp"
 
 #include <set>
+#include <QString>
 
 namespace HWD::Probe {
 
@@ -549,6 +550,8 @@ namespace HWD::Probe {
 
     std::map<uint32_t, uint64_t> s_PC_Map;
     std::map<uint32_t, uint64_t> s_ExecMap;
+    char* s_Console;
+    bool s_ConsoleUpdated;
     static void SWO_ARMv7M_ProcessData(SWO_PacketType type, uint8_t val) {
         switch (type) {
             case SWO_PacketType::EVENT_COUNTER: { // no payload
@@ -801,63 +804,7 @@ namespace HWD::Probe {
     }
 
     static uint8_t s_SWO_Buffer[4096];
-    static bool s_FirstRead = true;
     void JLink::Process() {
-        if (s_FirstRead) {
-            s_FirstRead = false;
-
-            //return;
-            uint8_t testStream[] = {
-                0b00000000,
-                0b00000000,
-                0b00000000,
-                0b00000000,
-                0b00000000,
-                0b10000000,
-                // SYNC
-
-                0b01110000,
-                // OVERFLOW
-                0b01110000,
-                // OVERFLOW
-                0b01110000,
-                // OVERFLOW
-
-                0b11111001,
-                0b11111111,
-                // SWIT, payload 0xFF
-
-                0b11111011,
-                0x50,
-                0xA5,
-                0xAD,
-                0xDE,
-                // SWIT, payload 0xDEADA550
-
-                0b10000001,
-                0b11111111,
-                // SWIT, payload 0xFF
-
-                0b10000000,
-                0b11111111,
-                0b00000000,
-                // Timestamp
-
-                0b10000000,
-                // Timestamp
-
-                0b11110000,
-                0b11111111,
-                0b11111111,
-                0b11111111,
-                0b01111111,
-                // Timestamp
-            };
-
-            SWO_Process(testStream, sizeof(testStream));
-            HWDLOG_CORE_CRITICAL("--------------------------");
-        }
-
         uint32_t bytesRead = sizeof(s_SWO_Buffer); // bytes to read
         m_Driver->target_SWO_Read(s_SWO_Buffer, 0, &bytesRead);
         // bytesRead now contains amount of bytes that were read
@@ -875,6 +822,10 @@ namespace HWD::Probe {
             int readCount = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
             for (int i = 0; i < readCount; i++) {
                 m_TerminalBuffer.push_back(str[i]);
+            }
+            if (readCount) {
+                s_Console        = m_TerminalBuffer.data();
+                s_ConsoleUpdated = true;
             }
         }
     }
