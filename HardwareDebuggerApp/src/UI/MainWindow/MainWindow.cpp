@@ -1,6 +1,8 @@
 #include "MainWindow.hpp"
 
 #include <QCloseEvent>
+#include <QFileDialog>
+#include <Debugger/ELF/ELF_Reader.hpp>
 
 namespace HWD::UI {
 

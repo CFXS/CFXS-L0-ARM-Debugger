@@ -2,7 +2,7 @@
     "version": 4,
     "configurations": [
         {
-            "name": "CFXS HWD Win32",
+            "name": "CFXS HWD",
             "defines": [
                 "_DEBUG",
                 "UNICODE",
@@ -16,7 +16,6 @@
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/",
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/Lua/src",
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/spdlog/include"
-
             ],
             "forcedInclude": [
                 "${workspaceFolder}/out/build/HardwareDebuggerApp/CMakeFiles/HardwareDebuggerApp.dir/cmake_pch.hxx"

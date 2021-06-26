@@ -27,7 +27,9 @@ find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControl
 
 set(UI_files "${ROOT_DIR}/src/UI/FunctionProfiler/FunctionProfilerWindow.ui")
 
-add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files})
+add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files}
+"${ROOT_DIR}/vendor/llvm/lib/Demangle/Demangle.cpp"
+"${ROOT_DIR}/vendor/llvm/lib/Demangle/ItaniumDemangle.cpp")
 
 target_precompile_headers(
   ${EXE_NAME}
@@ -46,6 +48,9 @@ target_precompile_headers(
   <sstream>
   <unordered_set>
   <filesystem>
+  <cstdint>
+  <cstddef>
+  <cstdlib>
   "src/Compiler.hpp"
   "src/Assert.hpp"
   "src/Log/Log.hpp"
@@ -66,6 +71,7 @@ endif()
 target_include_directories(${EXE_NAME} PRIVATE src)
 target_include_directories(${EXE_NAME} SYSTEM PRIVATE vendor)
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
+target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/llvm/include")
 
 if(MSVC)
   target_compile_options(${EXE_NAME} PRIVATE "/MP")

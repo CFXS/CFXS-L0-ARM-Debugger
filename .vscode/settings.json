@@ -82,6 +82,9 @@
         "bit": "cpp",
         "charconv": "cpp",
         "stop_token": "cpp",
-        "qcloseevent": "cpp"
+        "qcloseevent": "cpp",
+        "qfiledialog": "cpp",
+        "future": "cpp",
+        "numeric": "cpp"
     }
 }

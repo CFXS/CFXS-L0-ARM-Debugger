@@ -4,6 +4,8 @@
 #include <set>
 
 #include "ui_FunctionProfilerWindow.h"
+#include <Debugger/ELF/ELF_Reader.hpp>
+#include <QFileDialog>
 
 namespace HWD {
 
@@ -63,6 +65,10 @@ namespace HWD::UI {
         ui->table_PC->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
         ui->table_PC->verticalHeader()->setDefaultSectionSize(16);
 
+        QString filePath = QFileDialog::getOpenFileName(
+            this, "ELF File", R"(X:\CPP\GCC_ARM_Cortex_M\Dev_TM4C1294\build)", ("Executable File (*.elf *.out)"));
+        ELF::ELF_Reader* elfReader = new ELF::ELF_Reader(filePath.toStdString());
+
         setWidget(ui->RootWidget);
 
         QTimer* rt = new QTimer(this);
@@ -73,7 +79,23 @@ namespace HWD::UI {
                 ui->table_PC->setRowCount(static_cast<int>(s_PC_Map.size()));
             }
 
-            std::set<std::pair<uint32_t, uint64_t>, comp> sortedCalls(s_PC_Map.begin(), s_PC_Map.end());
+            std::map<std::string, uint64_t> calls;
+            for (auto& [pc, callCount] : s_PC_Map) {
+                auto sym = elfReader->AddressToSymbol(pc);
+                if (sym) {
+                    if (calls.find(sym->name) == calls.end()) {
+                        calls[sym->name] += callCount;
+                    }
+                } else {
+                    char name[24];
+                    snprintf(name, 24, "0x%08X", pc);
+                    if (calls.find(name) == calls.end()) {
+                        calls[name] += callCount;
+                    }
+                }
+            }
+
+            std::set<std::pair<std::string, uint64_t>, comp> sortedCalls(calls.begin(), calls.end());
 
             uint64_t totalSamples = 0;
             for (auto& [pc, sampleCount] : sortedCalls) {
@@ -91,9 +113,8 @@ namespace HWD::UI {
 
                     switch (c) {
                         case 0: {
-                            char str[24];
-                            snprintf(str, 24, "0x%08X", pc);
-                            cell->setText(str);
+                            cell->setText(pc.c_str());
+
                             break;
                         }
                         case 1: {

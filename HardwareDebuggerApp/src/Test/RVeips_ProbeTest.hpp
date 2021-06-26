@@ -9,6 +9,9 @@ namespace HWD::Test {
         RVeips_ProbeTest();
         ~RVeips_ProbeTest();
 
+        void ProbeTest();
+        void ElfTest();
+
         const char* GetTerminalText();
         uint64_t ReadMilliseconds();
         uint32_t Read32(uint32_t addr, bool halt = false);

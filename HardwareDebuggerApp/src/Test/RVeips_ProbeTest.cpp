@@ -6,6 +6,7 @@
 #include <Target/Cortex/ROM_Table.hpp>
 #include <Target/Cortex/TPIU_Registers.hpp>
 #include <fstream>
+#include <QFileDialog>
 
 namespace HWD::Test {
 
@@ -41,6 +42,13 @@ namespace HWD::Test {
     RVeips_ProbeTest::RVeips_ProbeTest() {
         HWDLOG_CORE_INFO("RVeips_ProbeTest()");
 
+        ProbeTest();
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    // Probe
+
+    void RVeips_ProbeTest::ProbeTest() {
         SupportedDevices::LoadSupportedDevices();
         auto& testDevice = SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
 
