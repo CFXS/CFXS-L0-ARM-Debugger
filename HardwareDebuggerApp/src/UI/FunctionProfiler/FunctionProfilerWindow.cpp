@@ -13,8 +13,6 @@ namespace HWD {
     namespace Probe {
         extern std::map<uint32_t, uint64_t> s_PC_Map;
         extern std::map<uint32_t, uint64_t> s_ExecMap;
-        extern char* s_Console;
-        extern bool s_ConsoleUpdated;
     } // namespace Probe
     using namespace Probe;
 
@@ -78,12 +76,6 @@ namespace HWD::UI {
         rt->setInterval(33);
         rt->setSingleShot(false);
         QObject::connect(rt, &QTimer::timeout, [=]() {
-            if (s_ConsoleUpdated) {
-                s_ConsoleUpdated = false;
-                ui->console->setPlainText(s_Console);
-                ui->console->verticalScrollBar()->setValue(ui->console->verticalScrollBar()->maximum());
-            }
-
             if (static_cast<int>(s_PC_Map.size()) != ui->table_PC->rowCount()) {
                 ui->table_PC->setRowCount(static_cast<int>(s_PC_Map.size()));
             }

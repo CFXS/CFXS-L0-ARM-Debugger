@@ -4,6 +4,8 @@
 
 #include <QStyleFactory>
 #include <QTimer>
+#include <fstream>
+#include <streambuf>
 
 #include "UI/Test_StyleSheet.hpp"
 
@@ -26,7 +28,26 @@ namespace HWD {
         m_QtApplication->setOrganizationName(QStringLiteral("CFXS"));
         m_QtApplication->setApplicationName(QString::fromStdString(name));
         m_QtApplication->setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
-        m_QtApplication->setStyleSheet(style_sheet);
+
+        auto palette = QPalette();
+        palette.setColor(QPalette::Window, QColor(53, 53, 53));
+        palette.setColor(QPalette::WindowText, Qt::white);
+        palette.setColor(QPalette::Base, QColor(33, 33, 33));
+        palette.setColor(QPalette::AlternateBase, QColor(44, 44, 44));
+        palette.setColor(QPalette::ToolTipBase, Qt::black);
+        palette.setColor(QPalette::ToolTipText, Qt::white);
+        palette.setColor(QPalette::Text, Qt::white);
+        palette.setColor(QPalette::Button, QColor(53, 53, 53));
+        palette.setColor(QPalette::ButtonText, Qt::white);
+        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::Link, QColor(42, 130, 218));
+        palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        palette.setColor(QPalette::HighlightedText, Qt::black);
+        m_QtApplication->setPalette(palette);
+
+        //std::ifstream fileStream("C:\\CFXS\\dark.qss", std::ios::in | std::ios::binary);
+        //std::vector<uint8_t> ssContent = std::vector<uint8_t>(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
+        //m_QtApplication->setStyleSheet((char*)ssContent.data());
 
         auto flags = KDDockWidgets::Config::self().flags();
         flags |= KDDockWidgets::Config::Flag_NativeTitleBar;

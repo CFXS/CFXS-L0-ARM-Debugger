@@ -18,8 +18,14 @@ namespace HWD {
         }))->detach();
 #endif
 
-        auto fpWindow = new UI::FunctionProfilerWindow;
-        fpWindow->show();
+        //auto fpWindow = new UI::FunctionProfilerWindow;
+        //fpWindow->show();
+
+        auto tcWindow = new UI::TargetConsoleWindow;
+        tcWindow->show();
+
+        //GetMainWindow()->addDockWidget(tcWindow, KDDockWidgets::Location::Location_OnBottom);
+        GetMainWindow()->addDockWidgetAsTab(tcWindow);
     }
 
     void HWD_Application::OnDestroy() {
