@@ -79,6 +79,10 @@ namespace HWD::Probe {
     JLink::~JLink() {
         HWDLOG_PROBE_TRACE("[JLink@{0}] Destructor", fmt::ptr(this));
 
+        if (m_TerminalEnabled) {
+            m_Driver->target_RTT_Control(Driver::JLink_Types::RTT_Command::STOP, nullptr);
+        }
+
         if (Probe_IsConnected())
             Probe_Disconnect();
         s_Probes[m_ProbeIndex] = nullptr;

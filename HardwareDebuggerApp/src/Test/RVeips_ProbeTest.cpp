@@ -8,6 +8,8 @@
 #include <fstream>
 #include <QFileDialog>
 
+static bool s_Stopped = false;
+
 namespace HWD::Test {
 
     using namespace Cortex::M4;
@@ -256,7 +258,9 @@ namespace HWD::Test {
                 auto thread = new std::thread([=]() {
                     while (1 < 2) {
                         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                        probe->Process();
+                        if (s_Stopped == false) {
+                            probe->Process();
+                        }
                     }
                 });
                 thread->detach();
@@ -265,6 +269,7 @@ namespace HWD::Test {
     }
 
     RVeips_ProbeTest::~RVeips_ProbeTest() {
+        s_Stopped            = true;
         auto connectedProbes = JLink::s_GetConnectedProbes();
         for (IProbe* probe : connectedProbes) {
             delete probe;

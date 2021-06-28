@@ -7,6 +7,7 @@
 #include <Debugger/ELF/ELF_Reader.hpp>
 #include <QFileDialog>
 #include <QScrollBar>
+#include <QFont>
 
 namespace HWD {
 
@@ -25,7 +26,11 @@ namespace HWD::UI {
         ui(std::make_unique<Ui::TargetConsoleWindow>()) {
         ui->setupUi(this);
 
-        ui->text_Console->setStyleSheet("background-color: #111111;");
+        ui->text_Console->setStyleSheet("background-color: #111111; font-size: 16px;");
+
+        QFont font("Source Code Pro");
+        font.setStyleHint(QFont::Monospace);
+        ui->text_Console->setFont(font);
 
         setWidget(ui->RootWidget);
 
