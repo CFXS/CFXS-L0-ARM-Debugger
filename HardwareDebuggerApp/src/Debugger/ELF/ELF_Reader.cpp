@@ -1,14 +1,20 @@
 #include "ELF_Reader.hpp"
-#include "ELF32.hpp"
-#include <fstream>
+
 #include <llvm/Demangle/Demangle.h>
+
+#include <fstream>
+
+#include "ELF32.hpp"
 
 namespace HWD::ELF {
 
     ELF_Reader::ELF_Reader(const std::string& path) : m_Path(path) {
-        HWDLOG_CORE_TRACE("Load ELF file {0}", path);
+    }
 
-        std::ifstream fileStream(path, std::ios::in | std::ios::binary);
+    bool ELF_Reader::LoadFile() {
+        HWDLOG_CORE_TRACE("Load ELF file {0}", m_Path);
+
+        std::ifstream fileStream(m_Path, std::ios::in | std::ios::binary);
         m_DataVector = std::vector<uint8_t>(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
         m_RawData    = m_DataVector.data();
 
@@ -16,12 +22,9 @@ namespace HWD::ELF {
 
         if (m_RawData == nullptr) {
             HWDLOG_CORE_ERROR(" - Failed to open file ({0})", strerror(errno));
-        } else {
-            LoadFile();
+            return false;
         }
-    }
 
-    bool ELF_Reader::LoadFile() {
         HWDLOG_CORE_TRACE(" - File size: {0} bytes", m_DataVector.size());
 
         auto header = m_ELF_Header.elf32;

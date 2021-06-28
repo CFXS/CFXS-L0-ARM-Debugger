@@ -9,13 +9,17 @@ namespace HWD::ELF {
         struct SymbolInfo {
             std::string fullName;
             std::string name;
-            uint64_t address;
-            uint64_t size;
+            uint64_t address; // symbol address in target memory - 64bit for future 64bit core support
+            uint64_t size;    // symbol size in bytes - 64bit for future 64bit core support
         };
 
     public:
         ELF_Reader(const std::string& path);
         ~ELF_Reader() = default;
+
+        inline void SetFilePath() {
+            m_Path = path;
+        }
 
         inline bool IsValid() const {
             return m_Valid;

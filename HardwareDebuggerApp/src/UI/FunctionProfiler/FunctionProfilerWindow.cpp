@@ -1,12 +1,12 @@
 #include "FunctionProfilerWindow.hpp"
 
+#include <Debugger/ELF/ELF_Reader.hpp>
+#include <QFileDialog>
+#include <QScrollBar>
 #include <QTimer>
 #include <set>
 
 #include "ui_FunctionProfilerWindow.h"
-#include <Debugger/ELF/ELF_Reader.hpp>
-#include <QFileDialog>
-#include <QScrollBar>
 
 namespace HWD {
 
@@ -69,6 +69,7 @@ namespace HWD::UI {
         QString filePath = QFileDialog::getOpenFileName(
             this, "ELF File", R"(X:\CPP\GCC_ARM_Cortex_M\Dev_TM4C1294\build)", ("Executable File (*.elf *.out)"));
         ELF::ELF_Reader* elfReader = new ELF::ELF_Reader(filePath.toStdString());
+        elfReader->LoadFile();
 
         setWidget(ui->RootWidget);
 
