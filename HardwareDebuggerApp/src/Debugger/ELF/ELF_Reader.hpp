@@ -17,7 +17,7 @@ namespace HWD::ELF {
         ELF_Reader(const std::string& path);
         ~ELF_Reader() = default;
 
-        inline void SetFilePath() {
+        inline void SetFilePath(const std::string& path) {
             m_Path = path;
         }
 
