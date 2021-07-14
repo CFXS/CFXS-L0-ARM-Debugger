@@ -172,9 +172,9 @@ namespace HWD::ELF {
             // section->link is section index for string table
             auto symbolNameMangled = GetSymbolName(section->link, symbolEntry->nameOffset);
 
-            char symName[512];
-            char mangleWorkBuf[512];
-            size_t mangleBufSize = 512;
+            char symName[4096];
+            char mangleWorkBuf[4096];
+            size_t mangleBufSize = 4096;
 
             // only demangle object and function names
             if ((symbolEntry->IsFunction() || symbolEntry->IsObject())) {
@@ -187,6 +187,7 @@ namespace HWD::ELF {
                     snprintf(symName, sizeof(symName), symbolNameMangled);
                 }
             } else {
+                continue;
                 snprintf(symName, sizeof(symName), symbolNameMangled);
             }
 
@@ -226,7 +227,7 @@ namespace HWD::ELF {
                 }
 
                 symInfo.name         = firstSpace;
-                symInfo.address      = symbolEntry->value - 1;
+                symInfo.address      = symbolEntry->value;
                 symInfo.size         = symbolEntry->size;
                 m_SymbolMap[symName] = symInfo;
             }

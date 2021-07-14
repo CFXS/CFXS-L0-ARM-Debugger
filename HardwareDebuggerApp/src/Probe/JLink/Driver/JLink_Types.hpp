@@ -652,9 +652,9 @@ namespace HWD::Probe::Driver::JLink_Types {
             R10,
             R11,
             R12,
-            R13, // Pseudo (SP_MSP or SP_PSP) depending on control register:
-            R14,
-            R15,
+            R13, // SP
+            R14, // LR
+            R15, // PC
             XPSR,
             MSP,
             PSP,

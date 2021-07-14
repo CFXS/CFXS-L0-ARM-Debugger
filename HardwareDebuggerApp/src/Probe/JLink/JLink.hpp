@@ -36,15 +36,15 @@ namespace HWD::Probe {
         }
         /////////////////////////////////////////
         // Probe target overrides
-        virtual bool Target_SelectDevice(const Target::DeviceDescription& device) override;
-        virtual bool Target_SelectDebugInterface(DebugInterface interface) override;
-        virtual bool Target_IsConnected() const override;
-        virtual bool Target_Connect() override;
-        virtual bool Target_Erase() override;
-        virtual bool Target_WriteProgram(const uint8_t* data, uint32_t size) override;
-        virtual bool Target_Reset(bool haltAfterReset = true) override;
-        virtual bool Target_StartTerminal(void* params = nullptr) override;
-        virtual const char* Target_GetTerminalBuffer() override;
+        bool Target_SelectDevice(const Target::DeviceDescription& device) override;
+        bool Target_SelectDebugInterface(DebugInterface interface) override;
+        bool Target_IsConnected() const override;
+        bool Target_Connect() override;
+        bool Target_Erase() override;
+        bool Target_WriteProgram(const uint8_t* data, uint32_t size) override;
+        bool Target_Reset(bool haltAfterReset = true) override;
+        bool Target_StartTerminal(void* params = nullptr) override;
+        const char* Target_GetTerminalBuffer() override;
 
         uint8_t Target_ReadMemory_8(uint32_t address, bool* success = nullptr) override;
         uint16_t Target_ReadMemory_16(uint32_t address, bool* success = nullptr) override;
@@ -53,10 +53,11 @@ namespace HWD::Probe {
         int Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) override;
         bool Target_WriteMemory_32(uint32_t address, uint32_t val) override;
         uint32_t Target_Get_ROM_Table_Address() override;
-        virtual bool Target_Halt() override;
-        virtual bool Target_Run() override;
-        virtual bool Target_IsRunning() override;
-        virtual float Target_GetFlashProgress() override;
+        bool Target_Halt() override;
+        bool Target_Run() override;
+        bool Target_IsRunning() override;
+        float Target_GetFlashProgress() override;
+        uint64_t Target_ReadPC(bool* success = nullptr) override;
         /////////////////////////////////////////
 
     public:

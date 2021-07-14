@@ -41,6 +41,16 @@ namespace HWD::ELF {
 
         const SymbolInfo* AddressToSymbol(uint64_t addr);
 
+        const SymbolInfo* NameToSymbol(const char* symbolName) {
+            for (auto& [name, info] : m_SymbolMap) {
+                if (strcmp(info.name.c_str(), symbolName) == 0) {
+                    return &info;
+                }
+            }
+
+            return nullptr;
+        }
+
     private:
         bool ParseFile();
 

@@ -5,6 +5,7 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <set>
+#include <Probe/IProbe.hpp>
 
 #include "ui_FunctionProfilerWindow.h"
 
@@ -13,6 +14,7 @@ namespace HWD {
     namespace Probe {
         extern std::map<uint32_t, uint64_t> s_PC_Map;
         extern std::map<uint32_t, uint64_t> s_ExecMap;
+        extern IProbe* s_Probe;
     } // namespace Probe
     using namespace Probe;
 
@@ -77,17 +79,27 @@ namespace HWD::UI {
         rt->setInterval(33);
         rt->setSingleShot(false);
         QObject::connect(rt, &QTimer::timeout, [=]() {
-            if (static_cast<int>(s_PC_Map.size()) != ui->table_PC->rowCount()) {
-                ui->table_PC->setRowCount(static_cast<int>(s_PC_Map.size()));
+            if (static_cast<int>(s_PC_Map.size() + 1) != ui->table_PC->rowCount()) {
+                ui->table_PC->setRowCount(static_cast<int>(s_PC_Map.size() + 1));
             }
+
+            QTableWidgetItem* cell2 = ui->table_PC->item(0, 0);
+            if (!cell2) {
+                cell2 = new QTableWidgetItem;
+                ui->table_PC->setItem(0, 0, cell2);
+            }
+
+            char xstr[128];
+            auto* symx    = elfReader->NameToSymbol("NAFT::Time::ms");
+            uint32_t time = s_Probe->Target_ReadMemory_32(symx->address);
+            snprintf(xstr, 128, "%u", time);
+            cell2->setText(xstr);
 
             std::map<std::string, uint64_t> calls;
             for (auto& [pc, callCount] : s_PC_Map) {
                 auto sym = elfReader->AddressToSymbol(pc);
                 if (sym) {
-                    if (calls.find(sym->name) == calls.end()) {
-                        calls[sym->name] += callCount;
-                    }
+                    calls[sym->name] += callCount;
                 } else {
                     char name[24];
                     snprintf(name, 24, "0x%08X", pc);
@@ -104,7 +116,7 @@ namespace HWD::UI {
                 totalSamples += sampleCount;
             }
 
-            int i = 0;
+            int i = 1;
             for (auto& [pc, sampleCount] : sortedCalls) {
                 for (int c = 0; c < 3; c++) {
                     QTableWidgetItem* cell = ui->table_PC->item(i, c);

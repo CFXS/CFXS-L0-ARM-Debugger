@@ -10,6 +10,10 @@
 
 static bool s_Stopped = false;
 
+namespace HWD::Probe {
+    IProbe* s_Probe;
+}
+
 namespace HWD::Test {
 
     using namespace Cortex::M4;
@@ -61,6 +65,8 @@ namespace HWD::Test {
 
                 probe->Probe_Connect();
 
+                Probe::s_Probe = probe;
+
                 probe->Target_SelectDebugInterface(IProbe::DebugInterface::SWD);
                 probe->Target_SelectDevice(testDevice);
                 probe->Target_Connect();
@@ -71,9 +77,16 @@ namespace HWD::Test {
 
                     probe->Target_Erase();
 
-                    auto firmware = readFile(R"(X:\CPP\GCC_ARM_Cortex_M\Dev_TM4C1294\build\TestProject.bin)");
+                    auto firmwareBin = readFile(R"(C:\Users\CFXS\Downloads\IQTester.bin)");
+
+                    std::vector<uint8_t> firmware;
+                    firmware.resize(0x10000, 0);
+
+                    for (auto b : firmwareBin)
+                        firmware.push_back(b);
 
                     probe->Target_WriteProgram(firmware.data(), static_cast<uint32_t>(firmware.size()));
+
                     probe->Target_Reset(true);
 
                     //////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +234,7 @@ namespace HWD::Test {
                                     HWDLOG_PROBE_ERROR("Failed to configure TPIU TPR");
                                 }
 
-                                auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_8192;
+                                auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_2048;
                                 dwt_ctrl.Set_Cycle_Counter_Enabled(true);
                                 dwt_ctrl.Set_Sampling_Divider(sampleRateDivider);
                                 dwt_ctrl.Set_PC_Sampling_Enabled(true);
@@ -249,7 +262,7 @@ namespace HWD::Test {
                         }
                     }
 
-                    probe->Target_StartTerminal();
+                    //probe->Target_StartTerminal();
                     probe->Target_Run();
 
                     //////////////////////////////////////////////////////////////////////////////////

@@ -423,6 +423,10 @@ namespace HWD::Probe {
         return m_Driver->target_Halt();
     }
     bool JLink::Target_Run() {
+        Target_Halt();
+
+        m_Driver->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R15, 0x000354C5);
+        m_Driver->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R13, 0x20012400);
         m_Driver->target_Run();
         return true;
     }
@@ -436,6 +440,10 @@ namespace HWD::Probe {
 
     float JLink::Target_GetFlashProgress() {
         return m_FlashProgress;
+    }
+
+    uint64_t JLink::Target_ReadPC(bool* success) {
+        return m_Driver->target_ReadRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R15);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -512,10 +520,10 @@ namespace HWD::Probe {
                 break;
             case SWO_PacketType::SWIT:
                 s_SWO_Stats.Counters.SWIT++; //
-                HWDLOG_PROBE_TRACE("[SWO Packet] SWIT {0:#X} [{1} bytes] - PADDRDBG {2:#X}",
-                                   s_SWO_SWIT_Payload,
-                                   s_SWO_SWIT_PayloadLength,
-                                   s_SWO_SWIT_PADDRDBG);
+                //HWDLOG_PROBE_TRACE("[SWO Packet] SWIT {0:#X} [{1} bytes] - PADDRDBG {2:#X}",
+                //                   s_SWO_SWIT_Payload,
+                //                   s_SWO_SWIT_PayloadLength,
+                //                   s_SWO_SWIT_PADDRDBG);
                 break;
         }
 

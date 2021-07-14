@@ -108,6 +108,9 @@ namespace HWD::Probe {
         /// Read 64bit value from address
         virtual uint64_t Target_ReadMemory_64(uint32_t address, bool* success = nullptr) = 0;
 
+        /// Read Program Counter
+        virtual uint64_t Target_ReadPC(bool* success = nullptr) = 0;
+
         /// Read multiple values to address
         /// \return bytes read
         virtual int Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) = 0;
