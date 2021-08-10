@@ -77,7 +77,7 @@ namespace HWD::Test {
 
                     probe->Target_Erase();
 
-                    auto firmwareBin = readFile(R"(C:\Users\CFXS\Downloads\IQTester.bin)");
+                    auto firmwareBin = readFile(R"(C:\Users\CFXS\Documents\GitHub\ARM-Cortex-Network-Test\build\CortexNetworkTestApp.bin)");
 
                     std::vector<uint8_t> firmware;
                     firmware.resize(0x10000, 0);
@@ -85,7 +85,7 @@ namespace HWD::Test {
                     for (auto b : firmwareBin)
                         firmware.push_back(b);
 
-                    probe->Target_WriteProgram(firmware.data(), static_cast<uint32_t>(firmware.size()));
+                    //probe->Target_WriteProgram(firmware.data(), static_cast<uint32_t>(firmware.size()));
 
                     probe->Target_Reset(true);
 

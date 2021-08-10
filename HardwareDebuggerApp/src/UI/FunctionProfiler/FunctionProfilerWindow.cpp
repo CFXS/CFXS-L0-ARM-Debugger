@@ -91,7 +91,7 @@ namespace HWD::UI {
 
             char xstr[128];
             auto* symx    = elfReader->NameToSymbol("NAFT::Time::ms");
-            uint32_t time = s_Probe->Target_ReadMemory_32(symx->address);
+            uint32_t time = s_Probe->Target_ReadMemory_32(symx ? symx->address : 0x20000000);
             snprintf(xstr, 128, "%u", time);
             cell2->setText(xstr);
 
