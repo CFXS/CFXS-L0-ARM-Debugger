@@ -21,7 +21,7 @@
  
 # Debug Probe Support
 - `SEGGER J-Link`
-- `Other probes too... some time next year maybe?`
+- `Other probes too... 2022 maybe?`
 
 ---
 
@@ -29,9 +29,9 @@
 The main reason is the existance of IAR
 
 At work we use IAR Embedded Workbench for our hardware related projects. It truly is a sad excuse for an IDE/Debugger.
-- Their compiler starts crashing in random cases when you start using C++ lambdas or initialize an STL container like `static std::array<int, 5> a{};` instead of '`static std::array<int, 5> a = {};`'
+- When a project gets very complicated, IAR decides to reset the CPU when trying to step/run after hitting a breakpoint or pausing execution.
 - The code editor/project part of IAR is just tragic
-- The debugger is the laggiest thing you will ever experience in your entire lifetime
+- The debugger is the laggiest thing you will ever experience in your entire lifetime (upload to debug time is usually >30 seconds)
 - Hard to use, as it constantly crashes when you look at it the wrong way
 - Has cost us in total at least 6+ months of work time just from having to struggle with it being absolutely unusable with all the crashing and not showing some important debug data until the target CPU is halted (so what do you do in cases where the target is in a state where it is not able to be halted? This happened at work one time - as HWD was in still in early development, I threw together a quick test build of HWD and was able to solve the problem using a live Program Counter log to see where the CPU locked up and find + fix the problem **in 2 minutes instead of struggling for 2 hours with no results**)
 - IAR crashes at least a few times/day + exactly when you are about to catch a hard to repeat bug
