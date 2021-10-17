@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Probe/IProbe.hpp>
+#include <Probe/I_Probe.hpp>
 
 #include "CoreSight.hpp"
 

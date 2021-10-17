@@ -14,84 +14,58 @@ namespace HWD::Probe {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     using namespace Driver::JLink_Types;
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    std::array<JLink*, JLink::MAX_DISCOVERABLE_PROBE_COUNT> JLink::s_Probes = {};
-
-    struct ProbeCallbackEntry {
-        JLink::MessageCallback log;
-        JLink::MessageCallback warning;
-        JLink::MessageCallback error;
-        JLink::FlashProgressCallback flashProgress;
-    };
-    static std::array<ProbeCallbackEntry, JLink::MAX_DISCOVERABLE_PROBE_COUNT> s_ProbeCallbackEntries;
-    static bool s_ProbeCallbackArrayInitialized = false;
-
-#define DEF_LIBRARY_CALLBACK_ENTRY(index)                                                                    \
-    s_ProbeCallbackEntries[index].log = [](const char* str) {                                                \
-        if (s_Probes[index])                                                                                 \
-            s_Probes[index]->Probe_LogCallback(str);                                                         \
-    };                                                                                                       \
-    s_ProbeCallbackEntries[index].warning = [](const char* str) {                                            \
-        if (s_Probes[index])                                                                                 \
-            s_Probes[index]->Probe_WarningCallback(str);                                                     \
-    };                                                                                                       \
-    s_ProbeCallbackEntries[index].error = [](const char* str) {                                              \
-        if (s_Probes[index])                                                                                 \
-            s_Probes[index]->Probe_ErrorCallback(str);                                                       \
-    };                                                                                                       \
-    s_ProbeCallbackEntries[index].flashProgress = [](const char* action, const char* prog, int percentage) { \
-        if (s_Probes[index])                                                                                 \
-            s_Probes[index]->Probe_FlashProgressCallback(action, prog, percentage);                          \
-    };
-
-    void JLink::s_InitializeProbeCallbackArray() {
-        // Max probe count is set to 8
-        DEF_LIBRARY_CALLBACK_ENTRY(0);
-        DEF_LIBRARY_CALLBACK_ENTRY(1);
-        DEF_LIBRARY_CALLBACK_ENTRY(2);
-        DEF_LIBRARY_CALLBACK_ENTRY(3);
-        DEF_LIBRARY_CALLBACK_ENTRY(4);
-        DEF_LIBRARY_CALLBACK_ENTRY(5);
-        DEF_LIBRARY_CALLBACK_ENTRY(6);
-        DEF_LIBRARY_CALLBACK_ENTRY(7);
-    }
+    Driver::JLink_Driver* JLink::s_Driver = nullptr;
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    JLink::JLink(const Driver::JLink_Types::ProbeInfo& probeInfo, int probeCallbackIndex) {
+    void JLink::HWD_Load() {
+        s_Driver = new Driver::JLink_Driver;
+
+        if (!s_Driver->IsLoaded()) {
+            delete s_Driver;
+            s_Driver = nullptr;
+        }
+    }
+
+    void JLink::HWD_Unload() {
+        if (s_Driver)
+            delete s_Driver;
+    }
+
+    JLink::JLink() {
         HWDLOG_PROBE_TRACE("[JLink@{0}] Constructor", fmt::ptr(this));
-
-        if (!s_ProbeCallbackArrayInitialized) {
-            s_ProbeCallbackArrayInitialized = true;
-            s_InitializeProbeCallbackArray();
-        }
-
-        m_Driver     = std::make_shared<Driver::JLink_Driver>();
-        m_ProbeIndex = probeCallbackIndex;
-
-        m_ModelName          = probeInfo.modelName;
-        m_SerialNumberString = std::to_string(probeInfo.serialNumber);
-        m_RawSerialNumber    = probeInfo.serialNumber;
-
-        if (!m_Driver->IsLoaded()) {
-            HWDLOG_PROBE_CRITICAL("Driver library not loaded");
-        }
+        m_DeviceAssigned = false;
     }
 
     JLink::~JLink() {
         HWDLOG_PROBE_TRACE("[JLink@{0}] Destructor", fmt::ptr(this));
 
-        if (m_TerminalEnabled) {
-            m_Driver->target_RTT_Control(Driver::JLink_Types::RTT_Command::STOP, nullptr);
-        }
-
         if (Probe_IsConnected())
             Probe_Disconnect();
-        s_Probes[m_ProbeIndex] = nullptr;
     }
 
     //////////////////////////////////////////////////////////////////////
 
+    // Select working device by serial number
+    void JLink::HWD_SelectDevice(uint32_t serialNumber) {
+        if (Probe_IsConnected())
+            Probe_Disconnect();
+
+        ErrorCode ec = GetDriver()->probe_SelectBySerialNumber_USB(serialNumber);
+
+        if (ec != ErrorCode::OK) {
+            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number {1} - {2}", fmt::ptr(this), serialNumber, ec);
+            m_DeviceAssigned = false;
+        } else {
+            HWDLOG_PROBE_TRACE("[JLink@{0}] Probe {1} selected", fmt::ptr(this), serialNumber);
+
+            m_SerialNumberString = std::to_string(serialNumber);
+
+            m_DeviceAssigned = true;
+        }
+    }
+
     bool JLink::Probe_IsReady() const {
-        return m_Driver->IsLoaded();
+        return m_DeviceAssigned;
     }
 
     /////////////////////////////////////////////////////////////
@@ -117,67 +91,81 @@ namespace HWD::Probe {
 
     void JLink::Probe_FlashProgressCallback(const char* action, const char* prog, int percentage) {
         //HWDLOG_PROBE_INFO("[JLink@{0}][PROG] >> {1} {2} {3}%", fmt::ptr(this), action ? action : "", prog ? prog : "", percentage);
-        m_FlashProgress = percentage / 100.0f;
+        //m_FlashProgress = percentage / 100.0f;
     }
 
     /////////////////////////////////////////////////////////////
     // Probe
 
+    const std::string& JLink::GetModelName() const {
+        return m_ModelName;
+    }
+
+    const std::string& JLink::GetSerialNumberString() const {
+        return m_SerialNumberString;
+    }
+
     void JLink::Probe_DisableFlashProgressPopup() {
         char charBuf[256];
         auto ret =
-            m_Driver->probe_ExecuteCommand(Driver::JLink_Types::Commands::DISABLE_FLASH_PROGRESS_POPUP, charBuf, sizeof(charBuf) - 1);
+            GetDriver()->probe_ExecuteCommand(Driver::JLink_Types::Commands::DISABLE_FLASH_PROGRESS_POPUP, charBuf, sizeof(charBuf) - 1);
 
         if (ret != ErrorCode::OK)
             HWDLOG_PROBE_WARN("[JLink@{0}] Failed to disable internal flash progress popup: {1}", fmt::ptr(this), charBuf);
     }
 
     bool JLink::Probe_Connect() {
+        if (!Probe_IsReady()) {
+            HWDLOG_PROBE_WARN("[JLink@{0}] Not ready", fmt::ptr(this));
+            return false;
+        }
+
         if (Probe_IsConnected()) {
             HWDLOG_PROBE_WARN("[JLink@{0}] Not connecting to probe - already connected", fmt::ptr(this));
             return true;
         }
 
-        ErrorCode ec = m_Driver->probe_SelectBySerialNumber_USB(GetRawSerialNumber());
-        if (ec != ErrorCode::OK) {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number - {1}", fmt::ptr(this), ec);
-            return false;
-        }
-
-        const char* openStatus =
-            m_Driver->probe_ConnectEx(s_ProbeCallbackEntries[m_ProbeIndex].log, s_ProbeCallbackEntries[m_ProbeIndex].error);
+        const char* openStatus = GetDriver()->probe_Connect();
+        //probe_ConnectEx(s_ProbeCallbackEntries[m_ProbeIndex].log, s_ProbeCallbackEntries[m_ProbeIndex].error);
 
         if (openStatus) {
             HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to connect to probe - {1}", fmt::ptr(this), openStatus);
             return false;
         }
 
-        m_Driver->probe_SetWarningCallback(s_ProbeCallbackEntries[m_ProbeIndex].warning);
+        //GetDriver()->probe_SetWarningCallback(s_ProbeCallbackEntries[m_ProbeIndex].warning);
 
         Probe_DisableFlashProgressPopup();
-        m_Driver->probe_SetFlashProgProgressCallback(s_ProbeCallbackEntries[m_ProbeIndex].flashProgress);
+        //GetDriver()->probe_SetFlashProgProgressCallback(s_ProbeCallbackEntries[m_ProbeIndex].flashProgress);
 
         UpdateProbeInfo();
 
         // temporary
-        m_Driver->target_SetInterfaceSpeed(50000);
+        GetDriver()->target_SetInterfaceSpeed(50000);
+
+        HWDLOG_PROBE_TRACE("[JLink@{0}] Connected", fmt::ptr(this));
 
         return true;
     }
 
     bool JLink::Probe_Disconnect() {
+        if (!Probe_IsReady()) {
+            HWDLOG_PROBE_WARN("[JLink@{0}] Not ready", fmt::ptr(this));
+            return false;
+        }
+
         if (Probe_IsConnected()) {
             HWDLOG_PROBE_TRACE("[JLink@{0}] Disconnect from probe", fmt::ptr(this));
 
             // need to check if nullptr is a valid no callback value
-            m_Driver->probe_SetLogCallback([](const char*) {
+            GetDriver()->probe_SetLogCallback([](const char*) {
             });
-            m_Driver->probe_SetErrorCallback([](const char*) {
+            GetDriver()->probe_SetErrorCallback([](const char*) {
             });
-            m_Driver->probe_SetWarningCallback([](const char*) {
+            GetDriver()->probe_SetWarningCallback([](const char*) {
             });
 
-            m_Driver->probe_Disconnect();
+            GetDriver()->probe_Disconnect();
         } else {
             HWDLOG_PROBE_WARN("[JLink@{0}] Not disconnecting - already disconnected", fmt::ptr(this));
         }
@@ -185,7 +173,7 @@ namespace HWD::Probe {
     }
 
     bool JLink::Probe_IsConnected() const {
-        return m_Driver->probe_IsConnectionOpen();
+        return GetDriver()->probe_IsConnectionOpen();
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -194,14 +182,14 @@ namespace HWD::Probe {
     // TODO: Implement error reason callback for higher level callers
     bool JLink::Target_SelectDevice(const Target::DeviceDescription& device) {
         char resp[256];
-        ErrorCode ec = m_Driver->probe_ExecuteCommand(fmt::format("Device = {0}\n", device.GetName()).c_str(), resp, 256);
+        ErrorCode ec = GetDriver()->probe_ExecuteCommand(fmt::format("Device = {0}\n", device.GetName()).c_str(), resp, 256);
 
         HWDLOG_PROBE_TRACE("[JLink@{0}]:", fmt::ptr(this));
         if (ec == ErrorCode::OK) {
             HWDLOG_PROBE_TRACE("Selected target device \"{0}\"", device.GetName());
             HWDLOG_PROBE_TRACE("Target memory regions:");
             for (auto& reg : device.GetMemoryRegions()) {
-                HWDLOG_PROBE_TRACE(" - {0}\t{1:6}\t0x{2:08X} - 0x{3:08X}",
+                HWDLOG_PROBE_TRACE(" - {0:3}\t{1:6}\t0x{2:08X} - 0x{3:08X}",
                                    To_C_String(reg.GetAccessPermissions()),
                                    reg.GetName(),
                                    reg.GetAddress(),
@@ -219,10 +207,10 @@ namespace HWD::Probe {
         switch (interface) {
             case DebugInterface::SWD: {
                 TargetInterfaceMask supportedInterfaces;
-                m_Driver->target_GetAvailableInterfaces(&supportedInterfaces);
+                GetDriver()->target_GetAvailableInterfaces(&supportedInterfaces);
 
                 if (supportedInterfaces & TargetInterfaceMask::SWD) {
-                    m_Driver->target_SelectInterface(TargetInterface::SWD);
+                    GetDriver()->target_SelectInterface(TargetInterface::SWD);
                     HWDLOG_PROBE_TRACE("[JLink@{0}] Selected SWD target interface", fmt::ptr(this));
                     return true;
                 } else {
@@ -237,12 +225,12 @@ namespace HWD::Probe {
     }
 
     bool JLink::Target_IsConnected() const {
-        return m_Driver->target_IsConnected();
+        return GetDriver()->target_IsConnected();
     }
 
     // TODO: Implement error reason callback for higher level callers
     bool JLink::Target_Connect() {
-        ErrorCode ec = m_Driver->target_Connect();
+        ErrorCode ec = GetDriver()->target_Connect();
 
         if (ec == ErrorCode::OK) {
             HWDLOG_PROBE_TRACE("[JLink@{0}] Connected to target", fmt::ptr(this));
@@ -261,7 +249,7 @@ namespace HWD::Probe {
 
     // TODO: Implement error reason callback for higher level callers
     bool JLink::Target_Erase() {
-        ErrorCode ec = m_Driver->target_Erase();
+        ErrorCode ec = GetDriver()->target_Erase();
 
         if (ec == ErrorCode::OK) {
             HWDLOG_PROBE_TRACE("[JLink@{0}] Target program erased", fmt::ptr(this));
@@ -274,11 +262,11 @@ namespace HWD::Probe {
 
     // TODO: Implement error reason callback for higher level callers
     bool JLink::Target_WriteProgram(const uint8_t* data, uint32_t size) {
-        m_Driver->target_BeginDownload(DownloadFlags::ALLOW_FLASH | DownloadFlags::ALLOW_BUFFERED_RAM);
+        GetDriver()->target_BeginDownload(DownloadFlags::ALLOW_FLASH | DownloadFlags::ALLOW_BUFFERED_RAM);
 
-        ErrorCode ret = m_Driver->target_WriteProgram(0, size, (void*)data);
+        ErrorCode ret = GetDriver()->target_WriteProgram(0, size, (void*)data);
         if ((int)ret >= 0) {
-            ret = m_Driver->target_EndDownload();
+            ret = GetDriver()->target_EndDownload();
 
             if ((int)ret >= 0 || (int)ret == -2) { // return code -2 is error code for target program matching requested program
                 HWDLOG_PROBE_TRACE("[JLink@{0}] Target programmed", fmt::ptr(this));
@@ -307,57 +295,29 @@ namespace HWD::Probe {
 
         if (haltAfterReset) {
             if (m_ProbeCapabilities & ProbeCapabilities::RESET_STOP_TIMED) { // can halt immediately after reset
-                ec = m_Driver->target_Reset();
+                ec = GetDriver()->target_Reset();
                 if (ec != ErrorCode::OK) {
                     HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to reset target - {1}", fmt::ptr(this), ec);
                 }
             } else {
                 HWDLOG_PROBE_WARN("[JLink@{0}] Immediate reset and halt not supported - resetting and halting seperately", fmt::ptr(this));
-                m_Driver->target_ResetAndRun();
-                m_Driver->target_Halt();
+                GetDriver()->target_ResetAndRun();
+                GetDriver()->target_Halt();
             }
         } else {
-            m_Driver->target_ResetAndRun();
+            GetDriver()->target_ResetAndRun();
         }
 
         return true;
-    }
-
-    bool JLink::Target_StartTerminal(void* params) {
-        // TODO: Implement error reason callback for higher level callers
-        if (!Probe_IsConnected()) {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to start terminal - probe not connected", fmt::ptr(this));
-            m_TerminalEnabled = false;
-            return false;
-        }
-
-        if (params) {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Start terminal with params not implemented", fmt::ptr(this));
-            m_TerminalEnabled = false;
-            return false;
-        } else {
-            ErrorCode ec = m_Driver->target_RTT_Control(Driver::JLink_Types::RTT_Command::START, nullptr);
-            if (ec == ErrorCode::OK) {
-                HWDLOG_PROBE_TRACE("[JLink@{0}] Terminal started", fmt::ptr(this));
-                m_TerminalEnabled = true;
-                m_TerminalBuffer.reserve(1024 * 1024 * 16);
-                return true;
-            } else {
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to start terminal - {1}", fmt::ptr(this), ec);
-
-                m_TerminalEnabled = false;
-                return true;
-            }
-        }
     }
 
     uint8_t JLink::Target_ReadMemory_8(uint32_t address, bool* success) {
         uint8_t tmp;
 
         if (success) {
-            *success = m_Driver->target_ReadMemory_8(address, 1, &tmp, nullptr) == 1;
+            *success = GetDriver()->target_ReadMemory_8(address, 1, &tmp, nullptr) == 1;
         } else {
-            m_Driver->target_ReadMemory_8(address, 1, &tmp, nullptr);
+            GetDriver()->target_ReadMemory_8(address, 1, &tmp, nullptr);
         }
 
         return tmp;
@@ -367,9 +327,9 @@ namespace HWD::Probe {
         uint16_t tmp;
 
         if (success) {
-            *success = m_Driver->target_ReadMemory_16(address, 1, &tmp, nullptr) == 1;
+            *success = GetDriver()->target_ReadMemory_16(address, 1, &tmp, nullptr) == 1;
         } else {
-            m_Driver->target_ReadMemory_16(address, 1, &tmp, nullptr);
+            GetDriver()->target_ReadMemory_16(address, 1, &tmp, nullptr);
         }
 
         return tmp;
@@ -379,9 +339,9 @@ namespace HWD::Probe {
         uint32_t tmp;
 
         if (success) {
-            *success = m_Driver->target_ReadMemory_32(address, 1, &tmp, nullptr) == 1;
+            *success = GetDriver()->target_ReadMemory_32(address, 1, &tmp, nullptr) == 1;
         } else {
-            m_Driver->target_ReadMemory_32(address, 1, &tmp, nullptr);
+            GetDriver()->target_ReadMemory_32(address, 1, &tmp, nullptr);
         }
 
         return tmp;
@@ -391,59 +351,44 @@ namespace HWD::Probe {
         uint64_t tmp;
 
         if (success) {
-            *success = m_Driver->target_ReadMemory_64(address, 1, &tmp, nullptr) == 1;
+            *success = GetDriver()->target_ReadMemory_64(address, 1, &tmp, nullptr) == 1;
         } else {
-            m_Driver->target_ReadMemory_64(address, 1, &tmp, nullptr);
+            GetDriver()->target_ReadMemory_64(address, 1, &tmp, nullptr);
         }
 
         return tmp;
     }
 
     int JLink::Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) {
-        return m_Driver->target_ReadMemoryEx(address, bytesToRead, to, (int)accessWidth);
+        return GetDriver()->target_ReadMemoryEx(address, bytesToRead, to, (int)accessWidth);
     }
 
     bool JLink::Target_WriteMemory_32(uint32_t address, uint32_t value) {
-        return m_Driver->target_WriteMemory_32(address, value) == 0;
-    }
-
-    uint32_t JLink::Target_Get_ROM_Table_Address() {
-        uint32_t rom_table_address;
-
-        ErrorCode ec = m_Driver->target_GetDebugInfo(DebugInfoIndex::ROM_TABLE_ADDRESS, &rom_table_address); // ROM Table
-        if (ec != ErrorCode::OK) {
-            rom_table_address = 0;
-            HWDLOG_PROBE_CRITICAL("Failed to get ROM table address - {0}", ec);
-        }
-
-        return rom_table_address;
+        return GetDriver()->target_WriteMemory_32(address, value) == 0;
     }
 
     bool JLink::Target_Halt() {
-        return m_Driver->target_Halt();
+        return GetDriver()->target_Halt();
     }
     bool JLink::Target_Run() {
         Target_Halt();
 
-        m_Driver->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R15, 0x000354C5);
-        m_Driver->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R13, 0x20012400);
-        m_Driver->target_Run();
+        GetDriver()->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R15, 0x000354C5);
+        GetDriver()->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R13, 0x20012400);
+        GetDriver()->target_Run();
         return true;
     }
     bool JLink::Target_IsRunning() {
-        return m_Driver->target_IsHalted();
-    }
-
-    const char* JLink::Target_GetTerminalBuffer() {
-        return m_TerminalBuffer.empty() ? "Waiting for data..." : m_TerminalBuffer.data();
+        return GetDriver()->target_IsHalted();
     }
 
     float JLink::Target_GetFlashProgress() {
-        return m_FlashProgress;
+        return 0;
+        //return m_FlashProgress;
     }
 
     uint64_t JLink::Target_ReadPC(bool* success) {
-        return m_Driver->target_ReadRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R15);
+        return GetDriver()->target_ReadRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R15);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -818,27 +763,15 @@ namespace HWD::Probe {
     static uint8_t s_SWO_Buffer[4096];
     void JLink::Process() {
         uint32_t bytesRead = sizeof(s_SWO_Buffer); // bytes to read
-        m_Driver->target_SWO_Read(s_SWO_Buffer, 0, &bytesRead);
+        GetDriver()->target_SWO_Read(s_SWO_Buffer, 0, &bytesRead);
         // bytesRead now contains amount of bytes that were read
 
         if (bytesRead) {
             // have to manually flush SWO buffer - JLink DLL does not do this automatically
             // flush [bytesRead] number of bytes from internal buffers
-            m_Driver->target_SWO_Control(SWO_Command::FLUSH, &bytesRead);
+            GetDriver()->target_SWO_Control(SWO_Command::FLUSH, &bytesRead);
 
             SWO_Process(s_SWO_Buffer, bytesRead);
-        }
-
-        if (m_TerminalEnabled) {
-            char str[1024];
-            int readCount = m_Driver->target_RTT_Read(0, str, sizeof(str) - 2);
-            for (int i = 0; i < readCount; i++) {
-                m_TerminalBuffer.push_back(str[i]);
-            }
-            if (readCount) {
-                s_Console        = m_TerminalBuffer.data();
-                s_ConsoleUpdated = true;
-            }
         }
     }
 

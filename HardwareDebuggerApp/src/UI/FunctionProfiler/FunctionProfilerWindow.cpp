@@ -5,7 +5,7 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <set>
-#include <Probe/IProbe.hpp>
+#include <Probe/I_Probe.hpp>
 
 #include "ui_FunctionProfilerWindow.h"
 
@@ -14,7 +14,7 @@ namespace HWD {
     namespace Probe {
         extern std::map<uint32_t, uint64_t> s_PC_Map;
         extern std::map<uint32_t, uint64_t> s_ExecMap;
-        extern IProbe* s_Probe;
+        extern I_Probe* s_Probe;
     } // namespace Probe
     using namespace Probe;
 

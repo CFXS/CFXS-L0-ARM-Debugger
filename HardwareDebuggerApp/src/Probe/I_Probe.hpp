@@ -4,9 +4,9 @@
 
 namespace HWD::Probe {
 
-    class IProbe {
-        static IProbe*& GetCurrentProbeRef() {
-            static IProbe* s_CurrentProbe = nullptr;
+    class I_Probe {
+        static I_Probe*& GetCurrentProbeRef() {
+            static I_Probe* s_CurrentProbe = nullptr;
             return s_CurrentProbe;
         }
 
@@ -21,18 +21,18 @@ namespace HWD::Probe {
                 return "Unknown";
         }
 
-        static IProbe* GetCurrentProbe() {
+        static I_Probe* GetCurrentProbe() {
             return GetCurrentProbeRef();
         }
 
-        static void SetCurrentProbe(IProbe* probe) {
+        static void SetCurrentProbe(I_Probe* probe) {
             HWDLOG_PROBE_INFO("Set current probe to {0} from thread {1}", fmt::ptr(probe), std::this_thread::get_id());
             GetCurrentProbeRef() = probe;
         }
 
     public:
-        IProbe()          = default;
-        virtual ~IProbe() = default;
+        I_Probe()          = default;
+        virtual ~I_Probe() = default;
 
         /// Process loop
         virtual void Process() = 0;
@@ -89,13 +89,6 @@ namespace HWD::Probe {
         /// \return true if reset successfully
         virtual bool Target_Reset(bool haltAfterReset = true) = 0;
 
-        /// Start terminal driver
-        /// \return true if started successfully
-        virtual bool Target_StartTerminal(void* params = nullptr) = 0;
-
-        /// Get terminal buffer
-        virtual const char* Target_GetTerminalBuffer() = 0;
-
         /// Read 8bit value from address
         virtual uint8_t Target_ReadMemory_8(uint32_t address, bool* success = nullptr) = 0;
 
@@ -119,9 +112,6 @@ namespace HWD::Probe {
         /// \return true on success
         virtual bool Target_WriteMemory_32(uint32_t address, uint32_t val) = 0;
 
-        /// Get base address of ROM Table
-        virtual uint32_t Target_Get_ROM_Table_Address() = 0;
-
         virtual bool Target_Halt()              = 0;
         virtual bool Target_Run()               = 0;
         virtual bool Target_IsRunning()         = 0;
@@ -133,14 +123,14 @@ namespace HWD::Probe {
 } // namespace HWD::Probe
 
 template<>
-struct fmt::formatter<HWD::Probe::IProbe::DebugInterface> {
+struct fmt::formatter<HWD::Probe::I_Probe::DebugInterface> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext& ctx) {
         return ctx.begin();
     }
 
     template<typename FormatContext>
-    auto format(HWD::Probe::IProbe::DebugInterface const& ifc, FormatContext& ctx) {
-        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::IProbe::DebugInterfaceToString(ifc));
+    auto format(HWD::Probe::I_Probe::DebugInterface const& ifc, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::I_Probe::DebugInterfaceToString(ifc));
     }
 };

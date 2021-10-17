@@ -1,19 +1,19 @@
 #pragma once
 
-#define DEF_REG_OPERATORS()                                                                                                               \
-    inline void operator=(uint32_t val) {                                                                                                 \
-        Probe::IProbe::GetCurrentProbe()->Target_WriteMemory_32(m_Address, val);                                                          \
-    }                                                                                                                                     \
-    inline void operator|=(uint32_t val) {                                                                                                \
-        Probe::IProbe::GetCurrentProbe()->Target_WriteMemory_32(m_Address,                                                                \
-                                                                Probe::IProbe::GetCurrentProbe()->Target_ReadMemory_32(m_Address) | val); \
-    }                                                                                                                                     \
-    inline void operator&=(uint32_t val) {                                                                                                \
-        Probe::IProbe::GetCurrentProbe()->Target_WriteMemory_32(m_Address,                                                                \
-                                                                Probe::IProbe::GetCurrentProbe()->Target_ReadMemory_32(m_Address) & val); \
-    }                                                                                                                                     \
-    inline uint32_t GetRaw() {                                                                                                            \
-        return Probe::IProbe::GetCurrentProbe()->Target_ReadMemory_32(m_Address);                                                         \
+#define DEF_REG_OPERATORS()                                                                       \
+    inline void operator=(uint32_t val) {                                                         \
+        Probe::I_Probe::GetCurrentProbe()->Target_WriteMemory_32(m_Address, val);                 \
+    }                                                                                             \
+    inline void operator|=(uint32_t val) {                                                        \
+        Probe::I_Probe::GetCurrentProbe()->Target_WriteMemory_32(                                 \
+            m_Address, Probe::I_Probe::GetCurrentProbe()->Target_ReadMemory_32(m_Address) | val); \
+    }                                                                                             \
+    inline void operator&=(uint32_t val) {                                                        \
+        Probe::I_Probe::GetCurrentProbe()->Target_WriteMemory_32(                                 \
+            m_Address, Probe::I_Probe::GetCurrentProbe()->Target_ReadMemory_32(m_Address) & val); \
+    }                                                                                             \
+    inline uint32_t GetRaw() {                                                                    \
+        return Probe::I_Probe::GetCurrentProbe()->Target_ReadMemory_32(m_Address);                \
     }
 
 #define DEF_REG_CONSTRUCTOR(name)                 \
@@ -27,7 +27,7 @@
     static constexpr uint32_t MASK_##name  = (((0xFFFFFFFF >> lowBitIndex) << lowBitIndex) << (31 - highBitIndex)) >> (31 - highBitIndex); \
     static constexpr uint32_t SHIFT_##name = lowBitIndex;                                                                                  \
     inline uint32_t Get_##name() const {                                                                                                   \
-        return (Probe::IProbe::GetCurrentProbe()->Target_ReadMemory_32(m_Address) & MASK_##name) >> SHIFT_##name;                          \
+        return (Probe::I_Probe::GetCurrentProbe()->Target_ReadMemory_32(m_Address) & MASK_##name) >> SHIFT_##name;                         \
     }                                                                                                                                      \
     inline uint32_t GetRaw_##name(uint32_t val) const {                                                                                    \
         return (val & MASK_##name) >> SHIFT_##name;                                                                                        \

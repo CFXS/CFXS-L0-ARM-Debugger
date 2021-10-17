@@ -11,7 +11,7 @@
 static bool s_Stopped = false;
 
 namespace HWD::Probe {
-    IProbe* s_Probe;
+    I_Probe* s_Probe;
 }
 
 namespace HWD::Test {
@@ -58,16 +58,23 @@ namespace HWD::Test {
         SupportedDevices::LoadSupportedDevices();
         auto& testDevice = SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
 
-        auto connectedProbes = JLink::s_GetConnectedProbes();
-        for (IProbe* probe : connectedProbes) {
+        auto jl = new JLink;
+        jl->HWD_SelectDevice(801022602);
+        jl->Probe_Connect();
+        jl->Target_SelectDebugInterface(I_Probe::DebugInterface::SWD);
+        jl->Target_SelectDevice(testDevice);
+        jl->Target_Connect();
+
+        /*auto connectedProbes = JLink::s_GetConnectedProbes();
+        for (I_Probe* probe : connectedProbes) {
             if (probe->GetModelName() != "SAM-ICE") {
-                IProbe::SetCurrentProbe(probe);
+                I_Probe::SetCurrentProbe(probe);
 
                 probe->Probe_Connect();
 
                 Probe::s_Probe = probe;
 
-                probe->Target_SelectDebugInterface(IProbe::DebugInterface::SWD);
+                probe->Target_SelectDebugInterface(I_Probe::DebugInterface::SWD);
                 probe->Target_SelectDevice(testDevice);
                 probe->Target_Connect();
 
@@ -92,7 +99,7 @@ namespace HWD::Test {
                     //////////////////////////////////////////////////////////////////////////////////
 
                     uint32_t rom_table_address;
-                    rom_table_address = probe->Target_Get_ROM_Table_Address();
+                    rom_table_address = 0xE00FF000;
 
                     HWDLOG_PROBE_TRACE("Target [Debug]");
                     if (rom_table_address) {
@@ -111,7 +118,7 @@ namespace HWD::Test {
                         memset(&rtOffsets, 0, sizeof(rtOffsets));
 
                         bytesRead =
-                            probe->Target_ReadMemoryTo(rom_table_address, rom_table_data, sizeof(rom_table_data), IProbe::AccessWidth::_4);
+                            probe->Target_ReadMemoryTo(rom_table_address, rom_table_data, sizeof(rom_table_data), I_Probe::AccessWidth::_4);
                         HWDLOG_PROBE_INFO("rom table read {0} bytes", bytesRead);
 
                         if (bytesRead == 4096) {
@@ -278,64 +285,10 @@ namespace HWD::Test {
                 });
                 thread->detach();
             }
-        }
+        }*/
     }
 
     RVeips_ProbeTest::~RVeips_ProbeTest() {
-        s_Stopped            = true;
-        auto connectedProbes = JLink::s_GetConnectedProbes();
-        for (IProbe* probe : connectedProbes) {
-            delete probe;
-        }
-    }
-
-    //
-
-    uint64_t RVeips_ProbeTest::ReadMilliseconds() {
-        /*uint64_t var = 0;
-
-        if (m_Probe) {
-            bool ret;
-            var = m_Probe->Target_ReadMemory_64(536874024, &ret);
-            if (!ret)
-                var = 0;
-        }
-
-        return var;*/
-        return 0;
-    }
-
-    uint32_t RVeips_ProbeTest::Read32(uint32_t addr, bool halt) {
-        /*uint32_t var = 0;
-
-        if (m_Probe) {
-            if (halt)
-                m_Probe->Target_Halt();
-            bool ret = m_Probe->Target_ReadMemory_32(addr, &var);
-            if (halt)
-                m_Probe->Target_Run();
-            if (!ret)
-                var = 0;
-        }
-
-        return var;*/
-        return 0;
-    }
-
-    uint32_t RVeips_ProbeTest::Write32(uint32_t addr, uint32_t value) {
-        //m_Probe->Target_WriteMemory_32(addr, value);
-        return 0;
-    }
-
-    float RVeips_ProbeTest::FlashProgress() {
-        return m_Probe->Target_GetFlashProgress();
-    }
-
-    const char* RVeips_ProbeTest::GetTerminalText() {
-        if (m_Probe)
-            return m_Probe->Target_GetTerminalBuffer();
-        else
-            return "Waiting for target...";
     }
 
 } // namespace HWD::Test

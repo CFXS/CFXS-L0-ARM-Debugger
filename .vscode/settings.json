@@ -85,6 +85,8 @@
         "qcloseevent": "cpp",
         "qfiledialog": "cpp",
         "future": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "format": "cpp",
+        "forward_list": "cpp"
     }
 }

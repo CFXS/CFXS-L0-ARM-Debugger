@@ -7,7 +7,7 @@ namespace HWD::Probe {
     void JLink::UpdateProbeInfo() {
         HWDLOG_PROBE_TRACE("[JLink@{0}] UpdateProbeInfo:", fmt::ptr(this));
 
-        m_ProbeCapabilities = m_Driver->probe_GetCapabilities();
+        m_ProbeCapabilities = GetDriver()->probe_GetCapabilities();
 
         HWDLOG_PROBE_TRACE("{0} Capabilities:", GetModelName());
         if (m_ProbeCapabilities & ProbeCapabilities::ADAPTIVE_CLOCKING)

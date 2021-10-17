@@ -52,19 +52,19 @@ target_precompile_headers(
   "src/Utils.hpp")
 
 if(WIN32)
-  target_compile_definitions(${EXE_NAME} PRIVATE "HWD_PLATFORM_WINDOWS")
+  target_compile_definitions(${EXE_NAME} PRIVATE "CFXS_PLATFORM_WINDOWS")
 elseif(UNIX)
-  target_compile_definitions(${EXE_NAME} PRIVATE "HWD_PLATFORM_LINUX")
+  target_compile_definitions(${EXE_NAME} PRIVATE "CFXS_PLATFORM_LINUX")
 else()
   message(FATAL_ERROR "Unsupported platform")
 endif()
 
 if("$ENV{USERNAME}" STREQUAL "CFXS")
-  target_compile_definitions(${EXE_NAME} PRIVATE "DEV_PC_RIHARDS")
+  target_compile_definitions(${EXE_NAME} PRIVATE "DEV_PC_CFXS")
 endif()
 
-target_include_directories(${EXE_NAME} PRIVATE src)
-target_include_directories(${EXE_NAME} SYSTEM PRIVATE vendor)
+target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(${EXE_NAME} SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/llvm/include")
 

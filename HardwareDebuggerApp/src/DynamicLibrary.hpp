@@ -3,7 +3,7 @@
 #ifdef __cplusplus
 //////////////////////////////////////////////////////////////////////////////
 // Platform specific library load
-#if defined(HWD_PLATFORM_WINDOWS)
+#if defined(CFXS_PLATFORM_WINDOWS)
 #include <Windows.h>
 
 namespace HWD {
@@ -57,7 +57,6 @@ namespace HWD {
             std::string message(messageBuffer, size);
             LocalFree(messageBuffer);
 
-            // trim newline at end of string
             message.erase(std::find_if(message.rbegin(),
                                        message.rend(),
                                        [](char ch) {
@@ -65,7 +64,7 @@ namespace HWD {
                                        })
                               .base(),
                           message.end());
-            // remove dot
+
             message.erase(message.end() - 1);
 
             return message;
