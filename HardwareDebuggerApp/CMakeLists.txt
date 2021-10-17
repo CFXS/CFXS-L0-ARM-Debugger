@@ -1,16 +1,11 @@
 set(EXE_NAME HardwareDebuggerApp)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
-
-exec_program(
-  py ARGS
-  "\"${CMAKE_SOURCE_DIR}/Tools/GenerateSources.py\" \"${ROOT_DIR}/src\" \"${ROOT_DIR}/_Sources.cmake\""
-)
+set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.2\\msvc2019_64")
 
 include("_Sources.cmake")
 
 add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
 
-add_compile_definitions("CFXS_HWD_WINDOW_TITLE_PREFIX=\"[CFXS HWD] \"")
 add_compile_definitions("CFXS_HWD_VERSION_STRING=\"v0.1-dev\"")
 add_compile_definitions("CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_HWD_VERSION_STRING")
 
@@ -105,7 +100,6 @@ string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 
 message("Creating file copy commands for required Qt libraries and binaries to output directory....")
-set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.2\\msvc2019_64")
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Core.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Cored.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\bin\\Qt5Gui.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
