@@ -88,6 +88,7 @@
         "numeric": "cpp",
         "format": "cpp",
         "forward_list": "cpp",
-        "qfilesystemmodel": "cpp"
+        "qfilesystemmodel": "cpp",
+        "qstandarditem": "cpp"
     }
 }

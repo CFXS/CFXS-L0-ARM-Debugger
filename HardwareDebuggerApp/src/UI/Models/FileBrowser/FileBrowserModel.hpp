@@ -19,15 +19,19 @@
 #pragma once
 #include <QFileSystemModel>
 #include "FileBrowserIconProvider.hpp"
+#include <QTreeView>
 
 namespace HWD::UI {
 
     class FileBrowserModel : public QFileSystemModel {
     public:
-        FileBrowserModel(QObject* parent = nullptr);
+        FileBrowserModel(QTreeView* workingTreeView, QObject* parent = nullptr);
+
+        QVariant data(const QModelIndex& index, int role) const;
 
     private:
         FileBrowserIconProvider m_IconProvider;
+        QTreeView* m_WorkingTreeView;
     };
 
 } // namespace HWD::UI

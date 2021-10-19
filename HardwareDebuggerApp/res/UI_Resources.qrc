@@ -4,10 +4,21 @@
         <file alias="Image/cfxs-full.png">UI/Images/cfxs-full.png</file>
 
         <file alias="Icon/folder.png">UI/Images/folder.png</file>
+        <file alias="Icon/folder-open.png">UI/Images/folder-open.png</file>
         <file alias="Icon/folder-src.png">UI/Images/folder-src.png</file>
+        <file alias="Icon/folder-src-open.png">UI/Images/folder-src-open.png</file>
         <file alias="Icon/folder-build.png">UI/Images/folder-build.png</file>
+        <file alias="Icon/folder-build-open.png">UI/Images/folder-build-open.png</file>
         <file alias="Icon/folder-vscode.png">UI/Images/folder-vscode.png</file>
+        <file alias="Icon/folder-vscode-open.png">UI/Images/folder-vscode-open.png</file>
         <file alias="Icon/folder-git.png">UI/Images/folder-git.png</file>
+        <file alias="Icon/folder-git-open.png">UI/Images/folder-git-open.png</file>
+        <file alias="Icon/folder-lib.png">UI/Images/folder-lib.png</file>
+        <file alias="Icon/folder-lib-open.png">UI/Images/folder-lib-open.png</file>
+        <file alias="Icon/folder-resource.png">UI/Images/folder-resource.png</file>
+        <file alias="Icon/folder-resource-open.png">UI/Images/folder-resource-open.png</file>
+        <file alias="Icon/folder-cfxs.png">UI/Images/folder-cfxs.png</file>
+        <file alias="Icon/folder-cfxs-open.png">UI/Images/folder-cfxs-open.png</file>
 
         <file alias="Icon/file.png">UI/Images/file.png</file>
         <file alias="Icon/doc.png">UI/Images/doc.png</file>

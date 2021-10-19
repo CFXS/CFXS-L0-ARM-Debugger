@@ -1,6 +1,7 @@
 // [CFXS] //
 #pragma once
 #include <QFileIconProvider>
+#include <QTreeView>
 
 namespace HWD::UI {
 
@@ -9,7 +10,10 @@ namespace HWD::UI {
         FileBrowserIconProvider();
 
         QIcon icon(IconType type) const override;
-        QIcon icon(const QFileInfo &info) const override;
+        QIcon icon(const QFileInfo& info, bool isExpanded) const;
+        QIcon icon(const QFileInfo& info) const override {
+            return icon(info, false);
+        }
     };
 
 } // namespace HWD::UI

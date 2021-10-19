@@ -38,7 +38,7 @@ namespace HWD::UI {
 
         QString rootPath = "C:\\CFXS_Projects\\CFXS-RTOS-Test";
 
-        m_FB_Model = new FileBrowserModel(this);
+        m_FB_Model = new FileBrowserModel(fileTree, this);
         m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
         m_FB_Model->setRootPath(rootPath);
 
@@ -53,7 +53,6 @@ namespace HWD::UI {
         }
 
         fileTree->setHeaderHidden(true);
-
         fileTree->setIndentation(16);
 
         setWidget(ui->RootWidget);
