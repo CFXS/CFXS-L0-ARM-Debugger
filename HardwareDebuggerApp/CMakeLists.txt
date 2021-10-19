@@ -14,13 +14,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
 include("_KDDockWidgets_Options.cmake")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/KDDockWidgets)
 
-set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOMOC ON) 
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui)
-
-set(UI_files "${ROOT_DIR}/src/UI/FunctionProfiler/FunctionProfilerWindow.ui")
 
 add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files}
 "${ROOT_DIR}/vendor/llvm/lib/Demangle/Demangle.cpp"

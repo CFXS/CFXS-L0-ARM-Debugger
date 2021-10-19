@@ -79,18 +79,22 @@ namespace HWD::Probe {
 
     private:
         // probe callbacks
+
         void Probe_LogCallback(const char* message);
         void Probe_WarningCallback(const char* message);
         void Probe_ErrorCallback(const char* message);
         void Probe_FlashProgressCallback(const char* action, const char* prog, int percentage);
 
         // specific config
+
         void Probe_DisableFlashProgressPopup();
 
         // Private probe stuff
+
         void UpdateProbeInfo();
 
         // Private target stuff
+
         void PrepareTarget();
         void UpdateTargetInfo();
 
