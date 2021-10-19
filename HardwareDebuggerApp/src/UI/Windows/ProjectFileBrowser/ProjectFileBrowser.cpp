@@ -39,7 +39,7 @@ namespace HWD::UI {
         QString rootPath = "C:\\CFXS_Projects\\CFXS-RTOS-Test";
 
         m_FB_Model = new FileBrowserModel(fileTree, this);
-        m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
+        m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files | QDir::Hidden);
         m_FB_Model->setRootPath(rootPath);
 
         fileTree->setSelectionMode(QAbstractItemView::NoSelection); // No highlight
