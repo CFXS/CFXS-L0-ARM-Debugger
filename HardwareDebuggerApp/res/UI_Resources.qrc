@@ -1,6 +1,40 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource>
-        <file alias="FolderIcon">UI/Images/FolderIcon.png</file>
+        <file alias="Image/cfxs-full.png">UI/Images/cfxs-full.png</file>
+
+        <file alias="Icon/folder.png">UI/Images/folder.png</file>
+        <file alias="Icon/folder-src.png">UI/Images/folder-src.png</file>
+        <file alias="Icon/folder-build.png">UI/Images/folder-build.png</file>
+        <file alias="Icon/folder-vscode.png">UI/Images/folder-vscode.png</file>
+        <file alias="Icon/folder-git.png">UI/Images/folder-git.png</file>
+
+        <file alias="Icon/file.png">UI/Images/file.png</file>
+        <file alias="Icon/doc.png">UI/Images/doc.png</file>
+        <file alias="Icon/asm.png">UI/Images/asm.png</file>
+        <file alias="Icon/bin.png">UI/Images/bin.png</file>
+        <file alias="Icon/c.png">UI/Images/c.png</file>
+        <file alias="Icon/cert.png">UI/Images/cert.png</file>
+        <file alias="Icon/cmake.png">UI/Images/cmake.png</file>
+        <file alias="Icon/compressed.png">UI/Images/compressed.png</file>
+        <file alias="Icon/cpp.png">UI/Images/cpp.png</file>
+        <file alias="Icon/exe.png">UI/Images/exe.png</file>
+        <file alias="Icon/font.png">UI/Images/font.png</file>
+        <file alias="Icon/gear.png">UI/Images/gear.png</file>
+        <file alias="Icon/git.png">UI/Images/git.png</file>
+        <file alias="Icon/h.png">UI/Images/h.png</file>
+        <file alias="Icon/hpp.png">UI/Images/hpp.png</file>
+        <file alias="Icon/image.png">UI/Images/image.png</file>
+        <file alias="Icon/json.png">UI/Images/json.png</file>
+        <file alias="Icon/lib.png">UI/Images/lib.png</file>
+        <file alias="Icon/lua.png">UI/Images/lua.png</file>
+        <file alias="Icon/pdf.png">UI/Images/pdf.png</file>
+        <file alias="Icon/py.png">UI/Images/py.png</file>
+        <file alias="Icon/xml.png">UI/Images/xml.png</file>
+        <file alias="Icon/info.png">UI/Images/info.png</file>
+        <file alias="Icon/log.png">UI/Images/log.png</file>
+        <file alias="Icon/cfxs.png">UI/Images/cfxs.png</file>
+        <file alias="Icon/segger.png">UI/Images/segger.png</file>
+        <file alias="Icon/link.png">UI/Images/link.png</file>
     </qresource>
 </RCC>
