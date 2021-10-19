@@ -20,7 +20,7 @@ static bool isItaniumEncoding(const std::string &MangledName) {
 }
 
 std::string llvm::demangle(const std::string &MangledName) {
-    char *Demangled;
+    char *Demangled = nullptr;
     if (isItaniumEncoding(MangledName))
         Demangled = itaniumDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
 

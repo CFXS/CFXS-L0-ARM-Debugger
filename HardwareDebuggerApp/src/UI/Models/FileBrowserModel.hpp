@@ -17,23 +17,10 @@
 // ---------------------------------------------------------------------
 // [CFXS] //
 #pragma once
+#include <QFileSystemModel>
 
-#include <Test/RVeips_ProbeTest.hpp>
+namespace HWD::UI {
 
-#include "Core/Application.hpp"
+    class FileBrowserModel : public QFileSystemModel {};
 
-namespace HWD {
-
-    class HWD_Application : public Application {
-    public:
-        HWD_Application(int argc, char** argv);
-        virtual ~HWD_Application() = default;
-
-        virtual void OnCreate() override;
-        virtual void OnDestroy() override;
-
-    private:
-        std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
-    };
-
-} // namespace HWD
+} // namespace HWD::UI

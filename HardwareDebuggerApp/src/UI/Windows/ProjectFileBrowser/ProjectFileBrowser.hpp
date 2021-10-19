@@ -18,22 +18,25 @@
 // [CFXS] //
 #pragma once
 
-#include <Test/RVeips_ProbeTest.hpp>
+#include <KDDockWidgets/DockWidget.h>
+#include <QFileSystemModel>
 
-#include "Core/Application.hpp"
+namespace Ui {
+    class ProjectFileBrowser;
+}
 
-namespace HWD {
+namespace HWD::UI {
 
-    class HWD_Application : public Application {
+    class ProjectFileBrowser : public KDDockWidgets::DockWidget {
+        Q_OBJECT
+
     public:
-        HWD_Application(int argc, char** argv);
-        virtual ~HWD_Application() = default;
-
-        virtual void OnCreate() override;
-        virtual void OnDestroy() override;
+        ProjectFileBrowser();
+        ~ProjectFileBrowser();
 
     private:
-        std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
+        std::unique_ptr<Ui::ProjectFileBrowser> ui;
+        QFileSystemModel* m_FS_Model;
     };
 
-} // namespace HWD
+} // namespace HWD::UI

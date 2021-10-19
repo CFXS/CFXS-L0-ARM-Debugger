@@ -10,3 +10,6 @@
 [submodule "Docs"]
 	path = Docs
 	url = https://github.com/CFXS/HWD-Private-Docs.git
+[submodule "HardwareDebuggerApp/vendor/LicenseGen"]
+	path = HardwareDebuggerApp/vendor/LicenseGen
+	url = https://github.com/CFXS/CFXS-License-Header-Generator.git

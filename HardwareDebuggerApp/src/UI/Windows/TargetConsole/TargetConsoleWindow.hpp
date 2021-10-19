@@ -18,22 +18,23 @@
 // [CFXS] //
 #pragma once
 
-#include <Test/RVeips_ProbeTest.hpp>
+#include <KDDockWidgets/DockWidget.h>
 
-#include "Core/Application.hpp"
+namespace Ui {
+    class TargetConsoleWindow;
+}
 
-namespace HWD {
+namespace HWD::UI {
 
-    class HWD_Application : public Application {
+    class TargetConsoleWindow : public KDDockWidgets::DockWidget {
+        Q_OBJECT
+
     public:
-        HWD_Application(int argc, char** argv);
-        virtual ~HWD_Application() = default;
-
-        virtual void OnCreate() override;
-        virtual void OnDestroy() override;
+        TargetConsoleWindow();
+        ~TargetConsoleWindow();
 
     private:
-        std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
+        std::unique_ptr<Ui::TargetConsoleWindow> ui;
     };
 
-} // namespace HWD
+} // namespace HWD::UI

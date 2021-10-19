@@ -16,24 +16,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-#pragma once
+#include "MainWindow.hpp"
 
-#include <Test/RVeips_ProbeTest.hpp>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <Debugger/ELF/ELF_Reader.hpp>
 
-#include "Core/Application.hpp"
+namespace HWD::UI {
 
-namespace HWD {
+    MainWindow::MainWindow(QWidget *parent) :
+        KDDockWidgets::MainWindow(QStringLiteral(CFXS_HWD_PROGRAM_NAME), KDDockWidgets::MainWindowOption_HasCentralFrame, parent) {
+        resize(640, 480);
+    }
 
-    class HWD_Application : public Application {
-    public:
-        HWD_Application(int argc, char** argv);
-        virtual ~HWD_Application() = default;
+    MainWindow::~MainWindow() {
+    }
 
-        virtual void OnCreate() override;
-        virtual void OnDestroy() override;
+    void MainWindow::closeEvent(QCloseEvent *event) {
+        emit Closed();
+        event->accept();
+    }
 
-    private:
-        std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
-    };
-
-} // namespace HWD
+} // namespace HWD::UI

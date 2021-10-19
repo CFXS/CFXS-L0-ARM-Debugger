@@ -18,22 +18,22 @@
 // [CFXS] //
 #pragma once
 
-#include <Test/RVeips_ProbeTest.hpp>
+#include <KDDockWidgets/MainWindow.h>
 
-#include "Core/Application.hpp"
+namespace HWD::UI {
 
-namespace HWD {
+    class MainWindow : public KDDockWidgets::MainWindow {
+        Q_OBJECT
 
-    class HWD_Application : public Application {
     public:
-        HWD_Application(int argc, char** argv);
-        virtual ~HWD_Application() = default;
+        explicit MainWindow(QWidget *parent = nullptr);
+        ~MainWindow();
 
-        virtual void OnCreate() override;
-        virtual void OnDestroy() override;
+    signals:
+        void Closed();
 
-    private:
-        std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
+    protected:
+        void closeEvent(QCloseEvent *event);
     };
 
-} // namespace HWD
+} // namespace HWD::UI

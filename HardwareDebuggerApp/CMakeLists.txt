@@ -2,6 +2,9 @@ set(EXE_NAME HardwareDebuggerApp)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
 set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.2\\msvc2019_64")
 
+#set(CMAKE_UNITY_BUILD true)
+#set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
+
 include("_Sources.cmake")
 
 add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
@@ -20,7 +23,7 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui)
 
-add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files}
+add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files}
 "${ROOT_DIR}/vendor/llvm/lib/Demangle/Demangle.cpp"
 "${ROOT_DIR}/vendor/llvm/lib/Demangle/ItaniumDemangle.cpp")
 

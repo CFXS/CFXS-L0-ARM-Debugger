@@ -9,7 +9,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "console": "externalTerminal"
+            "console": "externalTerminal",
+            "visualizerFile": "c:\\Users\\CFXS\\AppData\\Roaming\\Code\\User\\workspaceStorage\\6812e7b5e42f5b13eeeb9f04f80fcc0e\\tonka3000.qtvsctools\\qt.natvis.xml"
         }
     ]
 }

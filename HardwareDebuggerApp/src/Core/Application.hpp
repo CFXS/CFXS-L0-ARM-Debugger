@@ -2,9 +2,7 @@
 
 #include <QApplication>
 
-#include "UI/FunctionProfiler/FunctionProfilerWindow.hpp"
-#include "UI/TargetConsole/TargetConsoleWindow.hpp"
-#include "UI/MainWindow/MainWindow.hpp"
+#include "UI/Windows/MainWindow/MainWindow.hpp"
 
 int main(int argc, char** argv);
 

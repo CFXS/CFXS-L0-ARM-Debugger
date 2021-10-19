@@ -188,7 +188,7 @@ namespace HWD::ELF {
                 }
             } else {
                 continue;
-                snprintf(symName, sizeof(symName), symbolNameMangled);
+                //snprintf(symName, sizeof(symName), symbolNameMangled);
             }
 
             char* type;

@@ -2,9 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Generate Sources",
+            "label": "Generate License Headers",
             "type": "shell",
-            "command": "py \"${workspaceFolder}/Tools/GenerateSources.py\" \"${workspaceFolder}/HardwareDebuggerApp/src\" \"${workspaceFolder}/HardwareDebuggerApp/_Sources.cmake\"",
+            "command": "py",
+            "args": [
+                "${workspaceRoot}/HardwareDebuggerApp/vendor/LicenseGen/UpdateHeaders_GPLv3.py",
+                "${workspaceRoot}/HardwareDebuggerApp/src",
+                "${workspaceRoot}/HardwareDebuggerApp/_License.lhg"
+            ],
             "group": "test"
         }
     ]
