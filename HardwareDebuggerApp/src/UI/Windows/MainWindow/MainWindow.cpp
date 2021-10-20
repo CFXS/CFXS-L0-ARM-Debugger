@@ -25,6 +25,9 @@
 #include <QLabel>
 #include <QTableWidget>
 
+#include <QTreeView>
+#include <UI/Models/FileBrowser/FileBrowserModel.hpp>
+
 using ads::CDockManager;
 using ads::CDockWidget;
 using ads::DockWidgetArea;
@@ -37,46 +40,33 @@ namespace HWD::UI {
 
         m_DockManager = new ads::CDockManager(this);
 
-        // Set central widget
-        QLabel* label = new QLabel();
-        label->setText("");
-        label->setAlignment(Qt::AlignCenter);
-        CDockWidget* CentralDockWidget = new CDockWidget("CentralWidget");
-        CentralDockWidget->setWidget(label);
-        CentralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
-        auto* CentralDockArea = m_DockManager->setCentralWidget(CentralDockWidget);
+        auto fileTree = new QTreeView();
 
-        // create other dock widgets
-        QTableWidget* table = new QTableWidget();
-        table->setColumnCount(3);
-        table->setRowCount(10);
-        CDockWidget* TableDockWidget = new CDockWidget("Table 1");
-        TableDockWidget->setWidget(table);
-        TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
-        TableDockWidget->resize(250, 150);
-        TableDockWidget->setMinimumSize(200, 150);
-        m_DockManager->addDockWidgetTabToArea(TableDockWidget, CentralDockArea);
-        auto TableArea = m_DockManager->addDockWidget(DockWidgetArea::LeftDockWidgetArea, TableDockWidget);
+        auto rootPath = "C:/CFXS_Projects/CFXS-RTOS-Test";
 
-        table = new QTableWidget();
-        table->setColumnCount(5);
-        table->setRowCount(1020);
-        TableDockWidget = new CDockWidget("Table 2");
-        TableDockWidget->setWidget(table);
-        TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
-        TableDockWidget->resize(250, 150);
-        TableDockWidget->setMinimumSize(200, 150);
-        m_DockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, TableDockWidget, TableArea);
+        auto m_FB_Model = new FileBrowserModel(fileTree, this);
+        //m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
+        m_FB_Model->setRootPath(rootPath);
 
-        QTableWidget* propertiesTable = new QTableWidget();
-        propertiesTable->setColumnCount(3);
-        propertiesTable->setRowCount(10);
-        CDockWidget* PropertiesDockWidget = new CDockWidget("Properties");
-        PropertiesDockWidget->setWidget(propertiesTable);
-        PropertiesDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
-        PropertiesDockWidget->resize(250, 150);
-        PropertiesDockWidget->setMinimumSize(200, 150);
-        m_DockManager->addDockWidget(DockWidgetArea::RightDockWidgetArea, PropertiesDockWidget, CentralDockArea);
+        fileTree->setSelectionMode(QAbstractItemView::NoSelection); // No highlight
+        fileTree->setFocusPolicy(Qt::NoFocus);                      // No focus box
+
+        fileTree->setModel(m_FB_Model);
+        fileTree->setRootIndex(m_FB_Model->index(rootPath));
+
+        for (int i = 1; i < fileTree->model()->columnCount(); i++) {
+            fileTree->hideColumn(i); // hide all columns except name
+        }
+
+        fileTree->setHeaderHidden(true);
+        fileTree->setIndentation(16);
+
+        // Create a dock widget with the title Label 1 and set the created label
+        // as the dock widget content
+        ads::CDockWidget* dockWidget = new ads::CDockWidget("Project Files");
+        dockWidget->setWidget(fileTree);
+
+        m_DockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
     }
 
     MainWindow::~MainWindow() {

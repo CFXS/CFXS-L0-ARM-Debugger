@@ -20,7 +20,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui Svg Xml)
 
 add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files}
 "${ROOT_DIR}/vendor/llvm/lib/Demangle/Demangle.cpp"
@@ -85,7 +85,9 @@ target_link_libraries(
           Qt::Qml
           Qt::Quick
           Qt::QuickControls2
-          Qt::Gui)
+          Qt::Gui
+          Qt::Svg
+          Qt::Xml)
 
 if(BUILD_PROFILER)
   target_link_options(${EXE_NAME} PRIVATE "/PROFILE")
@@ -98,8 +100,6 @@ string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 # "$<TARGET_FILE_DIR:${EXE_NAME}>"
 # )
 
-
-
 message("Creating file copy commands for required Qt libraries and binaries to output directory....")
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Core.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Cored.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
@@ -107,6 +107,15 @@ add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E cop
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Guid.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Widgets.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Widgetsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Svg.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Svgd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Xml.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Xmld.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\platforms\\qwindows.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindows.dll)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\platforms\\qwindowsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindowsd.dll)
+
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\iconengines\\qsvgicon.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\iconengines\\qsvgicon.dll)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\iconengines\\qsvgicond.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\iconengines\\qsvgicond.dll)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\imageformats\\qsvg.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\imageformats\\qsvg.dll)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\imageformats\\qsvgd.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\imageformats\\qsvgd.dll)

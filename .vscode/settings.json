@@ -1,6 +1,6 @@
 {
     "cmake.generator": "Ninja",
-    "cmake.buildDirectory": "${workspaceFolder}/out/build",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
     "files.associations": {
         "*.ui": "xml",
         "*.qrc": "xml",
@@ -95,6 +95,7 @@
         "source_location": "cpp",
         "qstringliteral": "cpp",
         "qscrollbar": "cpp",
-        "qfile": "cpp"
+        "qfile": "cpp",
+        "qstylefactory": "cpp"
     }
 }

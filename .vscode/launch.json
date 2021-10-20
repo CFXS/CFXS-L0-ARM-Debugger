@@ -4,7 +4,7 @@
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/out/build/HardwareDebuggerApp/HardwareDebuggerApp.exe",
+            "program": "${workspaceFolder}/build/HardwareDebuggerApp/HardwareDebuggerApp.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
