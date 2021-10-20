@@ -11,6 +11,6 @@
                 "${workspaceRoot}/HardwareDebuggerApp/_License.lhg"
             ],
             "group": "test"
-        }
+        },
     ]
 }

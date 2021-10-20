@@ -2,6 +2,8 @@
     "cmake.generator": "Ninja",
     "cmake.buildDirectory": "${workspaceFolder}/out/build",
     "files.associations": {
+        "*.ui": "xml",
+        "*.qrc": "xml",
         "unordered_map": "cpp",
         "xstddef": "cpp",
         "xhash": "cpp",
@@ -89,6 +91,8 @@
         "format": "cpp",
         "forward_list": "cpp",
         "qfilesystemmodel": "cpp",
-        "qstandarditem": "cpp"
+        "qstandarditem": "cpp",
+        "source_location": "cpp",
+        "qstringliteral": "cpp"
     }
 }

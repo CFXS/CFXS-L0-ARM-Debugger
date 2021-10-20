@@ -191,7 +191,7 @@ namespace HWD::ELF {
                 //snprintf(symName, sizeof(symName), symbolNameMangled);
             }
 
-            char* type;
+            const char* type;
             switch (symbolEntry->info.GetBinding()) {
                 case ELF::SymbolBinding::GLOBAL: type = "GLOBAL"; break;
                 case ELF::SymbolBinding::LOCAL: type = "LOCAL"; break;
@@ -210,7 +210,7 @@ namespace HWD::ELF {
                 SymbolInfo symInfo;
                 symInfo.fullName = symName;
 
-                char* firstSpace = symName;
+                const char* firstSpace = symName;
                 /*size_t symLen    = strlen(symName);
                 for (size_t i = 0; i < symLen; i++) {
                     if (symName[i] == '(') {

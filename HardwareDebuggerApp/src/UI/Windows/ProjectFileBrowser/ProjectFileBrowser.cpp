@@ -29,14 +29,12 @@
 
 namespace HWD::UI {
 
-    ProjectFileBrowser::ProjectFileBrowser() :
+    ProjectFileBrowser::ProjectFileBrowser(const QString& rootPath) :
         KDDockWidgets::DockWidget(QStringLiteral("ProjectFileBrowser"), KDDockWidgets::DockWidgetBase::Option_DeleteOnClose),
         ui(std::make_unique<Ui::ProjectFileBrowser>()) {
         ui->setupUi(this);
 
         auto fileTree = ui->treeView;
-
-        QString rootPath = "C:\\CFXS_Projects\\CFXS-RTOS-Test";
 
         m_FB_Model = new FileBrowserModel(fileTree, this);
         m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files | QDir::Hidden);

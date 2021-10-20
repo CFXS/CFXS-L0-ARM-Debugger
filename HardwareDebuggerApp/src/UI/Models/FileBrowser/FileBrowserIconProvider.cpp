@@ -35,6 +35,7 @@ namespace HWD::UI {
         CFXS,
         SEGGER,
         LINK,
+        HWD,
 
         // Closed Folders
         FOLDER,
@@ -65,6 +66,7 @@ namespace HWD::UI {
         if (!s_Initialized) {
             s_Initialized = true;
             s_IconTable   = {
+                // Files
                 QPixmap(QStringLiteral(":/Icon/file.png")),
                 QPixmap(QStringLiteral(":/Icon/doc.png")),
                 QPixmap(QStringLiteral(":/Icon/asm.png")),
@@ -92,7 +94,9 @@ namespace HWD::UI {
                 QPixmap(QStringLiteral(":/Icon/cfxs.png")),
                 QPixmap(QStringLiteral(":/Icon/segger.png")),
                 QPixmap(QStringLiteral(":/Icon/link.png")),
+                QPixmap(QStringLiteral(":/Icon/hwd.png")),
 
+                // Closed folders
                 QPixmap(QStringLiteral(":/Icon/folder.png")),
                 QPixmap(QStringLiteral(":/Icon/folder-vscode.png")),
                 QPixmap(QStringLiteral(":/Icon/folder-git.png")),
@@ -102,6 +106,7 @@ namespace HWD::UI {
                 QPixmap(QStringLiteral(":/Icon/folder-resource.png")),
                 QPixmap(QStringLiteral(":/Icon/folder-cfxs.png")),
 
+                // Open folders
                 QPixmap(QStringLiteral(":/Icon/folder-open.png")),
                 QPixmap(QStringLiteral(":/Icon/folder-vscode-open.png")),
                 QPixmap(QStringLiteral(":/Icon/folder-git-open.png")),
@@ -157,6 +162,8 @@ namespace HWD::UI {
 
             if (suffix.contains(QStringLiteral("cfxs"))) {
                 return s_IconTable[Icon::CFXS];
+            } else if (suffix.contains(QStringLiteral("hwd"))) {
+                return s_IconTable[Icon::HWD];
             }
 
             if (suffix == QStringLiteral("txt")) {

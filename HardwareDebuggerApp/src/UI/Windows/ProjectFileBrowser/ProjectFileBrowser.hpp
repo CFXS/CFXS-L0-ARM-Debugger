@@ -31,7 +31,7 @@ namespace HWD::UI {
         Q_OBJECT
 
     public:
-        ProjectFileBrowser();
+        ProjectFileBrowser(const QString& rootPath);
         ~ProjectFileBrowser();
 
     private:

@@ -17,6 +17,8 @@
 // ---------------------------------------------------------------------
 // [CFXS] //
 #include "HWD_Application.hpp"
+#include <QString>
+#include <QStringLiteral>
 
 #include <KDDockWidgets/DockWidget.h>
 #include <KDDockWidgets/LayoutSaver.h>
@@ -51,16 +53,16 @@ namespace HWD {
         }))->detach();
 #endif
 
-        //auto fpWindow = new UI::FunctionProfilerWindow;
-        //fpWindow->show();
-        //GetMainWindow()->addDockWidgetAsTab(fpWindow);
+        const QString rootPath = QStringLiteral("C:/CFXS_Projects/CFXS-RTOS-Test");
 
-        auto pfbWindow = new UI::ProjectFileBrowser;
-        pfbWindow->show();
+        auto pfbWindow = new UI::ProjectFileBrowser(rootPath);
         GetMainWindow()->addDockWidgetAsTab(pfbWindow);
-        auto pfbWindow2 = new UI::ProjectFileBrowser;
-        pfbWindow2->show();
-        GetMainWindow()->addDockWidgetAsTab(pfbWindow2);
+        pfbWindow->show();
+
+        // project tests
+        QDir().mkdir(rootPath + "/.cfxs_hwd");
+        QFile projectFile(rootPath + "/.cfxs_hwd/project.hwd");
+        projectFile.open(QIODevice::ReadWrite);
     }
 
     void HWD_Application::OnDestroy() {

@@ -14,9 +14,7 @@ namespace HWD {
     Application* Application::s_Instance = nullptr;
 
     static void SetQtAttributes() {
-        QApplication::setAttribute(Qt::AA_UseOpenGLES);
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+        QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     }
 
     Application::Application(int argc, char** argv, const std::string& name) {

@@ -47,5 +47,6 @@
         <file alias="Icon/cfxs.png">UI/Images/cfxs.png</file>
         <file alias="Icon/segger.png">UI/Images/segger.png</file>
         <file alias="Icon/link.png">UI/Images/link.png</file>
+        <file alias="Icon/hwd.png">UI/Images/hwd.png</file>
     </qresource>
 </RCC>
