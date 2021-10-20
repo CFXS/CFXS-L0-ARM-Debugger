@@ -41,8 +41,6 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
-        //KDDockWidgets::Config::self().setFrameworkWidgetFactory(new UI::HWD_WidgetFactory);
-
         HWDLOG_CORE_INFO("Loading probes");
         Probe::JLink::HWD_Load();
 

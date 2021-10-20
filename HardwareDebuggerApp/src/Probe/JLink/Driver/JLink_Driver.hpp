@@ -1,5 +1,5 @@
 #pragma once
-#include <DynamicLibrary.hpp>
+#include <QLibrary>
 #include "JLink_Types.hpp"
 
 namespace HWD::Probe::Driver {
@@ -10,18 +10,17 @@ namespace HWD::Probe::Driver {
 
     public:
         JLink_Driver();
-        ~JLink_Driver() = default;
+        ~JLink_Driver();
 
         bool IsLoaded() const {
-            return m_Loaded;
+            return m_Library->isLoaded();
         }
 
     private:
         void LoadFunctionPointers();
 
     private:
-        std::unique_ptr<DynamicLibrary> m_Library;
-        bool m_Loaded = false;
+        QLibrary* m_Library;
 
     public: // library functions
         int (*probe_GetAvailableLicense)(char* pBuffer, uint32_t BufferSize)                                              = nullptr;
