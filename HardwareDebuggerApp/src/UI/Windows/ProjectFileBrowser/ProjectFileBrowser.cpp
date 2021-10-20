@@ -49,7 +49,7 @@ namespace HWD::UI {
         fileTree->setRootIndex(m_FB_Model->index(rootPath));
 
         for (int i = 1; i < fileTree->model()->columnCount(); i++) {
-            fileTree->hideColumn(i);
+            fileTree->hideColumn(i); // hide all columns except name
         }
 
         fileTree->setHeaderHidden(true);

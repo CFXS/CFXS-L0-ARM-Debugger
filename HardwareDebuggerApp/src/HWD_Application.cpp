@@ -20,10 +20,12 @@
 
 #include <KDDockWidgets/DockWidget.h>
 #include <KDDockWidgets/LayoutSaver.h>
+#include <KDDockWidgets/Config.h>
 
 #include <Probe/JLink/JLink.hpp>
 
 #include <UI/Windows/ProjectFileBrowser/ProjectFileBrowser.hpp>
+#include <UI/HWD_WidgetFactory.hpp>
 
 namespace HWD {
 
@@ -37,6 +39,8 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
+        //KDDockWidgets::Config::self().setFrameworkWidgetFactory(new UI::HWD_WidgetFactory);
+
         HWDLOG_CORE_INFO("Loading probes");
         Probe::JLink::HWD_Load();
 
@@ -54,6 +58,9 @@ namespace HWD {
         auto pfbWindow = new UI::ProjectFileBrowser;
         pfbWindow->show();
         GetMainWindow()->addDockWidgetAsTab(pfbWindow);
+        auto pfbWindow2 = new UI::ProjectFileBrowser;
+        pfbWindow2->show();
+        GetMainWindow()->addDockWidgetAsTab(pfbWindow2);
     }
 
     void HWD_Application::OnDestroy() {
