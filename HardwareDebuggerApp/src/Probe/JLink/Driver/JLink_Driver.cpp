@@ -25,9 +25,14 @@ namespace HWD::Probe::Driver {
         m_Library->load();
 
         if (m_Library && m_Library->isLoaded()) {
+            HWDLOG_PROBE_TRACE("JLink_Driver[{0}] Load function pointers", fmt::ptr(this));
             LoadFunctionPointers();
         } else {
-            HWDLOG_PROBE_ERROR("JLink_Driver[{0}] Driver initialization failed", fmt::ptr(this));
+            if (m_Library) {
+                HWDLOG_PROBE_ERROR("JLink_Driver[{0}] Driver initialization failed: {1}", fmt::ptr(this), m_Library->errorString());
+            } else {
+                HWDLOG_PROBE_ERROR("JLink_Driver[{0}] Driver initialization failed - could not allocate QLibrary", fmt::ptr(this));
+            }
         }
     }
 

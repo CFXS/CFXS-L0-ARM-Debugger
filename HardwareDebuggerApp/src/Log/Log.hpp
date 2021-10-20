@@ -6,6 +6,8 @@
 #include <spdlog/fmt/ostr.h>
 #pragma warning(pop)
 
+#include <QString>
+
 namespace HWD {
 
     class Log {
@@ -26,6 +28,18 @@ namespace HWD {
     };
 
 } // namespace HWD
+
+template<>
+struct fmt::formatter<QString> {
+    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+        return ctx.end();
+    }
+
+    template<typename FormatContext>
+    auto format(const QString& input, FormatContext& ctx) -> decltype(ctx.out()) {
+        return format_to(ctx.out(), "{}", input.toStdString());
+    }
+};
 
 // Core log macros
 #define HWDLOG_CORE_TRACE(...)    ::HWD::Log::GetCoreLogger()->trace(__VA_ARGS__)
