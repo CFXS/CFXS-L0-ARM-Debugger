@@ -43,6 +43,7 @@ function(set_project_warnings project_name)
       /wd4200 # Disable zero sized array warning
       /wd4127 # Disable conditional expression is constant for QVector god dammit
       /wd4100 # Disable unreferenced parameter
+      /wd4242 # Disable conversion from 'a' to 'b', possible loss of data. Causes spam with qt ("note: see reference to class template instantiation")
   )
 
   set(CLANG_WARNINGS
