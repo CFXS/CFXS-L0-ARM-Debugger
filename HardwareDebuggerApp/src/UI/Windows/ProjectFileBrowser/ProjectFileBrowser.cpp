@@ -17,18 +17,11 @@
 // ---------------------------------------------------------------------
 // [CFXS] //
 #include "ProjectFileBrowser.hpp"
-
-#include <Debugger/ELF/ELF_Reader.hpp>
-#include <QFileDialog>
-#include <QScrollBar>
-#include <QTimer>
-#include <set>
-#include <Probe/I_Probe.hpp>
-
 #include "ui_ProjectFileBrowser.h"
 
 namespace HWD::UI {
 
+    /*
     ProjectFileBrowser::ProjectFileBrowser(const QString& rootPath) :
         KDDockWidgets::DockWidget(QStringLiteral("ProjectFileBrowser"), KDDockWidgets::DockWidgetBase::Option_DeleteOnClose),
         ui(std::make_unique<Ui::ProjectFileBrowser>()) {
@@ -58,5 +51,7 @@ namespace HWD::UI {
 
     ProjectFileBrowser::~ProjectFileBrowser() {
     }
+
+*/
 
 } // namespace HWD::UI

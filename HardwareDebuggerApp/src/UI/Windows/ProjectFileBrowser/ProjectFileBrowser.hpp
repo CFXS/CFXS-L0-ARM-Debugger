@@ -18,7 +18,6 @@
 // [CFXS] //
 #pragma once
 
-#include <KDDockWidgets/DockWidget.h>
 #include <UI/Models/FileBrowser/FileBrowserModel.hpp>
 
 namespace Ui {
@@ -27,6 +26,7 @@ namespace Ui {
 
 namespace HWD::UI {
 
+    /*
     class ProjectFileBrowser : public KDDockWidgets::DockWidget {
         Q_OBJECT
 
@@ -38,5 +38,6 @@ namespace HWD::UI {
         std::unique_ptr<Ui::ProjectFileBrowser> ui;
         FileBrowserModel* m_FB_Model;
     };
+    */
 
 } // namespace HWD::UI

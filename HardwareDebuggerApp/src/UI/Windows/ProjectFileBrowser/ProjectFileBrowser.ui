@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
     <class>ProjectFileBrowser</class>
-    <widget class="KDDockWidgets::DockWidget" name="ProjectFileBrowser">
+    <widget class="QWidget" name="ProjectFileBrowser">
         <property name="geometry">
             <rect>
                 <x>0</x>
@@ -57,14 +57,6 @@
             </layout>
         </widget>
     </widget>
-    <customwidgets>
-        <customwidget>
-            <class>KDDockWidgets::DockWidget</class>
-            <extends>QWidget</extends>
-            <header location="global">KDDockWidgets/DockWidget.h</header>
-            <container>1</container>
-        </customwidget>
-    </customwidgets>
     <resources />
     <connections />
 </ui>

@@ -22,17 +22,67 @@
 #include <QFileDialog>
 #include <Debugger/ELF/ELF_Reader.hpp>
 
+#include <QLabel>
+#include <QTableWidget>
+
+using ads::CDockManager;
+using ads::CDockWidget;
+using ads::DockWidgetArea;
+
 namespace HWD::UI {
 
-    MainWindow::MainWindow(QWidget *parent) :
-        KDDockWidgets::MainWindow(QStringLiteral(CFXS_HWD_PROGRAM_NAME), KDDockWidgets::MainWindowOption_HasCentralFrame, parent) {
+    MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+        setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME));
         resize(640, 480);
+
+        m_DockManager = new ads::CDockManager(this);
+
+        // Set central widget
+        QLabel* label = new QLabel();
+        label->setText("");
+        label->setAlignment(Qt::AlignCenter);
+        CDockWidget* CentralDockWidget = new CDockWidget("CentralWidget");
+        CentralDockWidget->setWidget(label);
+        CentralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
+        auto* CentralDockArea = m_DockManager->setCentralWidget(CentralDockWidget);
+
+        // create other dock widgets
+        QTableWidget* table = new QTableWidget();
+        table->setColumnCount(3);
+        table->setRowCount(10);
+        CDockWidget* TableDockWidget = new CDockWidget("Table 1");
+        TableDockWidget->setWidget(table);
+        TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
+        TableDockWidget->resize(250, 150);
+        TableDockWidget->setMinimumSize(200, 150);
+        m_DockManager->addDockWidgetTabToArea(TableDockWidget, CentralDockArea);
+        auto TableArea = m_DockManager->addDockWidget(DockWidgetArea::LeftDockWidgetArea, TableDockWidget);
+
+        table = new QTableWidget();
+        table->setColumnCount(5);
+        table->setRowCount(1020);
+        TableDockWidget = new CDockWidget("Table 2");
+        TableDockWidget->setWidget(table);
+        TableDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
+        TableDockWidget->resize(250, 150);
+        TableDockWidget->setMinimumSize(200, 150);
+        m_DockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, TableDockWidget, TableArea);
+
+        QTableWidget* propertiesTable = new QTableWidget();
+        propertiesTable->setColumnCount(3);
+        propertiesTable->setRowCount(10);
+        CDockWidget* PropertiesDockWidget = new CDockWidget("Properties");
+        PropertiesDockWidget->setWidget(propertiesTable);
+        PropertiesDockWidget->setMinimumSizeHintMode(CDockWidget::MinimumSizeHintFromDockWidget);
+        PropertiesDockWidget->resize(250, 150);
+        PropertiesDockWidget->setMinimumSize(200, 150);
+        m_DockManager->addDockWidget(DockWidgetArea::RightDockWidgetArea, PropertiesDockWidget, CentralDockArea);
     }
 
     MainWindow::~MainWindow() {
     }
 
-    void MainWindow::closeEvent(QCloseEvent *event) {
+    void MainWindow::closeEvent(QCloseEvent* event) {
         emit Closed();
         event->accept();
     }

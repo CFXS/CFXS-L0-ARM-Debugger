@@ -20,14 +20,9 @@
 #include <QString>
 #include <QStringLiteral>
 
-#include <KDDockWidgets/DockWidget.h>
-#include <KDDockWidgets/LayoutSaver.h>
-#include <KDDockWidgets/Config.h>
-
 #include <Probe/JLink/JLink.hpp>
 
 #include <UI/Windows/ProjectFileBrowser/ProjectFileBrowser.hpp>
-#include <UI/HWD_WidgetFactory.hpp>
 
 namespace HWD {
 
@@ -53,14 +48,14 @@ namespace HWD {
 
         const QString rootPath = QStringLiteral("C:/CFXS_Projects/CFXS-RTOS-Test");
 
-        auto pfbWindow = new UI::ProjectFileBrowser(rootPath);
-        GetMainWindow()->addDockWidgetAsTab(pfbWindow);
-        pfbWindow->show();
+        //auto pfbWindow = new UI::ProjectFileBrowser(rootPath);
+        //GetMainWindow()->addDockWidgetAsTab(pfbWindow);
+        //pfbWindow->show();
 
-        // project tests
-        QDir().mkdir(rootPath + "/.cfxs_hwd");
-        QFile projectFile(rootPath + "/.cfxs_hwd/project.hwd");
-        projectFile.open(QIODevice::ReadWrite);
+        //// project tests
+        //QDir().mkdir(rootPath + "/.cfxs_hwd");
+        //QFile projectFile(rootPath + "/.cfxs_hwd/project.hwd");
+        //projectFile.open(QIODevice::ReadWrite);
     }
 
     void HWD_Application::OnDestroy() {

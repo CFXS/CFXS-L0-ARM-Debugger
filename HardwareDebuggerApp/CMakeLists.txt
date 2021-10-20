@@ -14,8 +14,7 @@ add_compile_definitions("CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
 
-include("_KDDockWidgets_Options.cmake")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/KDDockWidgets)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/QtAdvancedDockingSystem)
 
 set(CMAKE_AUTOMOC ON) 
 set(CMAKE_AUTORCC ON)
@@ -68,6 +67,7 @@ target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 target_include_directories(${EXE_NAME} SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/llvm/include")
+target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/QtAdvancedDockingSystem/src")
 
 if(MSVC)
   target_compile_options(${EXE_NAME} PRIVATE "/MP")
@@ -78,7 +78,7 @@ target_link_libraries(
   PRIVATE project_options
           project_warnings
           Lua
-          KDAB::kddockwidgets
+          qtadvanceddocking
           Qt::Core
           Qt::Widgets
           Qt::Network

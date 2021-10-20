@@ -4,12 +4,12 @@
 [submodule "HardwareDebuggerApp/vendor/Lua"]
 	path = HardwareDebuggerApp/vendor/Lua
 	url = https://github.com/CFXS/lua.git
-[submodule "HardwareDebuggerApp/vendor/KDDockWidgets"]
-	path = HardwareDebuggerApp/vendor/KDDockWidgets
-	url = https://github.com/KDAB/KDDockWidgets.git
 [submodule "Docs"]
 	path = Docs
 	url = https://github.com/CFXS/HWD-Private-Docs.git
 [submodule "HardwareDebuggerApp/vendor/LicenseGen"]
 	path = HardwareDebuggerApp/vendor/LicenseGen
 	url = https://github.com/CFXS/CFXS-License-Header-Generator.git
+[submodule "HardwareDebuggerApp/vendor/QtAdvancedDockingSystem"]
+	path = HardwareDebuggerApp/vendor/QtAdvancedDockingSystem
+	url = https://github.com/CFXS/Qt-Advanced-Docking-System.git

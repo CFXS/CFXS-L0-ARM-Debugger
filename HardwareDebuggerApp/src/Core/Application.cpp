@@ -1,13 +1,10 @@
 #include "Application.hpp"
 
-#include <KDDockWidgets/Config.h>
-
+#include <DockManager.h>
+#include <QFile>
 #include <QStyleFactory>
-#include <QTimer>
-#include <fstream>
-#include <streambuf>
 
-#include "UI/Test_StyleSheet.hpp"
+using ads::CDockManager;
 
 namespace HWD {
 
@@ -25,36 +22,42 @@ namespace HWD {
         m_QtApplication = std::make_unique<QApplication>(argc, argv);
         m_QtApplication->setOrganizationName(QStringLiteral("CFXS"));
         m_QtApplication->setApplicationName(QString::fromStdString(name));
-        m_QtApplication->setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
 
-        auto palette = QPalette();
-        palette.setColor(QPalette::Window, QColor(53, 53, 53));
-        palette.setColor(QPalette::WindowText, Qt::white);
-        palette.setColor(QPalette::Base, QColor(33, 33, 33));
-        palette.setColor(QPalette::AlternateBase, QColor(44, 44, 44));
-        palette.setColor(QPalette::ToolTipBase, Qt::black);
-        palette.setColor(QPalette::ToolTipText, Qt::white);
-        palette.setColor(QPalette::Text, Qt::white);
-        palette.setColor(QPalette::Button, QColor(53, 53, 53));
-        palette.setColor(QPalette::ButtonText, Qt::white);
-        palette.setColor(QPalette::BrightText, Qt::red);
-        palette.setColor(QPalette::Link, QColor(42, 130, 218));
-        palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-        palette.setColor(QPalette::HighlightedText, Qt::black);
-        m_QtApplication->setPalette(palette);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::AllTabsHaveCloseButton);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaDynamicTabsMenuButtonVisibility);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab);
 
-        //std::ifstream fileStream("C:\\CFXS\\dark.qss", std::ios::in | std::ios::binary);
-        //std::vector<uint8_t> ssContent = std::vector<uint8_t>(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
-        //m_QtApplication->setStyleSheet((char*)ssContent.data());
+        m_QtApplication->setStyle(QStyleFactory::create(QStringLiteral("fusion")));
 
-        auto flags = KDDockWidgets::Config::self().flags();
-        flags |= KDDockWidgets::Config::Flag_NativeTitleBar;
-        flags |= KDDockWidgets::Config::Flag_AllowReorderTabs;
-        flags |= KDDockWidgets::Config::Flag_TabsHaveCloseButton;
-        flags |= KDDockWidgets::Config::Flag_TitleBarHasMaximizeButton;
-        flags |= KDDockWidgets::Config::Flag_AutoHideSupport;
+        QPalette darkPalette;
+        darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+        darkPalette.setColor(QPalette::WindowText, Qt::white);
+        darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+        darkPalette.setColor(QPalette::Base, QColor(42, 42, 42));
+        darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+        darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+        darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+        darkPalette.setColor(QPalette::Text, Qt::white);
+        darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+        darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
+        darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+        darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+        darkPalette.setColor(QPalette::ButtonText, Qt::white);
+        darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+        darkPalette.setColor(QPalette::BrightText, Qt::red);
+        darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+        darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+        darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+        darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
 
-        KDDockWidgets::Config::self().setFlags(flags);
+        m_QtApplication->setPalette(darkPalette);
+
+        QFile styleFile(":/Style/DarkStyle.qss");
+        styleFile.open(QFile::ReadOnly);
+        m_QtApplication->setStyleSheet(styleFile.readAll());
 
         m_MainWindow = std::make_unique<UI::MainWindow>();
         QObject::connect(m_MainWindow.get(), &UI::MainWindow::Closed, [&]() {

@@ -93,6 +93,8 @@
         "qfilesystemmodel": "cpp",
         "qstandarditem": "cpp",
         "source_location": "cpp",
-        "qstringliteral": "cpp"
+        "qstringliteral": "cpp",
+        "qscrollbar": "cpp",
+        "qfile": "cpp"
     }
 }
