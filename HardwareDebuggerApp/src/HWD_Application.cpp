@@ -19,10 +19,8 @@
 #include "HWD_Application.hpp"
 #include <QString>
 #include <QStringLiteral>
-
+#include <QStandardPaths>
 #include <Probe/JLink/JLink.hpp>
-
-#include <UI/Windows/ProjectFileBrowser/ProjectFileBrowser.hpp>
 
 namespace HWD {
 
@@ -30,32 +28,9 @@ namespace HWD {
         qApp->setOrganizationName("CFXS");
         qApp->setApplicationDisplayName(CFXS_HWD_PROGRAM_NAME);
     }
-
-    namespace Test {
-        extern RVeips_ProbeTest* m_RV;
-    }
-
     void HWD_Application::OnCreate() {
         HWDLOG_CORE_INFO("Loading probes");
         Probe::JLink::HWD_Load();
-
-#ifdef DEV_PC_CFXS_n
-        HWDLOG_CORE_INFO("DEV_PC_CFXS init");
-        (new std::thread([=]() {
-            m_RihardsTest = std::make_unique<Test::RVeips_ProbeTest>();
-        }))->detach();
-#endif
-
-        const QString rootPath = QStringLiteral("C:/CFXS_Projects/CFXS-RTOS-Test");
-
-        //auto pfbWindow = new UI::ProjectFileBrowser(rootPath);
-        //GetMainWindow()->addDockWidgetAsTab(pfbWindow);
-        //pfbWindow->show();
-
-        //// project tests
-        //QDir().mkdir(rootPath + "/.cfxs_hwd");
-        //QFile projectFile(rootPath + "/.cfxs_hwd/project.hwd");
-        //projectFile.open(QIODevice::ReadWrite);
     }
 
     void HWD_Application::OnDestroy() {

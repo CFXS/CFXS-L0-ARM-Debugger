@@ -10,7 +10,7 @@ include("_Sources.cmake")
 add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
 
 add_compile_definitions("CFXS_HWD_VERSION_STRING=\"v0.1-dev\"")
-add_compile_definitions("CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger \" CFXS_HWD_VERSION_STRING")
+add_compile_definitions("CFXS_HWD_PROGRAM_NAME=\"CFXS Hardware Debugger\"")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
 

@@ -26,7 +26,7 @@
 #include <QTableWidget>
 
 #include <QTreeView>
-#include <UI/Models/FileBrowser/FileBrowserModel.hpp>
+#include <UI/Windows/WorkspacePanel/WorkspacePanel.hpp>
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -40,33 +40,9 @@ namespace HWD::UI {
 
         m_DockManager = new ads::CDockManager(this);
 
-        auto fileTree = new QTreeView();
-
-        auto rootPath = "C:/CFXS_Projects/CFXS-RTOS-Test";
-
-        auto m_FB_Model = new FileBrowserModel(fileTree, this);
-        //m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
-        m_FB_Model->setRootPath(rootPath);
-
-        fileTree->setSelectionMode(QAbstractItemView::NoSelection); // No highlight
-        fileTree->setFocusPolicy(Qt::NoFocus);                      // No focus box
-
-        fileTree->setModel(m_FB_Model);
-        fileTree->setRootIndex(m_FB_Model->index(rootPath));
-
-        for (int i = 1; i < fileTree->model()->columnCount(); i++) {
-            fileTree->hideColumn(i); // hide all columns except name
-        }
-
-        fileTree->setHeaderHidden(true);
-        fileTree->setIndentation(16);
-
-        // Create a dock widget with the title Label 1 and set the created label
-        // as the dock widget content
-        ads::CDockWidget* dockWidget = new ads::CDockWidget("Project Files");
-        dockWidget->setWidget(fileTree);
-
-        m_DockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
+        auto workspacePanel = new WorkspacePanel;
+        workspacePanel->SetRootPath("C:/CFXS_Projects/CFXS-RTOS-Test");
+        m_DockManager->addDockWidget(ads::TopDockWidgetArea, workspacePanel);
     }
 
     MainWindow::~MainWindow() {

@@ -19,25 +19,26 @@
 #pragma once
 
 #include <UI/Models/FileBrowser/FileBrowserModel.hpp>
+#include <DockWidget.h>
 
 namespace Ui {
-    class ProjectFileBrowser;
+    class WorkspacePanel;
 }
 
 namespace HWD::UI {
 
-    /*
-    class ProjectFileBrowser : public KDDockWidgets::DockWidget {
+    class WorkspacePanel : public ads::CDockWidget {
         Q_OBJECT
 
     public:
-        ProjectFileBrowser(const QString& rootPath);
-        ~ProjectFileBrowser();
+        WorkspacePanel();
+        ~WorkspacePanel() = default;
+
+        void SetRootPath(const QString& path);
 
     private:
-        std::unique_ptr<Ui::ProjectFileBrowser> ui;
+        std::unique_ptr<Ui::WorkspacePanel> ui;
         FileBrowserModel* m_FB_Model;
     };
-    */
 
 } // namespace HWD::UI
