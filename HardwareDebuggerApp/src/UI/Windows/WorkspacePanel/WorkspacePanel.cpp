@@ -37,6 +37,7 @@ namespace HWD::UI {
     ////////////////////////////////////////////////////////////
 
     WorkspacePanel::WorkspacePanel() : ads::CDockWidget(QStringLiteral("Workspace")), ui(std::make_unique<Ui::WorkspacePanel>()) {
+        HWDLOG_CORE_TRACE("Create workspace panel");
         ui->setupUi(this);
 
         m_FB_Model = new FileBrowserModel(ui->tw_FileBrowser, this);
@@ -68,6 +69,10 @@ namespace HWD::UI {
 
         setWidget(ui->root);
     }
+
+    WorkspacePanel::~WorkspacePanel() {
+        HWDLOG_CORE_TRACE("Destroy workspace panel");
+    };
 
     void WorkspacePanel::SetRootPath(const QString& path) {
         if (QDir().exists(path)) {

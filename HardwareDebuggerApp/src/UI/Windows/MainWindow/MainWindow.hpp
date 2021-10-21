@@ -21,6 +21,12 @@
 #include <QMainWindow>
 #include "DockManager.h"
 
+#include <UI/Windows/WorkspacePanel/WorkspacePanel.hpp>
+
+namespace Ui {
+    class MainWindow;
+}
+
 namespace HWD::UI {
 
     class MainWindow : public QMainWindow {
@@ -30,6 +36,11 @@ namespace HWD::UI {
         explicit MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
 
+    private:
+        void RegisterActions(); // connect actions to functions
+
+        void OpenPanel_Workspace(); // Open workspace panel
+
     signals:
         void Closed();
 
@@ -37,7 +48,11 @@ namespace HWD::UI {
         void closeEvent(QCloseEvent *event);
 
     private:
+        std::unique_ptr<Ui::MainWindow> ui;
         ads::CDockManager *m_DockManager;
+
+        // Panels
+        WorkspacePanel *m_Panel_Workspace = nullptr;
     };
 
 } // namespace HWD::UI

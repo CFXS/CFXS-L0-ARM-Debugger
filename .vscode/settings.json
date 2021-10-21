@@ -96,6 +96,8 @@
         "qstringliteral": "cpp",
         "qscrollbar": "cpp",
         "qfile": "cpp",
-        "qstylefactory": "cpp"
+        "qstylefactory": "cpp",
+        "qboxlayout": "cpp",
+        "qstring": "cpp"
     }
 }

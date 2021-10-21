@@ -27,14 +27,25 @@ namespace HWD {
     HWD_Application::HWD_Application(int argc, char** argv) : Application(argc, argv, CFXS_HWD_PROGRAM_NAME) {
         qApp->setOrganizationName("CFXS");
         qApp->setApplicationDisplayName(CFXS_HWD_PROGRAM_NAME);
+        qApp->setWindowIcon(QPixmap(":/HWD_Icon.png"));
     }
     void HWD_Application::OnCreate() {
-        HWDLOG_CORE_INFO("Loading probes");
-        Probe::JLink::HWD_Load();
+        Load_Probe();
     }
 
     void HWD_Application::OnDestroy() {
-        HWDLOG_CORE_INFO("Destroying App");
+        Unload_Probe();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
+    void HWD_Application::Load_Probe() {
+        HWDLOG_CORE_TRACE("Load probes");
+        Probe::JLink::HWD_Load();
+    }
+
+    void HWD_Application::Unload_Probe() {
+        HWDLOG_CORE_TRACE("Unload probes");
         Probe::JLink::HWD_Unload();
     }
 

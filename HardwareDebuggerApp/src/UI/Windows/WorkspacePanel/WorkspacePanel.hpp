@@ -32,7 +32,7 @@ namespace HWD::UI {
 
     public:
         WorkspacePanel();
-        ~WorkspacePanel() = default;
+        ~WorkspacePanel();
 
         void SetRootPath(const QString& path);
 

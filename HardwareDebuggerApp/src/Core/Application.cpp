@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QStyleFactory>
 #include <QTextStream>
+#include <QFontDatabase>
 
 using ads::CDockManager;
 
@@ -61,9 +62,10 @@ namespace HWD {
         QApplication::setPalette(darkPalette);
         QApplication::setStyle(QStyleFactory::create(QStringLiteral("fusion")));
 
-        QFile file(":/Style/DarkStyle.qss");
+        QFile file(":/Style/Main");
         file.open(QFile::ReadOnly);
         m_QtApplication->setStyleSheet(QLatin1String(file.readAll()));
+        file.close();
 
         m_MainWindow = std::make_unique<UI::MainWindow>();
         QObject::connect(m_MainWindow.get(), &UI::MainWindow::Closed, [&]() {
@@ -88,6 +90,7 @@ namespace HWD {
             QApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents | QEventLoop::EventLoopExec);
         }
 
+        HWDLOG_CORE_INFO("Stopping application");
         OnDestroy();
     }
 

@@ -17,16 +17,14 @@
 // ---------------------------------------------------------------------
 // [CFXS] //
 #include "MainWindow.hpp"
-
+#include "ui_MainWindow.h"
 #include <QCloseEvent>
-#include <QFileDialog>
-#include <Debugger/ELF/ELF_Reader.hpp>
-
-#include <QLabel>
-#include <QTableWidget>
-
 #include <QTreeView>
-#include <UI/Windows/WorkspacePanel/WorkspacePanel.hpp>
+#include <QAction>
+#include <QLayout>
+
+#include <DockAreaWidget.h>
+#include "CFXS_Center_Widget.hpp"
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -34,15 +32,33 @@ using ads::DockWidgetArea;
 
 namespace HWD::UI {
 
-    MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+    MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
+        ui->setupUi(this);
         setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME));
-        resize(640, 480);
+        resize(1280, 720);
 
-        m_DockManager = new ads::CDockManager(this);
+        auto menuFont = ui->menubar->font();
+        menuFont.setPointSize(menuFont.pointSize() + 1);
+        ui->menubar->setFont(menuFont);
 
-        auto workspacePanel = new WorkspacePanel;
-        workspacePanel->SetRootPath("C:/CFXS_Projects/CFXS-RTOS-Test");
-        m_DockManager->addDockWidget(ads::TopDockWidgetArea, workspacePanel);
+        for (auto action : ui->menubar->actions()) {
+            auto actionFont = action->font();
+            actionFont.setPointSize(actionFont.pointSize() + 1);
+            action->setFont(actionFont);
+        }
+
+        CFXS_Center_Widget* centralFrame = new CFXS_Center_Widget;
+        centralFrame->setObjectName("MainWindowCentralFrame");
+
+        CDockWidget* centralDockWidget = new CDockWidget("CentralWidget");
+        centralDockWidget->setWidget(centralFrame);
+        centralDockWidget->layout()->setContentsMargins({0, 0, 0, 0});
+
+        centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
+        auto centralDockArea = ui->dockManager->setCentralWidget(centralDockWidget);
+        centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+
+        RegisterActions();
     }
 
     MainWindow::~MainWindow() {
@@ -51,6 +67,34 @@ namespace HWD::UI {
     void MainWindow::closeEvent(QCloseEvent* event) {
         emit Closed();
         event->accept();
+    }
+
+    ///////////////////////////////////////////////////////////////
+
+    void MainWindow::RegisterActions() {
+        // Exit
+        connect(ui->actionExit, &QAction::triggered, this, [=]() {
+            this->close();
+        });
+
+        // View > Workspace
+        connect(ui->actionWorkspace, &QAction::triggered, this, [=]() {
+            OpenPanel_Workspace();
+        });
+    }
+
+    void MainWindow::OpenPanel_Workspace() {
+        if (!m_Panel_Workspace) {
+            m_Panel_Workspace = new WorkspacePanel;
+            ui->dockManager->addDockWidget(ads::LeftDockWidgetArea, m_Panel_Workspace);
+            m_Panel_Workspace->SetRootPath("C:/CFXS_Projects/CFXS-RTOS-Test");
+        } else {
+            m_Panel_Workspace->toggleView();
+            if (m_Panel_Workspace->isFloating()) {
+                m_Panel_Workspace->setFocus(Qt::FocusReason::ActiveWindowFocusReason);
+                m_Panel_Workspace->raise();
+            }
+        }
     }
 
 } // namespace HWD::UI
