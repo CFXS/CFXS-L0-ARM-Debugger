@@ -6,6 +6,7 @@
 namespace HWD {
 
     std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
+    std::shared_ptr<spdlog::logger> Log::s_UILogger;
     std::shared_ptr<spdlog::logger> Log::s_ProbeLogger;
 
     void Log::Initialize() {
@@ -20,6 +21,11 @@ namespace HWD {
         spdlog::register_logger(s_CoreLogger);
         s_CoreLogger->set_level(spdlog::level::trace);
         s_CoreLogger->flush_on(spdlog::level::trace);
+
+        s_UILogger = std::make_shared<spdlog::logger>("HWD-UI", begin(logSinks), end(logSinks));
+        spdlog::register_logger(s_UILogger);
+        s_UILogger->set_level(spdlog::level::trace);
+        s_UILogger->flush_on(spdlog::level::trace);
 
         s_ProbeLogger = std::make_shared<spdlog::logger>("HWD-Probe", begin(logSinks), end(logSinks));
         spdlog::register_logger(s_ProbeLogger);

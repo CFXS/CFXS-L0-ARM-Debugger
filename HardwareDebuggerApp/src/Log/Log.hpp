@@ -18,12 +18,17 @@ namespace HWD {
             return s_CoreLogger;
         }
 
+        static inline std::shared_ptr<spdlog::logger>& GetUILogger() {
+            return s_UILogger;
+        }
+
         static inline std::shared_ptr<spdlog::logger>& GetProbeLogger() {
             return s_ProbeLogger;
         }
 
     private:
         static std::shared_ptr<spdlog::logger> s_CoreLogger;
+        static std::shared_ptr<spdlog::logger> s_UILogger;
         static std::shared_ptr<spdlog::logger> s_ProbeLogger;
     };
 
@@ -48,7 +53,14 @@ struct fmt::formatter<QString> {
 #define HWDLOG_CORE_ERROR(...)    ::HWD::Log::GetCoreLogger()->error(__VA_ARGS__)
 #define HWDLOG_CORE_CRITICAL(...) ::HWD::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
-// Core log macros
+// UI log macros
+#define HWDLOG_UI_TRACE(...)    ::HWD::Log::GetUILogger()->trace(__VA_ARGS__)
+#define HWDLOG_UI_INFO(...)     ::HWD::Log::GetUILogger()->info(__VA_ARGS__)
+#define HWDLOG_UI_WARN(...)     ::HWD::Log::GetUILogger()->warn(__VA_ARGS__)
+#define HWDLOG_UI_ERROR(...)    ::HWD::Log::GetUILogger()->error(__VA_ARGS__)
+#define HWDLOG_UI_CRITICAL(...) ::HWD::Log::GetUILogger()->critical(__VA_ARGS__)
+
+// Probe log macros
 #define HWDLOG_PROBE_TRACE(...)    ::HWD::Log::GetProbeLogger()->trace(__VA_ARGS__)
 #define HWDLOG_PROBE_INFO(...)     ::HWD::Log::GetProbeLogger()->info(__VA_ARGS__)
 #define HWDLOG_PROBE_WARN(...)     ::HWD::Log::GetProbeLogger()->warn(__VA_ARGS__)

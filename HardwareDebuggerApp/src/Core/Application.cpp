@@ -25,14 +25,18 @@ namespace HWD {
         m_QtApplication->setOrganizationName(QStringLiteral("CFXS"));
         m_QtApplication->setApplicationName(QString::fromStdString(name));
 
+        // DockManager disabled flags
         ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasCloseButton, false);
         ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaHasUndockButton, false);
-        ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting);
-        ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap);
-        ads::CDockManager::setConfigFlag(ads::CDockManager::AllTabsHaveCloseButton);
-        ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaDynamicTabsMenuButtonVisibility);
-        ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize);
-        ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab);
+
+        // DockManager enabled flags
+        ads::CDockManager::setConfigFlag(ads::CDockManager::XmlCompressionEnabled, true);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::AllTabsHaveCloseButton, true);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaDynamicTabsMenuButtonVisibility, true);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, true);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
 
         QPalette darkPalette;
         darkPalette.setColor(QPalette::Window, QColor(55, 55, 55));

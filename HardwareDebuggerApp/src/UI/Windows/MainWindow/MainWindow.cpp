@@ -32,6 +32,16 @@ using ads::DockWidgetArea;
 
 namespace HWD::UI {
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    static constexpr int STATE_SERIALIZER_VERSION = 1; // Used to track state loading differences
+    static const QString CENTRAL_WIDGET_NAME      = QStringLiteral("__CentralWidget");
+    static const QString KEY_VERSION              = QStringLiteral("version");
+    static const QString KEY_WINDOW_GEOMETRY      = QStringLiteral("windowGeometry");
+    static const QString KEY_WINDOW_STATE         = QStringLiteral("windowState");
+    static const QString KEY_DOCK_STATE           = QStringLiteral("dockState");
+    static const QString KEY_OPEN_PANELS          = QStringLiteral("openPanels");
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
     MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
         ui->setupUi(this);
         setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME));
@@ -50,12 +60,12 @@ namespace HWD::UI {
         CFXS_Center_Widget* centralFrame = new CFXS_Center_Widget;
         centralFrame->setObjectName("MainWindowCentralFrame");
 
-        CDockWidget* centralDockWidget = new CDockWidget("CentralWidget");
+        CDockWidget* centralDockWidget = new CDockWidget(CENTRAL_WIDGET_NAME);
         centralDockWidget->setWidget(centralFrame);
         centralDockWidget->layout()->setContentsMargins({0, 0, 0, 0});
 
         centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
-        auto centralDockArea = ui->dockManager->setCentralWidget(centralDockWidget);
+        auto centralDockArea = GetDockManager()->setCentralWidget(centralDockWidget);
         centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
 
         RegisterActions();
@@ -64,9 +74,99 @@ namespace HWD::UI {
     MainWindow::~MainWindow() {
     }
 
+    ads::CDockManager* MainWindow::GetDockManager() {
+        return ui->dockManager;
+    }
+
     void MainWindow::closeEvent(QCloseEvent* event) {
+        HWDLOG_UI_TRACE("Close MainWindow");
+        QMap<QString, QVariant> state;
+        state[KEY_VERSION]         = STATE_SERIALIZER_VERSION;
+        state[KEY_WINDOW_GEOMETRY] = saveGeometry();
+        state[KEY_WINDOW_STATE]    = saveState();
+        state[KEY_DOCK_STATE]      = GetDockManager()->saveState();
+
+        QStringList openPanelList;
+
+        HWDLOG_UI_TRACE("Open panels:");
+        for (auto w : GetDockManager()->dockWidgets()) {
+            if (!w->isClosed() && w->objectName() != CENTRAL_WIDGET_NAME) {
+                HWDLOG_UI_TRACE(" - {}", w->objectName());
+                openPanelList.append(w->objectName());
+            }
+        }
+
+        state[KEY_OPEN_PANELS] = openPanelList;
+
+        QByteArray rawState;
+        QDataStream stateStream(&rawState, QIODevice::WriteOnly);
+        stateStream << state;
+
+        emit StateDataReady(rawState);
         emit Closed();
         event->accept();
+    }
+
+    void MainWindow::LoadState(const QByteArray& rawState) {
+        if (!m_StateLoaded) {
+            m_StateLoaded = true; // This is set to true even if state load fails
+
+            if (rawState.size() == 0) {
+                HWDLOG_UI_ERROR("MainWindow failed to load state - data size is 0");
+            } else {
+                QMap<QString, QVariant> state;
+                QDataStream stateStream(rawState);
+                stateStream.startTransaction();
+                stateStream >> state;
+
+                if (stateStream.commitTransaction()) {
+                    if (!state.contains(KEY_VERSION)) {
+                        HWDLOG_UI_ERROR("MainWindow failed to load state - no version field");
+                        return;
+                    }
+
+                    switch (state[KEY_VERSION].toInt()) {
+                        case 1: {
+                            HWDLOG_UI_TRACE("MainWindow load state [version = {0}]", state[KEY_VERSION].toInt());
+                            if (!state.contains(KEY_WINDOW_GEOMETRY) || !state.contains(KEY_WINDOW_STATE) ||
+                                !state.contains(KEY_DOCK_STATE) || !state.contains(KEY_OPEN_PANELS)) {
+                                HWDLOG_UI_ERROR("MainWindow failed to load state v{0} - invalid data", state[KEY_VERSION].toInt());
+                                return;
+                            }
+
+                            // Open all stored panels
+                            for (auto& panelName : state[KEY_OPEN_PANELS].toStringList()) {
+                                bool known = true;
+                                if (panelName == QStringLiteral("WorkspacePanel")) {
+                                    OpenPanel_Workspace();
+                                } else {
+                                    known = false;
+                                }
+
+                                if (known) {
+                                    HWDLOG_UI_TRACE(" - Open {}", panelName);
+                                } else {
+                                    HWDLOG_UI_ERROR(" - Unknown panel: {}", panelName);
+                                }
+                            }
+
+                            // Load data
+                            restoreGeometry(state[KEY_WINDOW_GEOMETRY].toByteArray());
+                            restoreState(state[KEY_WINDOW_STATE].toByteArray());
+                            GetDockManager()->restoreState(state[KEY_DOCK_STATE].toByteArray());
+
+                            break;
+                        }
+                        default: HWDLOG_UI_ERROR("MainWindow failed to load state - unsupported version"); return;
+                    }
+                } else {
+                    HWDLOG_UI_ERROR("MainWindow failed to load state - corrupted data");
+                    return;
+                }
+            }
+        } else {
+            HWDLOG_UI_WARN("MainWindow state already loaded");
+        }
     }
 
     ///////////////////////////////////////////////////////////////
@@ -86,14 +186,11 @@ namespace HWD::UI {
     void MainWindow::OpenPanel_Workspace() {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
-            ui->dockManager->addDockWidget(ads::LeftDockWidgetArea, m_Panel_Workspace);
+            GetDockManager()->addDockWidget(ads::LeftDockWidgetArea, m_Panel_Workspace);
             m_Panel_Workspace->SetRootPath("C:/CFXS_Projects/CFXS-RTOS-Test");
         } else {
             m_Panel_Workspace->toggleView();
-            if (m_Panel_Workspace->isFloating()) {
-                m_Panel_Workspace->setFocus(Qt::FocusReason::ActiveWindowFocusReason);
-                m_Panel_Workspace->raise();
-            }
+            m_Panel_Workspace->raise();
         }
     }
 

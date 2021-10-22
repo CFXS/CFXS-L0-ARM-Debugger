@@ -2,8 +2,10 @@
     "cmake.generator": "Ninja",
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "files.associations": {
+        "*.hwd": "xml",
         "*.ui": "xml",
         "*.qrc": "xml",
+        "*.qss": "css",
         "unordered_map": "cpp",
         "xstddef": "cpp",
         "xhash": "cpp",

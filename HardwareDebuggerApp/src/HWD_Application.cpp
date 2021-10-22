@@ -31,6 +31,23 @@ namespace HWD {
     }
     void HWD_Application::OnCreate() {
         Load_Probe();
+
+        QByteArray windowStateData;
+        QFile windowStateFile("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd");
+        if (windowStateFile.exists()) {
+            windowStateFile.open(QFile::ReadOnly);
+            if (windowStateFile.isOpen()) {
+                windowStateData = windowStateFile.readAll();
+                HWDLOG_CORE_TRACE("Window state file {} bytes read", windowStateData.size());
+                GetMainWindow()->LoadState(windowStateData);
+            } else {
+                HWDLOG_CORE_ERROR("Failed to open window state file: {}", windowStateFile.errorString());
+            }
+        } else {
+            HWDLOG_CORE_WARN("Window state file not found");
+        }
+
+        QObject::connect(GetMainWindow(), &UI::MainWindow::StateDataReady, SaveWindowState);
     }
 
     void HWD_Application::OnDestroy() {
@@ -40,13 +57,34 @@ namespace HWD {
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     void HWD_Application::Load_Probe() {
-        HWDLOG_CORE_TRACE("Load probes");
+        HWDLOG_CORE_INFO("Load probes");
         Probe::JLink::HWD_Load();
     }
 
     void HWD_Application::Unload_Probe() {
-        HWDLOG_CORE_TRACE("Unload probes");
+        HWDLOG_CORE_INFO("Unload probes");
         Probe::JLink::HWD_Unload();
+    }
+
+    void HWD_Application::SaveWindowState(const QByteArray& rawState) {
+        HWDLOG_CORE_INFO("Saving window state");
+
+        QFile windowStateFile("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd");
+        windowStateFile.open(QFile::WriteOnly | QFile::Truncate); // open for overwrite
+
+        if (windowStateFile.isOpen()) {
+            auto bytesWritten = windowStateFile.write(rawState);
+
+            if (bytesWritten == rawState.size()) {
+                windowStateFile.close();
+                HWDLOG_CORE_INFO("Window state saved");
+            } else {
+                HWDLOG_CORE_ERROR(
+                    "Failed to save window state: {}/{} bytes written ({})", bytesWritten, rawState.size(), windowStateFile.errorString());
+            }
+        } else {
+            HWDLOG_CORE_ERROR("Failed to open window state file: {}", windowStateFile.errorString());
+        }
     }
 
 } // namespace HWD

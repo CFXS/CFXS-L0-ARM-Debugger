@@ -39,6 +39,9 @@ namespace HWD {
         void Unload_Probe();
 
     private:
+        static void SaveWindowState(const QByteArray& rawState);
+
+    private:
         std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
     };
 

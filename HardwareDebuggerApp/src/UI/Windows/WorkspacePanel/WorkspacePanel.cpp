@@ -40,6 +40,8 @@ namespace HWD::UI {
         HWDLOG_CORE_TRACE("Create workspace panel");
         ui->setupUi(this);
 
+        setObjectName("WorkspacePanel");
+
         m_FB_Model = new FileBrowserModel(ui->tw_FileBrowser, this);
         m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
 

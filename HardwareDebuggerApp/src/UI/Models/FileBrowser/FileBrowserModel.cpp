@@ -27,7 +27,7 @@ namespace HWD::UI {
     }
 
     QVariant FileBrowserModel::data(const QModelIndex& index, int role) const {
-        if (role == QFileSystemModel::FileIconRole) {
+        if (role == QFileSystemModel::FileIconRole && m_WorkingTreeView->isVisible()) {
             auto info = fileInfo(index);
             if (info.isDir()) {
                 return m_IconProvider.icon(info, m_WorkingTreeView->isExpanded(index));

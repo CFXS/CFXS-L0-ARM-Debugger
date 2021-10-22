@@ -33,25 +33,40 @@ namespace HWD::UI {
         Q_OBJECT
 
     public:
+        /// \param rawStateToLoad state data received from SaveState signal on window close
         explicit MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
 
-    private:
-        void RegisterActions(); // connect actions to functions
+        /// Load window + docking state
+        void LoadState(const QByteArray &rawState);
 
-        void OpenPanel_Workspace(); // Open workspace panel
+    private:
+        /// getter for ui->dockManager
+        ads::CDockManager *GetDockManager();
+
+        /// connect actions to functions
+        void RegisterActions();
+
+        /// Open workspace panel
+        void OpenPanel_Workspace();
 
     signals:
         void Closed();
+
+        /// TODO: check if this has to be a copy or ref
+        /// Emitted when window + docking state has been serialized
+        void StateDataReady(const QByteArray &rawState);
 
     protected:
         void closeEvent(QCloseEvent *event);
 
     private:
+        bool m_StateLoaded = false; // true when LoadState has been called
         std::unique_ptr<Ui::MainWindow> ui;
         ads::CDockManager *m_DockManager;
 
         // Panels
+
         WorkspacePanel *m_Panel_Workspace = nullptr;
     };
 
