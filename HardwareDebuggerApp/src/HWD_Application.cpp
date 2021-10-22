@@ -20,7 +20,7 @@
 #include <QString>
 #include <QStringLiteral>
 #include <QStandardPaths>
-#include <Probe/JLink/JLink.hpp>
+#include <Debugger/Probe/JLink/JLink.hpp>
 
 namespace HWD {
 

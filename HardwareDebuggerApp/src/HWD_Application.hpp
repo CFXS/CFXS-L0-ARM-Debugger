@@ -18,7 +18,6 @@
 // [CFXS] //
 #pragma once
 
-#include <Test/RVeips_ProbeTest.hpp>
 #include <QSettings>
 
 #include "Core/Application.hpp"
@@ -41,9 +40,6 @@ namespace HWD {
 
     private:
         static void SaveWindowState(QSettings* stateData);
-
-    private:
-        std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
     };
 
 } // namespace HWD
