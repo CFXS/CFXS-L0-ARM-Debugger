@@ -181,7 +181,7 @@
         </action>
         <action name="actionWorkspace">
             <property name="text">
-                <string>Workspace    </string>
+                <string>Workspace        </string>
             </property>
         </action>
         <action name="actionCFXS_HWD_Github_Page">

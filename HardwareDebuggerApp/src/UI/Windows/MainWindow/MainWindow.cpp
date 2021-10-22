@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-//
+// 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -29,6 +29,7 @@
 #include "CFXS_Center_Widget.hpp"
 
 #include <UI/Windows/AboutWindow/AboutWindow.hpp>
+#include <Core/Project/ProjectManager.hpp>
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -49,8 +50,8 @@ namespace HWD::UI {
 
     MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
         ui->setupUi(this);
-        setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME));
-        resize(1280, 720);
+        UpdateTitle();
+        resize(1280, 720); // default size
 
         auto menuFont = ui->menubar->font();
         menuFont.setPointSize(menuFont.pointSize() + 1);
@@ -74,9 +75,26 @@ namespace HWD::UI {
         centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
 
         RegisterActions();
+
+        // Update title if project dir changed
+        connect(ProjectManager::GetNotifier(), &ProjectManager::Notifier::ProjectOpened, this, [=]() {
+            UpdateTitle();
+        });
     }
 
     MainWindow::~MainWindow() {
+    }
+
+    ///////////////////////////////////////////////////////////////////
+
+    void MainWindow::UpdateTitle() {
+        if (ProjectManager::IsProjectOpen()) {
+            auto path           = ProjectManager::GetWorkspacePath();
+            QString lastDirName = path.mid(path.lastIndexOf("/") + 1);
+            setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME) + " - " + lastDirName);
+        } else {
+            setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME) + " - No project open");
+        }
     }
 
     ads::CDockManager* MainWindow::GetDockManager() {
@@ -213,7 +231,6 @@ namespace HWD::UI {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
             GetDockManager()->addDockWidgetFloating(m_Panel_Workspace);
-            m_Panel_Workspace->SetRootPath("C:/CFXS_Projects/CFXS-RTOS-Test");
         } else {
             m_Panel_Workspace->toggleView();
             m_Panel_Workspace->raise();
