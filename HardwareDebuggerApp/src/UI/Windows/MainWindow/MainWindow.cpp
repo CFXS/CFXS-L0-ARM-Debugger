@@ -23,6 +23,7 @@
 #include <QAction>
 #include <QLayout>
 #include <QSettings>
+#include <QDesktopServices>
 
 #include <DockAreaWidget.h>
 #include "CFXS_Center_Widget.hpp"
@@ -187,6 +188,16 @@ namespace HWD::UI {
         // View > Workspace
         connect(ui->actionWorkspace, &QAction::triggered, this, [=]() {
             OpenPanel_Workspace();
+        });
+
+        // CFXS HWD Github
+        connect(ui->actionCFXS_HWD_Github_Page, &QAction::triggered, this, [=]() {
+            QDesktopServices::openUrl(QStringLiteral("https://github.com/CFXS/CFXS-Hardware-Debugger"));
+        });
+
+        // CFXS Discord
+        connect(ui->actionCFXS_Discord, &QAction::triggered, this, [=]() {
+            QDesktopServices::openUrl(QStringLiteral("https://discord.gg/ZdhfzQAC4S"));
         });
     }
 

@@ -18,7 +18,7 @@
 // [CFXS] //
 #pragma once
 
-#include <Probe/I_Probe.hpp>
+#include <Debugger/Probe/I_Probe.hpp>
 #include "Driver/JLink_Driver.hpp"
 
 namespace HWD::Probe {

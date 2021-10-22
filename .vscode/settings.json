@@ -103,6 +103,7 @@
         "qstring": "cpp",
         "qlayout": "cpp",
         "qicon": "cpp",
-        "qsettings": "cpp"
+        "qsettings": "cpp",
+        "qdesktopservices": "cpp"
     }
 }
