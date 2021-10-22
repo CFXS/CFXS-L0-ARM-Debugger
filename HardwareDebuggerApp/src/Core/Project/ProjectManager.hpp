@@ -17,7 +17,7 @@ namespace HWD {
 
         static bool IsProjectOpen();
         static const QString& GetWorkspacePath();
-        static QString GetProjectPath(Path path);
+        static QString GetProjectFilePath(Path path);
     };
 
 } // namespace HWD

@@ -29,7 +29,7 @@ namespace HWD {
         return s_WorkspacePath;
     }
 
-    QString ProjectManager::GetProjectPath(Path path) {
+    QString ProjectManager::GetProjectFilePath(Path path) {
         switch (path) {
             case Path::WINDOW_STATE: return GetWorkspacePath() + "/.cfxs_hwd/WindowState.hwd";
         }

@@ -21,7 +21,7 @@
 #include <QMainWindow>
 #include "DockManager.h"
 
-#include <UI/Windows/WorkspacePanel/WorkspacePanel.hpp>
+#include <UI/Windows/Panels/WorkspacePanel/WorkspacePanel.hpp>
 
 namespace Ui {
     class MainWindow;

@@ -104,6 +104,7 @@
         "qlayout": "cpp",
         "qicon": "cpp",
         "qsettings": "cpp",
-        "qdesktopservices": "cpp"
+        "qdesktopservices": "cpp",
+        "qwindow": "cpp"
     }
 }

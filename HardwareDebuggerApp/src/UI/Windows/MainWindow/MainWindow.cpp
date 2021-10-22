@@ -28,6 +28,8 @@
 #include <DockAreaWidget.h>
 #include "CFXS_Center_Widget.hpp"
 
+#include <UI/Windows/AboutWindow/AboutWindow.hpp>
+
 using ads::CDockManager;
 using ads::CDockWidget;
 using ads::DockWidgetArea;
@@ -60,7 +62,7 @@ namespace HWD::UI {
             action->setFont(actionFont);
         }
 
-        CFXS_Center_Widget* centralFrame = new CFXS_Center_Widget;
+        auto centralFrame = new CFXS_Center_Widget;
         centralFrame->setObjectName("MainWindowCentralFrame");
 
         CDockWidget* centralDockWidget = new CDockWidget(CENTRAL_WIDGET_NAME);
@@ -198,6 +200,12 @@ namespace HWD::UI {
         // CFXS Discord
         connect(ui->actionCFXS_Discord, &QAction::triggered, this, [=]() {
             QDesktopServices::openUrl(QStringLiteral("https://discord.gg/ZdhfzQAC4S"));
+        });
+
+        // About
+        connect(ui->actionAbout, &QAction::triggered, this, [=]() {
+            auto aboutWindow = new AboutWindow;
+            aboutWindow->show();
         });
     }
 

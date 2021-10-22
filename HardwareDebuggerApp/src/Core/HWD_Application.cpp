@@ -37,9 +37,9 @@ namespace HWD {
 
         HWDLOG_CORE_INFO("Load window state");
         QByteArray windowStateData;
-        QFile windowStateFile(ProjectManager::GetProjectPath(ProjectManager::Path::WINDOW_STATE));
+        QFile windowStateFile(ProjectManager::GetProjectFilePath(ProjectManager::Path::WINDOW_STATE));
         if (windowStateFile.exists()) {
-            QSettings stateData(ProjectManager::GetProjectPath(ProjectManager::Path::WINDOW_STATE), QSettings::IniFormat);
+            QSettings stateData(ProjectManager::GetProjectFilePath(ProjectManager::Path::WINDOW_STATE), QSettings::IniFormat);
             if (stateData.status() == QSettings::NoError) {
                 GetMainWindow()->LoadState(stateData);
             } else {
@@ -71,7 +71,7 @@ namespace HWD {
 
     void HWD_Application::SaveWindowState(QSettings* stateData) {
         HWDLOG_CORE_INFO("Saving window state");
-        QSettings localCopy(ProjectManager::GetProjectPath(ProjectManager::Path::WINDOW_STATE), QSettings::IniFormat);
+        QSettings localCopy(ProjectManager::GetProjectFilePath(ProjectManager::Path::WINDOW_STATE), QSettings::IniFormat);
 
         for (auto key : stateData->allKeys()) {
             localCopy.setValue(key, stateData->value(key));
