@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -24,6 +24,7 @@
 #include <QLayout>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QFileDialog>
 
 #include <DockAreaWidget.h>
 #include "CFXS_Center_Widget.hpp"
@@ -136,80 +137,101 @@ namespace HWD::UI {
     }
 
     void MainWindow::LoadState(QSettings& stateData) {
-        if (!m_StateLoaded) {
-            m_StateLoaded = true; // This is set to true even if state load fails
+        if (stateData.status() != QSettings::Status::NoError) {
+            HWDLOG_UI_ERROR("MainWindow failed to load state");
+        } else {
+            QMap<QString, QVariant> state = stateData.value("windowStateData").toMap();
 
-            if (stateData.status() != QSettings::Status::NoError) {
-                HWDLOG_UI_ERROR("MainWindow failed to load state");
-            } else {
-                QMap<QString, QVariant> state = stateData.value("windowStateData").toMap();
-
-                if (!state.isEmpty()) {
-                    if (!state.contains(KEY_VERSION)) {
-                        HWDLOG_UI_ERROR("MainWindow failed to load state - no version field");
-                        return;
-                    }
-
-                    switch (state[KEY_VERSION].toInt()) {
-                        case 1: {
-                            HWDLOG_UI_TRACE("MainWindow load state [version = {0}]", state[KEY_VERSION].toInt());
-                            if (!state.contains(KEY_WINDOW_GEOMETRY) || !state.contains(KEY_WINDOW_STATE) ||
-                                !state.contains(KEY_DOCK_STATE) || !state.contains(KEY_OPEN_PANELS)) {
-                                HWDLOG_UI_ERROR("MainWindow failed to load state v{0} - invalid data", state[KEY_VERSION].toInt());
-                                return;
-                            }
-
-                            // Open all stored panels
-                            for (auto& panelName : state[KEY_OPEN_PANELS].toStringList()) {
-                                bool known = true;
-                                if (panelName == QStringLiteral("WorkspacePanel")) {
-                                    OpenPanel_Workspace();
-                                } else {
-                                    known = false;
-                                }
-
-                                if (known) {
-                                    HWDLOG_UI_TRACE(" - Open {}", panelName);
-                                } else {
-                                    HWDLOG_UI_ERROR(" - Unknown panel: {}", panelName);
-                                }
-                            }
-
-                            // Load data
-                            restoreGeometry(state[KEY_WINDOW_GEOMETRY].toByteArray());
-                            restoreState(state[KEY_WINDOW_STATE].toByteArray());
-                            //GetDockManager()->restoreState(state[KEY_DOCK_STATE].toByteArray());
-
-                            GetDockManager()->loadPerspectives(stateData);
-                            GetDockManager()->openPerspective(LAST_SESSION_PERSPECTIVE_NAME);
-
-                            break;
-                        }
-                        default: HWDLOG_UI_ERROR("MainWindow failed to load state - unsupported version"); return;
-                    }
-                } else {
-                    HWDLOG_UI_ERROR("MainWindow failed to load state - corrupted data");
+            if (!state.isEmpty()) {
+                if (!state.contains(KEY_VERSION)) {
+                    HWDLOG_UI_ERROR("MainWindow failed to load state - no version field");
                     return;
                 }
+
+                switch (state[KEY_VERSION].toInt()) {
+                    case 1: {
+                        HWDLOG_UI_TRACE("MainWindow load state [version = {0}]", state[KEY_VERSION].toInt());
+                        if (!state.contains(KEY_WINDOW_GEOMETRY) || !state.contains(KEY_WINDOW_STATE) || !state.contains(KEY_DOCK_STATE) ||
+                            !state.contains(KEY_OPEN_PANELS)) {
+                            HWDLOG_UI_ERROR("MainWindow failed to load state v{0} - invalid data", state[KEY_VERSION].toInt());
+                            return;
+                        }
+
+                        // Open all stored panels
+                        for (auto& panelName : state[KEY_OPEN_PANELS].toStringList()) {
+                            bool known = true;
+                            if (panelName == QStringLiteral("WorkspacePanel")) {
+                                OpenPanel_Workspace();
+                            } else {
+                                known = false;
+                            }
+
+                            if (known) {
+                                HWDLOG_UI_TRACE(" - Open {}", panelName);
+                            } else {
+                                HWDLOG_UI_ERROR(" - Unknown panel: {}", panelName);
+                            }
+                        }
+
+                        // Load data
+                        restoreGeometry(state[KEY_WINDOW_GEOMETRY].toByteArray());
+                        restoreState(state[KEY_WINDOW_STATE].toByteArray());
+                        //GetDockManager()->restoreState(state[KEY_DOCK_STATE].toByteArray());
+
+                        GetDockManager()->loadPerspectives(stateData);
+                        GetDockManager()->openPerspective(LAST_SESSION_PERSPECTIVE_NAME);
+
+                        break;
+                    }
+                    default: HWDLOG_UI_ERROR("MainWindow failed to load state - unsupported version"); return;
+                }
+            } else {
+                HWDLOG_UI_ERROR("MainWindow failed to load state - corrupted data");
+                return;
             }
-        } else {
-            HWDLOG_UI_WARN("MainWindow state already loaded");
         }
     }
 
     ///////////////////////////////////////////////////////////////
 
     void MainWindow::RegisterActions() {
+        RegisterActions_File();
+        RegisterActions_Edit();
+        RegisterActions_View();
+        RegisterActions_Help();
+    }
+
+    void MainWindow::RegisterActions_File() {
+        // Open Project...
+        connect(ui->actionOpen_Project, &QAction::triggered, this, [=]() {
+            QString dir = QFileDialog::getExistingDirectory(
+                this, QStringLiteral("Open Project"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+            if (dir.isEmpty()) {
+                HWDLOG_CORE_TRACE("Not opening project - no directory selected");
+            } else {
+                HWDLOG_CORE_TRACE("Selected project directory - {}", dir);
+                ProjectManager::OpenProject(dir);
+            }
+        });
+
         // Exit
         connect(ui->actionExit, &QAction::triggered, this, [=]() {
             this->close();
         });
+    }
 
+    void MainWindow::RegisterActions_Edit() {
+    }
+
+    void MainWindow::RegisterActions_View() {
         // View > Workspace
         connect(ui->actionWorkspace, &QAction::triggered, this, [=]() {
             OpenPanel_Workspace();
         });
+    }
 
+    void MainWindow::RegisterActions_Help() {
         // CFXS HWD Github
         connect(ui->actionCFXS_HWD_Github_Page, &QAction::triggered, this, [=]() {
             QDesktopServices::openUrl(QStringLiteral("https://github.com/CFXS/CFXS-Hardware-Debugger"));
@@ -226,6 +248,9 @@ namespace HWD::UI {
             aboutWindow->show();
         });
     }
+
+    ////////////////////////////////////////////////////////////////////
+    // Panel opening
 
     void MainWindow::OpenPanel_Workspace() {
         if (!m_Panel_Workspace) {

@@ -161,11 +161,6 @@
                 <string>Ctrl+Shift+S</string>
             </property>
         </action>
-        <action name="actionNo_recent_projects">
-            <property name="text">
-                <string>No recent projects</string>
-            </property>
-        </action>
         <action name="actionSettings">
             <property name="text">
                 <string>Settings</string>
