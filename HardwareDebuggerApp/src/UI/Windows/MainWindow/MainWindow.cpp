@@ -22,6 +22,7 @@
 #include <QTreeView>
 #include <QAction>
 #include <QLayout>
+#include <QSettings>
 
 #include <DockAreaWidget.h>
 #include "CFXS_Center_Widget.hpp"
@@ -32,15 +33,16 @@ using ads::DockWidgetArea;
 
 namespace HWD::UI {
 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    static constexpr int STATE_SERIALIZER_VERSION = 1; // Used to track state loading differences
-    static const QString CENTRAL_WIDGET_NAME      = QStringLiteral("__CentralWidget");
-    static const QString KEY_VERSION              = QStringLiteral("version");
-    static const QString KEY_WINDOW_GEOMETRY      = QStringLiteral("windowGeometry");
-    static const QString KEY_WINDOW_STATE         = QStringLiteral("windowState");
-    static const QString KEY_DOCK_STATE           = QStringLiteral("dockState");
-    static const QString KEY_OPEN_PANELS          = QStringLiteral("openPanels");
-    /////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    static constexpr int STATE_SERIALIZER_VERSION      = 1; // Used to track state loading differences
+    static const QString LAST_SESSION_PERSPECTIVE_NAME = QStringLiteral("__LastSession");
+    static const QString CENTRAL_WIDGET_NAME           = QStringLiteral("__CentralWidget");
+    static const QString KEY_VERSION                   = QStringLiteral("version");
+    static const QString KEY_WINDOW_GEOMETRY           = QStringLiteral("windowGeometry");
+    static const QString KEY_WINDOW_STATE              = QStringLiteral("windowState");
+    static const QString KEY_DOCK_STATE                = QStringLiteral("dockState");
+    static const QString KEY_OPEN_PANELS               = QStringLiteral("openPanels");
+    //////////////////////////////////////////////////////////////////////////////////////////////////
 
     MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
         ui->setupUi(this);
@@ -64,7 +66,7 @@ namespace HWD::UI {
         centralDockWidget->setWidget(centralFrame);
         centralDockWidget->layout()->setContentsMargins({0, 0, 0, 0});
 
-        centralDockWidget->setFeature(ads::CDockWidget::NoTab, true);
+        centralDockWidget->setFeature(CDockWidget::NoTab, true);
         auto centralDockArea = GetDockManager()->setCentralWidget(centralDockWidget);
         centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
 
@@ -88,9 +90,16 @@ namespace HWD::UI {
 
         QStringList openPanelList;
 
+        GetDockManager()->removePerspective(LAST_SESSION_PERSPECTIVE_NAME);
+        GetDockManager()->addPerspective(LAST_SESSION_PERSPECTIVE_NAME);
+        QSettings s;
+        GetDockManager()->savePerspectives(s);
+
         HWDLOG_UI_TRACE("Open panels:");
-        for (auto w : GetDockManager()->dockWidgets()) {
-            if (!w->isClosed() && w->objectName() != CENTRAL_WIDGET_NAME) {
+
+        auto dockWidgets = GetDockManager()->dockWidgetsMap();
+        for (auto w : dockWidgets) {
+            if (w->objectName() != CENTRAL_WIDGET_NAME) {
                 HWDLOG_UI_TRACE(" - {}", w->objectName());
                 openPanelList.append(w->objectName());
             }
@@ -98,28 +107,23 @@ namespace HWD::UI {
 
         state[KEY_OPEN_PANELS] = openPanelList;
 
-        QByteArray rawState;
-        QDataStream stateStream(&rawState, QIODevice::WriteOnly);
-        stateStream << state;
+        s.setValue("windowStateData", state);
 
-        emit StateDataReady(rawState);
+        emit StateDataReady(&s);
         emit Closed();
         event->accept();
     }
 
-    void MainWindow::LoadState(const QByteArray& rawState) {
+    void MainWindow::LoadState(QSettings& stateData) {
         if (!m_StateLoaded) {
             m_StateLoaded = true; // This is set to true even if state load fails
 
-            if (rawState.size() == 0) {
-                HWDLOG_UI_ERROR("MainWindow failed to load state - data size is 0");
+            if (stateData.status() != QSettings::Status::NoError) {
+                HWDLOG_UI_ERROR("MainWindow failed to load state");
             } else {
-                QMap<QString, QVariant> state;
-                QDataStream stateStream(rawState);
-                stateStream.startTransaction();
-                stateStream >> state;
+                QMap<QString, QVariant> state = stateData.value("windowStateData").toMap();
 
-                if (stateStream.commitTransaction()) {
+                if (!state.isEmpty()) {
                     if (!state.contains(KEY_VERSION)) {
                         HWDLOG_UI_ERROR("MainWindow failed to load state - no version field");
                         return;
@@ -153,7 +157,10 @@ namespace HWD::UI {
                             // Load data
                             restoreGeometry(state[KEY_WINDOW_GEOMETRY].toByteArray());
                             restoreState(state[KEY_WINDOW_STATE].toByteArray());
-                            GetDockManager()->restoreState(state[KEY_DOCK_STATE].toByteArray());
+                            //GetDockManager()->restoreState(state[KEY_DOCK_STATE].toByteArray());
+
+                            GetDockManager()->loadPerspectives(stateData);
+                            GetDockManager()->openPerspective(LAST_SESSION_PERSPECTIVE_NAME);
 
                             break;
                         }
@@ -186,7 +193,7 @@ namespace HWD::UI {
     void MainWindow::OpenPanel_Workspace() {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
-            GetDockManager()->addDockWidget(ads::LeftDockWidgetArea, m_Panel_Workspace);
+            GetDockManager()->addDockWidgetFloating(m_Panel_Workspace);
             m_Panel_Workspace->SetRootPath("C:/CFXS_Projects/CFXS-RTOS-Test");
         } else {
             m_Panel_Workspace->toggleView();

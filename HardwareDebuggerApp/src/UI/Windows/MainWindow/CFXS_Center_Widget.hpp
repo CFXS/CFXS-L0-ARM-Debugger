@@ -7,6 +7,7 @@
 #include <QString>
 #include <QPixmap>
 #include <QIcon>
+#include <QBitmap>
 
 namespace HWD::UI {
 

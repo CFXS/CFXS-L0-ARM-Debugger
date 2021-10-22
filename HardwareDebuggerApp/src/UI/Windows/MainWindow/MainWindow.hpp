@@ -38,7 +38,7 @@ namespace HWD::UI {
         ~MainWindow();
 
         /// Load window + docking state
-        void LoadState(const QByteArray &rawState);
+        void LoadState(QSettings &stateData);
 
     private:
         /// getter for ui->dockManager
@@ -53,9 +53,8 @@ namespace HWD::UI {
     signals:
         void Closed();
 
-        /// TODO: check if this has to be a copy or ref
         /// Emitted when window + docking state has been serialized
-        void StateDataReady(const QByteArray &rawState);
+        void StateDataReady(QSettings *stateData);
 
     protected:
         void closeEvent(QCloseEvent *event);

@@ -16,8 +16,6 @@ namespace HWD {
         virtual void OnCreate()  = 0;
         virtual void OnDestroy() = 0;
 
-        void Close();
-
         inline UI::MainWindow* GetMainWindow() {
             return m_MainWindow.get();
         }
@@ -33,7 +31,6 @@ namespace HWD {
     private:
         std::unique_ptr<QApplication> m_QtApplication;
         std::unique_ptr<UI::MainWindow> m_MainWindow;
-        bool m_Running = true;
 
     private:
         static Application* s_Instance;

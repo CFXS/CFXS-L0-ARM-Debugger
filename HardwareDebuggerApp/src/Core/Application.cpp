@@ -36,7 +36,7 @@ namespace HWD {
         ads::CDockManager::setConfigFlag(ads::CDockManager::AllTabsHaveCloseButton, true);
         ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaDynamicTabsMenuButtonVisibility, true);
         ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, true);
-        ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
+        //ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
 
         QPalette darkPalette;
         darkPalette.setColor(QPalette::Window, QColor(55, 55, 55));
@@ -72,27 +72,17 @@ namespace HWD {
         file.close();
 
         m_MainWindow = std::make_unique<UI::MainWindow>();
-        QObject::connect(m_MainWindow.get(), &UI::MainWindow::Closed, [&]() {
-            Close();
-        });
         m_MainWindow->show();
     }
 
     Application::~Application() {
     }
 
-    void Application::Close() {
-        HWDLOG_CORE_INFO("Closing application");
-        m_Running = false;
-    }
-
     void Application::Run() {
         HWDLOG_CORE_INFO("Running application");
         OnCreate();
 
-        while (m_Running) {
-            QApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents | QEventLoop::EventLoopExec);
-        }
+        qApp->exec();
 
         HWDLOG_CORE_INFO("Stopping application");
         OnDestroy();

@@ -25,23 +25,21 @@
 namespace HWD {
 
     HWD_Application::HWD_Application(int argc, char** argv) : Application(argc, argv, CFXS_HWD_PROGRAM_NAME) {
-        qApp->setOrganizationName("CFXS");
-        qApp->setApplicationDisplayName(CFXS_HWD_PROGRAM_NAME);
         qApp->setWindowIcon(QPixmap(":/HWD_Icon.png"));
     }
+
     void HWD_Application::OnCreate() {
         Load_Probe();
 
+        HWDLOG_CORE_INFO("Load window state");
         QByteArray windowStateData;
         QFile windowStateFile("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd");
         if (windowStateFile.exists()) {
-            windowStateFile.open(QFile::ReadOnly);
-            if (windowStateFile.isOpen()) {
-                windowStateData = windowStateFile.readAll();
-                HWDLOG_CORE_TRACE("Window state file {} bytes read", windowStateData.size());
-                GetMainWindow()->LoadState(windowStateData);
+            QSettings stateData("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd", QSettings::IniFormat);
+            if (stateData.status() == QSettings::NoError) {
+                GetMainWindow()->LoadState(stateData);
             } else {
-                HWDLOG_CORE_ERROR("Failed to open window state file: {}", windowStateFile.errorString());
+                HWDLOG_CORE_ERROR("Failed to open window state file");
             }
         } else {
             HWDLOG_CORE_WARN("Window state file not found");
@@ -66,24 +64,20 @@ namespace HWD {
         Probe::JLink::HWD_Unload();
     }
 
-    void HWD_Application::SaveWindowState(const QByteArray& rawState) {
+    void HWD_Application::SaveWindowState(QSettings* stateData) {
         HWDLOG_CORE_INFO("Saving window state");
+        QSettings localCopy("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd", QSettings::IniFormat);
 
-        QFile windowStateFile("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd");
-        windowStateFile.open(QFile::WriteOnly | QFile::Truncate); // open for overwrite
+        for (auto key : stateData->allKeys()) {
+            localCopy.setValue(key, stateData->value(key));
+        }
 
-        if (windowStateFile.isOpen()) {
-            auto bytesWritten = windowStateFile.write(rawState);
+        localCopy.sync();
 
-            if (bytesWritten == rawState.size()) {
-                windowStateFile.close();
-                HWDLOG_CORE_INFO("Window state saved");
-            } else {
-                HWDLOG_CORE_ERROR(
-                    "Failed to save window state: {}/{} bytes written ({})", bytesWritten, rawState.size(), windowStateFile.errorString());
-            }
+        if (localCopy.status() == QSettings::NoError) {
+            HWDLOG_CORE_INFO("Window state saved");
         } else {
-            HWDLOG_CORE_ERROR("Failed to open window state file: {}", windowStateFile.errorString());
+            HWDLOG_CORE_ERROR("Failed to save window state");
         }
     }
 

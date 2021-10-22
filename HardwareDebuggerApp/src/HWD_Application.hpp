@@ -19,6 +19,7 @@
 #pragma once
 
 #include <Test/RVeips_ProbeTest.hpp>
+#include <QSettings>
 
 #include "Core/Application.hpp"
 
@@ -39,7 +40,7 @@ namespace HWD {
         void Unload_Probe();
 
     private:
-        static void SaveWindowState(const QByteArray& rawState);
+        static void SaveWindowState(QSettings* stateData);
 
     private:
         std::unique_ptr<Test::RVeips_ProbeTest> m_RihardsTest;
