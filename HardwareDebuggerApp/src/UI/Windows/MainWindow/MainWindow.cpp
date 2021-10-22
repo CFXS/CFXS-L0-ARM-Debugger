@@ -47,6 +47,7 @@ namespace HWD::UI {
     static const QString KEY_WINDOW_STATE              = QStringLiteral("windowState");
     static const QString KEY_DOCK_STATE                = QStringLiteral("dockState");
     static const QString KEY_OPEN_PANELS               = QStringLiteral("openPanels");
+    static const QString KEY_WINDOW_DATA               = QStringLiteral("windowStateData");
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
     MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
@@ -104,6 +105,12 @@ namespace HWD::UI {
 
     void MainWindow::closeEvent(QCloseEvent* event) {
         HWDLOG_UI_TRACE("Close MainWindow");
+        SaveState();
+        emit Closed();
+        event->accept();
+    }
+
+    void MainWindow::SaveState() {
         QMap<QString, QVariant> state;
         state[KEY_VERSION]         = STATE_SERIALIZER_VERSION;
         state[KEY_WINDOW_GEOMETRY] = saveGeometry();
@@ -129,18 +136,24 @@ namespace HWD::UI {
 
         state[KEY_OPEN_PANELS] = openPanelList;
 
-        s.setValue("windowStateData", state);
+        s.setValue(KEY_WINDOW_DATA, state);
 
         emit StateDataReady(&s);
-        emit Closed();
-        event->accept();
+    }
+
+    void MainWindow::CloseAllPanels() {
+        for (auto panel : GetDockManager()->dockWidgetsMap()) {
+            if (panel->objectName() != CENTRAL_WIDGET_NAME) {
+                panel->toggleView(false);
+            }
+        }
     }
 
     void MainWindow::LoadState(QSettings& stateData) {
         if (stateData.status() != QSettings::Status::NoError) {
             HWDLOG_UI_ERROR("MainWindow failed to load state");
         } else {
-            QMap<QString, QVariant> state = stateData.value("windowStateData").toMap();
+            QMap<QString, QVariant> state = stateData.value(KEY_WINDOW_DATA).toMap();
 
             if (!state.isEmpty()) {
                 if (!state.contains(KEY_VERSION)) {
@@ -211,6 +224,11 @@ namespace HWD::UI {
                 HWDLOG_CORE_TRACE("Not opening project - no directory selected");
             } else {
                 HWDLOG_CORE_TRACE("Selected project directory - {}", dir);
+
+                if (ProjectManager::IsProjectOpen()) {
+                    SaveState();
+                }
+
                 ProjectManager::OpenProject(dir);
             }
         });

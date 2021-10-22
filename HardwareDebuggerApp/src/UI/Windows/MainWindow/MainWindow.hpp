@@ -37,8 +37,14 @@ namespace HWD::UI {
         explicit MainWindow(QWidget *parent = nullptr);
         ~MainWindow();
 
+        /// save window + dock state and emit ready signal
+        void SaveState();
+
         /// Load window + docking state
         void LoadState(QSettings &stateData);
+
+        /// Close all panels
+        void CloseAllPanels();
 
     private:
         /// getter for ui->dockManager

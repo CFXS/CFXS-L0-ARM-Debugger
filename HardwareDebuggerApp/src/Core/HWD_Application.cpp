@@ -69,11 +69,13 @@ namespace HWD {
             if (windowStateFile.exists()) {
                 QSettings stateData(ProjectManager::GetProjectFilePath(ProjectManager::Path::WINDOW_STATE), QSettings::IniFormat);
                 if (stateData.status() == QSettings::NoError) {
+                    GetMainWindow()->CloseAllPanels();
                     GetMainWindow()->LoadState(stateData);
                 } else {
                     HWDLOG_CORE_ERROR("Failed to open window state file");
                 }
             } else {
+                GetMainWindow()->CloseAllPanels();
                 HWDLOG_CORE_WARN("Window state file not found");
             }
         } else {
