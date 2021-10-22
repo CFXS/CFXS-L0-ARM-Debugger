@@ -18,13 +18,13 @@
                 "${workspaceFolder}/HardwareDebuggerApp/vendor/spdlog/include"
             ],
             "forcedInclude": [
-                "${workspaceFolder}/out/build/HardwareDebuggerApp/CMakeFiles/HardwareDebuggerApp.dir/cmake_pch.hxx"
+                "${workspaceFolder}/build/HardwareDebuggerApp/CMakeFiles/HardwareDebuggerApp.dir/cmake_pch.hxx"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-msvc-x64",
             "configurationProvider": "ms-vscode.cmake-tools",
-            "compileCommands": "${workspaceFolder}/out/build/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ]
 }

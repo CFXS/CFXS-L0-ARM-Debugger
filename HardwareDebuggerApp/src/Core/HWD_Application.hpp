@@ -20,7 +20,7 @@
 
 #include <QSettings>
 
-#include "Core/Application.hpp"
+#include <Application.hpp>
 
 namespace HWD {
 

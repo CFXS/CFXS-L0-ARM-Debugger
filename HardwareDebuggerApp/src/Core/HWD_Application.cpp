@@ -21,6 +21,7 @@
 #include <QStringLiteral>
 #include <QStandardPaths>
 #include <Debugger/Probe/JLink/JLink.hpp>
+#include "Project/ProjectManager.hpp"
 
 namespace HWD {
 
@@ -29,13 +30,16 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
+        ProjectManager::HWD_Load();
+        ProjectManager::OpenProject("C:/CFXS_Projects/CFXS-RTOS-Test");
+
         Load_Probe();
 
         HWDLOG_CORE_INFO("Load window state");
         QByteArray windowStateData;
-        QFile windowStateFile("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd");
+        QFile windowStateFile(ProjectManager::GetProjectPath(ProjectManager::Path::WINDOW_STATE));
         if (windowStateFile.exists()) {
-            QSettings stateData("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd", QSettings::IniFormat);
+            QSettings stateData(ProjectManager::GetProjectPath(ProjectManager::Path::WINDOW_STATE), QSettings::IniFormat);
             if (stateData.status() == QSettings::NoError) {
                 GetMainWindow()->LoadState(stateData);
             } else {
@@ -50,6 +54,7 @@ namespace HWD {
 
     void HWD_Application::OnDestroy() {
         Unload_Probe();
+        ProjectManager::HWD_Unload();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +71,7 @@ namespace HWD {
 
     void HWD_Application::SaveWindowState(QSettings* stateData) {
         HWDLOG_CORE_INFO("Saving window state");
-        QSettings localCopy("C:/CFXS_Projects/CFXS-RTOS-Test/.cfxs_hwd/WindowState.hwd", QSettings::IniFormat);
+        QSettings localCopy(ProjectManager::GetProjectPath(ProjectManager::Path::WINDOW_STATE), QSettings::IniFormat);
 
         for (auto key : stateData->allKeys()) {
             localCopy.setValue(key, stateData->value(key));

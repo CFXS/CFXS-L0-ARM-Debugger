@@ -16,8 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-#include "HWD_Application.hpp"
-#include "Log/Log.hpp"
+#include <Core/HWD_Application.hpp>
+#include <Log/Log.hpp>
 
 int main(int argc, char** argv) {
     HWD::Log::Initialize();

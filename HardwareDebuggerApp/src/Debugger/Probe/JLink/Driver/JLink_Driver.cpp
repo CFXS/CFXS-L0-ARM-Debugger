@@ -25,7 +25,6 @@ namespace HWD::Probe::Driver {
         m_Library->load();
 
         if (m_Library && m_Library->isLoaded()) {
-            HWDLOG_PROBE_TRACE("JLink_Driver[{0}] Load function pointers", fmt::ptr(this));
             LoadFunctionPointers();
         } else {
             if (m_Library) {

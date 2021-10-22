@@ -22,6 +22,10 @@ namespace HWD {
             return s_UILogger;
         }
 
+        static inline std::shared_ptr<spdlog::logger>& GetProjectLogger() {
+            return s_ProjectLogger;
+        }
+
         static inline std::shared_ptr<spdlog::logger>& GetProbeLogger() {
             return s_ProbeLogger;
         }
@@ -29,6 +33,7 @@ namespace HWD {
     private:
         static std::shared_ptr<spdlog::logger> s_CoreLogger;
         static std::shared_ptr<spdlog::logger> s_UILogger;
+        static std::shared_ptr<spdlog::logger> s_ProjectLogger;
         static std::shared_ptr<spdlog::logger> s_ProbeLogger;
     };
 
@@ -59,6 +64,13 @@ struct fmt::formatter<QString> {
 #define HWDLOG_UI_WARN(...)     ::HWD::Log::GetUILogger()->warn(__VA_ARGS__)
 #define HWDLOG_UI_ERROR(...)    ::HWD::Log::GetUILogger()->error(__VA_ARGS__)
 #define HWDLOG_UI_CRITICAL(...) ::HWD::Log::GetUILogger()->critical(__VA_ARGS__)
+
+// Project log macros
+#define HWDLOG_PROJECT_TRACE(...)    ::HWD::Log::GetProjectLogger()->trace(__VA_ARGS__)
+#define HWDLOG_PROJECT_INFO(...)     ::HWD::Log::GetProjectLogger()->info(__VA_ARGS__)
+#define HWDLOG_PROJECT_WARN(...)     ::HWD::Log::GetProjectLogger()->warn(__VA_ARGS__)
+#define HWDLOG_PROJECT_ERROR(...)    ::HWD::Log::GetProjectLogger()->error(__VA_ARGS__)
+#define HWDLOG_PROJECT_CRITICAL(...) ::HWD::Log::GetProjectLogger()->critical(__VA_ARGS__)
 
 // Probe log macros
 #define HWDLOG_PROBE_TRACE(...)    ::HWD::Log::GetProbeLogger()->trace(__VA_ARGS__)
