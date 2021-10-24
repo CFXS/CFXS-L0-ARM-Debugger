@@ -38,7 +38,7 @@ QMenu::item {
 }
 
 QMenu::item:selected {
-    background: rgba(0, 105, 220, 128);
+    background: rgba(0, 105, 230, 128);
 }
 
 QMenu::item:pressed {
@@ -49,4 +49,26 @@ QMenu::separator {
     height: 1px;
     background: palette(midlight);
     margin: 4px;
+}
+
+QMenu::right-arrow {
+  image: url(:/Image/SmallRightArrow.svg);
+}
+
+/* QTreeView */
+
+QTreeView::item  {
+    margin: 2px 2px;
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+    border-image: none;
+    image: url(:/Image/MidDownArrow.svg);
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    border-image: none;
+    image: url(:/Image/MidRightArrow.svg);
 }

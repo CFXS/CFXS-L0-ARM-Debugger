@@ -32,12 +32,16 @@ namespace HWD {
         _ProjectManagerNotifier() = default;
 
     signals:
-        void ProjectOpened(); // Emitted when a new project has been opened
+        void ProjectOpened();         // Emitted when a new project has been opened
+        void RecentProjectsChanged(); // Emitted when recent project list order/content has changed
     };
 
     ///////////////////////////////////////////////////////////////////////////
 
+    class HWD_Application;
     class ProjectManager {
+        friend class HWD_Application;
+
     public:
         using Notifier = _ProjectManagerNotifier;
         enum class Path { WINDOW_STATE };
@@ -46,11 +50,11 @@ namespace HWD {
         // Get instance for connections
         static _ProjectManagerNotifier* GetNotifier();
 
-        /// Call when loading app
-        static void HWD_Load();
+        /// Get list of recently opened projects
+        static const QStringList& GetRecentProjectPaths();
 
-        /// Call when unloading app
-        static void HWD_Unload();
+        /// Clears recently opened project list leaving only current project (if open)
+        static void ClearRecentProjects();
 
         /// Set current project root directory
         static void OpenProject(const QString& workspacePath);
@@ -66,6 +70,22 @@ namespace HWD {
 
         /// Get path to specific project files
         static QString GetProjectFilePath(Path path);
+
+    private:
+        /// Call when loading app
+        static void HWD_Load();
+
+        /// Call when unloading app
+        static void HWD_Unload();
+
+        /// Save recent project list to user storage
+        static void SaveRecentProjectList();
+
+        /// Load recent project list from user storage
+        static void LoadRecentProjectList();
+
+        /// Add recent project path
+        static void AddRecentProjectPath(const QString& path);
     };
 
 } // namespace HWD

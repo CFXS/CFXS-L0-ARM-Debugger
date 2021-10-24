@@ -43,8 +43,8 @@ namespace HWD::UI {
         /// Load window + docking state
         void LoadState(QSettings &stateData);
 
-        /// Close all panels
-        void CloseAllPanels();
+        /// Hide all panels - required for state load if new state contains less panels than current
+        void HideAllPanels();
 
     private:
         /// getter for ui->dockManager
@@ -52,6 +52,9 @@ namespace HWD::UI {
 
         /// Update window title
         void UpdateTitle();
+
+        /// Update recent projects list
+        void UpdateRecentProjects();
 
         /// connect actions to functions
         void RegisterActions();

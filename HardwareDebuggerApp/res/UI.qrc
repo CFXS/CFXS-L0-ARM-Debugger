@@ -4,6 +4,10 @@
         <file alias="HWD_Icon.png">Images/HWD_Icon.png</file>
         <file alias="HWD_Full_Icon.png">Images/HWD_Full_Icon.png</file>
         <file alias="Image/CFXS">Images/CFXS_NotPerfect.svg</file>
+        <file alias="Image/SmallRightArrow.svg">Images/UI/smooth-arrow-right-small.svg</file>
+        <file alias="Image/SmallDownArrow.svg">Images/UI/smooth-arrow-down-small.svg</file>
+        <file alias="Image/MidRightArrow.svg">Images/UI/smooth-arrow-right-mid.svg</file>
+        <file alias="Image/MidDownArrow.svg">Images/UI/smooth-arrow-down-mid.svg</file>
 
         <file alias="Icon/folder">Images/UI/FileBrowser/folder.svg</file>
         <file alias="Icon/folder-open">Images/UI/FileBrowser/folder-open.svg</file>

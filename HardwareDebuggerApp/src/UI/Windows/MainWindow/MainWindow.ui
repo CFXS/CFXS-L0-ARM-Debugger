@@ -43,6 +43,7 @@
                 <addaction name="separator" />
                 <addaction name="actionExit" />
             </widget>
+            <!--
             <widget class="QMenu" name="menuEdit">
                 <property name="title">
                     <string>Edit</string>
@@ -57,6 +58,7 @@
                 <addaction name="actionFind" />
                 <addaction name="actionReplace" />
             </widget>
+            -->
             <widget class="QMenu" name="menuView">
                 <property name="title">
                     <string>View</string>

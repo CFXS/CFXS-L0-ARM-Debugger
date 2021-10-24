@@ -82,9 +82,26 @@ namespace HWD::UI {
         connect(ProjectManager::GetNotifier(), &ProjectManager::Notifier::ProjectOpened, this, [=]() {
             UpdateTitle();
         });
+
+        // Update recent projects if recent project list changed
+        connect(ProjectManager::GetNotifier(), &ProjectManager::Notifier::RecentProjectsChanged, this, [=]() {
+            UpdateRecentProjects();
+        });
+        UpdateRecentProjects();
     }
 
     MainWindow::~MainWindow() {
+    }
+
+    ads::CDockManager* MainWindow::GetDockManager() {
+        return ui->dockManager;
+    }
+
+    void MainWindow::closeEvent(QCloseEvent* event) {
+        HWDLOG_UI_TRACE("Close MainWindow");
+        SaveState();
+        emit Closed();
+        event->accept();
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -99,15 +116,24 @@ namespace HWD::UI {
         }
     }
 
-    ads::CDockManager* MainWindow::GetDockManager() {
-        return ui->dockManager;
-    }
+    void MainWindow::UpdateRecentProjects() {
+        ui->menuOpen_Recent->clear();
 
-    void MainWindow::closeEvent(QCloseEvent* event) {
-        HWDLOG_UI_TRACE("Close MainWindow");
-        SaveState();
-        emit Closed();
-        event->accept();
+        auto& recentList = ProjectManager::GetRecentProjectPaths();
+
+        if (recentList.isEmpty()) {
+            ui->menuOpen_Recent->addAction("No Recent Projects");
+        } else {
+            for (auto& path : recentList) {
+                ui->menuOpen_Recent->addAction(path, [=]() {
+                    ProjectManager::OpenProject(path);
+                });
+            }
+            ui->menuOpen_Recent->addSeparator();
+            ui->menuOpen_Recent->addAction("Clear Recent Projects", [=]() {
+                ProjectManager::ClearRecentProjects();
+            });
+        }
     }
 
     void MainWindow::SaveState() {
@@ -141,7 +167,7 @@ namespace HWD::UI {
         emit StateDataReady(&s);
     }
 
-    void MainWindow::CloseAllPanels() {
+    void MainWindow::HideAllPanels() {
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
             if (panel->objectName() != CENTRAL_WIDGET_NAME) {
                 panel->toggleView(false);

@@ -18,12 +18,17 @@
 // [CFXS] //
 #include "ProjectManager.hpp"
 #include <QDir>
+#include <QSettings>
+#include <QStandardPaths>
 
 namespace HWD {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     static const QString CFXS_HWD_CONFIG_DIRECTORY = QStringLiteral("/.cfxs_hwd");
+    static const QString KEY_RECENT_PATHS          = QStringLiteral("recentPaths");
+    static constexpr int MAX_RECENT_PROJECTS       = 16;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    static QStringList s_RecentProjectPaths;  // List of recently opened projects
     static bool s_ProjectOpen        = false; // true when project folder has been opened
     static bool s_ProjectInitialized = false; // true when CFXS_HWD_CONFIG_DIRECTORY contains a project file
     static QString s_WorkspacePath;
@@ -37,11 +42,84 @@ namespace HWD {
     //////////////////////////////////////////////////////////////////////////////
 
     void ProjectManager::HWD_Load() {
-        HWDLOG_PROJECT_INFO("ProjectManager load");
+        HWDLOG_PROJECT_INFO("Load ProjectManager");
+
+        LoadRecentProjectList();
+
+        if (!s_RecentProjectPaths.isEmpty()) {
+            HWDLOG_PROJECT_TRACE("Open project from last session - {}", s_RecentProjectPaths.first());
+            OpenProject(s_RecentProjectPaths.first());
+        }
+
+        QObject::connect(GetNotifier(), &Notifier::RecentProjectsChanged, []() {
+            SaveRecentProjectList();
+        });
+    }
+
+    void ProjectManager::SaveRecentProjectList() {
+        QString location =
+            QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppDataLocation).first() + "/RecentProjects.hwd";
+        QSettings projectList(location, QSettings::IniFormat);
+        projectList.setValue(KEY_RECENT_PATHS, s_RecentProjectPaths);
+        projectList.sync();
+
+        if (projectList.status() == QSettings::NoError) {
+            HWDLOG_PROJECT_TRACE("Saved recent project list to {}", location);
+        } else {
+            HWDLOG_PROJECT_ERROR("Failed to save recent project list to {}", location);
+        }
+    }
+
+    void ProjectManager::LoadRecentProjectList() {
+        QString location =
+            QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppDataLocation).first() + "/RecentProjects.hwd";
+        QSettings projectList(
+            QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppDataLocation).first() + "/RecentProjects.hwd",
+            QSettings::IniFormat);
+
+        if (projectList.status() == QSettings::NoError) {
+            HWDLOG_PROJECT_TRACE("Loaded recent project list from {}", location);
+            s_RecentProjectPaths = projectList.value(KEY_RECENT_PATHS).toStringList();
+        } else {
+            HWDLOG_PROJECT_ERROR("Failed to load recent project list from {}", location);
+        }
+
+        while (s_RecentProjectPaths.size() > MAX_RECENT_PROJECTS) {
+            s_RecentProjectPaths.pop_back();
+        }
+
+        emit GetNotifier()->RecentProjectsChanged();
     }
 
     void ProjectManager::HWD_Unload() {
-        HWDLOG_PROJECT_INFO("ProjectManager unload");
+        HWDLOG_PROJECT_INFO("Unload ProjectManager");
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+
+    const QStringList& ProjectManager::GetRecentProjectPaths() {
+        return s_RecentProjectPaths;
+    }
+
+    void ProjectManager::ClearRecentProjects() {
+        s_RecentProjectPaths.clear();
+        if (IsProjectOpen()) {
+            s_RecentProjectPaths.append(GetWorkspacePath());
+        }
+
+        emit GetNotifier()->RecentProjectsChanged();
+    }
+
+    void ProjectManager::AddRecentProjectPath(const QString& path) {
+        if (s_RecentProjectPaths.contains(path)) {
+            s_RecentProjectPaths.removeAll(path);
+        }
+
+        s_RecentProjectPaths.push_front(path);
+
+        if (s_RecentProjectPaths.size() > MAX_RECENT_PROJECTS) {
+            s_RecentProjectPaths.pop_back();
+        }
     }
 
     void ProjectManager::OpenProject(const QString& path) {
@@ -57,7 +135,10 @@ namespace HWD {
                 s_WorkspacePath = workspacePath;
                 s_ProjectOpen   = true;
 
+                AddRecentProjectPath(s_WorkspacePath);
+
                 emit GetNotifier()->ProjectOpened();
+                emit GetNotifier()->RecentProjectsChanged();
             } else {
                 HWDLOG_PROJECT_ERROR("OpenProject(): Invalid path - {}", workspacePath);
             }
