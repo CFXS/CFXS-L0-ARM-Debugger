@@ -66,6 +66,8 @@ namespace HWD::UI {
                 // If extension matches external app list then open with external app
                 if (s_OpenWithExternalAppExtensionList.contains(info.suffix())) {
                     QDesktopServices::openUrl(info.absoluteFilePath());
+                } else {
+                    emit RequestOpenFile(info.absoluteFilePath());
                 }
             }
         });

@@ -71,6 +71,9 @@ namespace HWD {
         /// Get path to specific project files
         static QString GetProjectFilePath(Path path);
 
+        /// Get full path to file that might or might not be a relative path
+        static QString GetFullFilePath(const QString& path);
+
     private:
         /// Call when loading app
         static void HWD_Load();

@@ -35,6 +35,9 @@ namespace HWD::UI {
 
         void SetRootPath(const QString& path);
 
+    signals:
+        void RequestOpenFile(const QString& path);
+
     private:
         std::unique_ptr<Ui::WorkspacePanel> ui;
         FileBrowserModel* m_FB_Model;

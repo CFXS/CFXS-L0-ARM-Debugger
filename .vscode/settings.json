@@ -105,6 +105,9 @@
         "qicon": "cpp",
         "qsettings": "cpp",
         "qdesktopservices": "cpp",
-        "qwindow": "cpp"
+        "qwindow": "cpp",
+        "qstandardpaths": "cpp",
+        "qfileinfo": "cpp",
+        "qdir": "cpp"
     }
 }

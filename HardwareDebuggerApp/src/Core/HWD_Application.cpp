@@ -22,6 +22,7 @@
 #include <QStandardPaths>
 #include <Debugger/Probe/JLink/JLink.hpp>
 #include "Project/ProjectManager.hpp"
+#include <QFontDatabase>
 
 namespace HWD {
 
@@ -30,6 +31,8 @@ namespace HWD {
     }
 
     void HWD_Application::OnCreate() {
+        QFontDatabase::addApplicationFont(":/Font/Code");
+
         ProjectManager::HWD_Load();
         Load_Probe();
         Load_Window();

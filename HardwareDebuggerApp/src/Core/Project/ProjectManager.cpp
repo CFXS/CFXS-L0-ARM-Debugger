@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QUrl>
 
 namespace HWD {
 
@@ -165,6 +166,17 @@ namespace HWD {
 
         HWDLOG_PROJECT_CRITICAL("Unknown path {}", (int)path);
         return s_WorkspacePath + "_error_temp.txt";
+    }
+
+    /// Get full path to file that might or might not be a relative path
+    QString ProjectManager::GetFullFilePath(const QString& path) {
+        QFileInfo info(GetWorkspacePath() + QStringLiteral("/") + path);
+
+        if (info.exists()) {
+            return info.filePath();
+        } else {
+            return path;
+        }
     }
 
 } // namespace HWD

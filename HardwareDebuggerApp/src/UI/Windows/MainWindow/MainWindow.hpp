@@ -63,8 +63,11 @@ namespace HWD::UI {
         void RegisterActions_View();
         void RegisterActions_Help();
 
-        /// Open workspace panel
-        void OpenPanel_Workspace();
+        void OpenPanel_Workspace();                   // Open workspace panel
+        void OpenPanel_TextEdit(const QString &path); // Open text edit panel
+
+        /// Open file
+        void OpenFile(const QString &path);
 
     signals:
         void Closed();

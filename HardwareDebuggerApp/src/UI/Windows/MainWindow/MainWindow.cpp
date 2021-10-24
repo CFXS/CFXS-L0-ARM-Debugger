@@ -53,8 +53,8 @@ using ads::DockWidgetArea;
 // If multiple panels with the same name are constructed, then saving and loading panels will not work right because of map key overlaps
 // Good panel objectName example:
 //    Panel #1 - WorkspacePanel
-//    Panel #2 - MemoryViewPanel|Custom Memory View Title For RAM View Panel
-//    Panel #3 - MemoryViewPanel|Custom Memory View Title For Flash View Panel
+//    Panel #2 - MemoryViewPanel|0
+//    Panel #3 - MemoryViewPanel|1,"Custom Panel Title Label"
 //    Panel #4 - TextEditPanel|./CFXS_RTOS_Test/src/main.cpp
 //    Panel #5 - TextEditPanel|./CFXS_RTOS_Test/src/_TM4C129X_Startup_RTOS.cpp
 
@@ -230,22 +230,22 @@ namespace HWD::UI {
                             auto seperatorOffset = panelDescription.indexOf("|");
 
                             if (seperatorOffset > 0) {
-                                HWDLOG_CORE_ERROR("{}", seperatorOffset);
                                 panelName = panelDescription.mid(0, seperatorOffset);  // start to '|'
                                 panelData = panelDescription.mid(seperatorOffset + 1); // '|' to end
                             } else {
                                 panelName = panelDescription;
-                                panelData = "[No Data]";
                             }
 
                             if (panelName == QStringLiteral("WorkspacePanel")) {
                                 OpenPanel_Workspace();
+                            } else if (panelName == QStringLiteral("TextEditPanel")) {
+                                OpenFile(panelData); // panelData for TextEditPanel is relative file path
                             } else {
                                 known = false;
                             }
 
                             if (known) {
-                                HWDLOG_UI_TRACE(" - Open {}|{}", panelName, panelData);
+                                HWDLOG_UI_TRACE(" - Open {}|{}", panelName, panelData.isEmpty() ? "[No Data]" : panelData);
                             } else {
                                 HWDLOG_UI_ERROR(" - Unknown panel: {}", panelName);
                             }
@@ -339,10 +339,48 @@ namespace HWD::UI {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
             GetDockManager()->addDockWidgetFloating(m_Panel_Workspace);
+
+            connect(m_Panel_Workspace, &WorkspacePanel::RequestOpenFile, [=](const QString& path) {
+                OpenFile(path);
+            });
         } else {
             m_Panel_Workspace->toggleView();
             m_Panel_Workspace->raise();
         }
+    }
+
+    void MainWindow::OpenFile(const QString& path) {
+        QString newPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(path);
+        auto fullPath   = ProjectManager::GetFullFilePath(newPath);
+        QFileInfo fileInfo(fullPath);
+
+        if (!fileInfo.exists()) {
+            HWDLOG_CORE_WARN("OpenFile file does not exist - {}", path);
+            return;
+        }
+
+        TextEditPanel* existingEditor = nullptr;
+        for (auto panel : GetDockManager()->dockWidgetsMap()) {
+            if (panel->objectName().contains(QStringLiteral("TextEditPanel")) &&
+                panel->property("absoluteFilePath").toString() == fullPath) {
+                existingEditor = static_cast<TextEditPanel*>(panel);
+                break;
+            }
+        }
+
+        // if exists, set as current tab
+        if (existingEditor) {
+            existingEditor->setAsCurrentTab();
+        } else {
+            OpenPanel_TextEdit(fullPath);
+        }
+    }
+
+    void MainWindow::OpenPanel_TextEdit(const QString& path) {
+        auto textEditPanel = new TextEditPanel;
+        textEditPanel->SetFilePath(path);
+        GetDockManager()->addDockWidgetTabToArea(textEditPanel, GetDockManager()->centralWidget()->dockAreaWidget());
+        textEditPanel->setFeature(CDockWidget::DockWidgetAlwaysCloseAndDelete, true); // delete on close
     }
 
 } // namespace HWD::UI

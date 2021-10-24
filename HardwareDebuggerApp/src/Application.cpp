@@ -36,7 +36,7 @@ namespace HWD {
         ads::CDockManager::setConfigFlag(ads::CDockManager::AllTabsHaveCloseButton, true);
         ads::CDockManager::setConfigFlag(ads::CDockManager::DockAreaDynamicTabsMenuButtonVisibility, true);
         ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, true);
-        //ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
+        ads::CDockManager::setConfigFlag(ads::CDockManager::MiddleMouseButtonClosesTab, true);
 
         QPalette darkPalette;
         darkPalette.setColor(QPalette::Window, QColor(55, 55, 55));
