@@ -80,10 +80,6 @@ namespace HWD::UI {
         });
     }
 
-    WorkspacePanel::~WorkspacePanel() {
-        HWDLOG_CORE_TRACE("Destroy workspace panel");
-    };
-
     void WorkspacePanel::SetRootPath(const QString& path) {
         if (!path.isEmpty() && QDir().exists(path)) {
             m_FB_Model->setRootPath(path);

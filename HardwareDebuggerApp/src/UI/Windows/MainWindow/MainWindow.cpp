@@ -30,11 +30,33 @@
 #include "CFXS_Center_Widget.hpp"
 
 #include <UI/Windows/AboutWindow/AboutWindow.hpp>
+#include <UI/Windows/Panels/TextEditPanel/TextEditPanel.hpp>
 #include <Core/Project/ProjectManager.hpp>
 
 using ads::CDockManager;
 using ads::CDockWidget;
 using ads::DockWidgetArea;
+
+/////////////////////////////////////////////////////////////
+////////////////// [ Window/Panel Stuff ] //////////////////
+/////////////////////////////////////////////////////////////
+// Panel/Window differences:
+//     - Window: A window that is not a part of the docking system
+//     - Panel: A dockable window that's state is saved/loaded when opening/closing projects
+// Panels are the main dynamic component of the HWD UI
+// Each main debugger function like MemoryView and LiveWatch will have it's own panel (including open source files - TextEditPanel)
+//
+// Panel names and descriptions are stored in it's objectName in this format: PanelName|PanelData
+// This is stored to the /.cfxs_hwd/WindowState.hwd file and when loaded, the PanelData string is passed to the constructed panel if necessary
+// Right now this is the only idea I have to not make loading panels in LoadState() too messy
+// All panels with the same base panel name must have different PanelData values as the docking system uses a QMap<QString, ...> to store its dock widgets
+// If multiple panels with the same name are constructed, then saving and loading panels will not work right because of map key overlaps
+// Good panel objectName example:
+//    Panel #1 - WorkspacePanel
+//    Panel #2 - MemoryViewPanel|Custom Memory View Title For RAM View Panel
+//    Panel #3 - MemoryViewPanel|Custom Memory View Title For Flash View Panel
+//    Panel #4 - TextEditPanel|./CFXS_RTOS_Test/src/main.cpp
+//    Panel #5 - TextEditPanel|./CFXS_RTOS_Test/src/_TM4C129X_Startup_RTOS.cpp
 
 namespace HWD::UI {
 
@@ -46,7 +68,7 @@ namespace HWD::UI {
     static const QString KEY_WINDOW_GEOMETRY           = QStringLiteral("windowGeometry");
     static const QString KEY_WINDOW_STATE              = QStringLiteral("windowState");
     static const QString KEY_DOCK_STATE                = QStringLiteral("dockState");
-    static const QString KEY_OPEN_PANELS               = QStringLiteral("openPanels");
+    static const QString KEY_OPEN_PANEL_DESCRIPTION    = QStringLiteral("openPanels");
     static const QString KEY_WINDOW_DATA               = QStringLiteral("windowStateData");
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -154,13 +176,14 @@ namespace HWD::UI {
 
         auto dockWidgets = GetDockManager()->dockWidgetsMap();
         for (auto w : dockWidgets) {
+            // Don't store info about the central widget
             if (w->objectName() != CENTRAL_WIDGET_NAME) {
                 HWDLOG_UI_TRACE(" - {}", w->objectName());
                 openPanelList.append(w->objectName());
             }
         }
 
-        state[KEY_OPEN_PANELS] = openPanelList;
+        state[KEY_OPEN_PANEL_DESCRIPTION] = openPanelList;
 
         s.setValue(KEY_WINDOW_DATA, state);
 
@@ -191,14 +214,30 @@ namespace HWD::UI {
                     case 1: { // Window state format version 1
                         HWDLOG_UI_TRACE("MainWindow load state [version = {0}]", state[KEY_VERSION].toInt());
                         if (!state.contains(KEY_WINDOW_GEOMETRY) || !state.contains(KEY_WINDOW_STATE) || !state.contains(KEY_DOCK_STATE) ||
-                            !state.contains(KEY_OPEN_PANELS)) {
+                            !state.contains(KEY_OPEN_PANEL_DESCRIPTION)) {
                             HWDLOG_UI_ERROR("MainWindow failed to load state v{0} - invalid data", state[KEY_VERSION].toInt());
                             return;
                         }
 
                         // Open all stored panels
-                        for (auto& panelName : state[KEY_OPEN_PANELS].toStringList()) {
+                        for (auto& panelDescription : state[KEY_OPEN_PANEL_DESCRIPTION].toStringList()) {
                             bool known = true;
+
+                            // panelDescription format:
+                            // PanelName|PanelData...
+                            QString panelName;
+                            QString panelData;
+                            auto seperatorOffset = panelDescription.indexOf("|");
+
+                            if (seperatorOffset > 0) {
+                                HWDLOG_CORE_ERROR("{}", seperatorOffset);
+                                panelName = panelDescription.mid(0, seperatorOffset);  // start to '|'
+                                panelData = panelDescription.mid(seperatorOffset + 1); // '|' to end
+                            } else {
+                                panelName = panelDescription;
+                                panelData = "[No Data]";
+                            }
+
                             if (panelName == QStringLiteral("WorkspacePanel")) {
                                 OpenPanel_Workspace();
                             } else {
@@ -206,7 +245,7 @@ namespace HWD::UI {
                             }
 
                             if (known) {
-                                HWDLOG_UI_TRACE(" - Open {}", panelName);
+                                HWDLOG_UI_TRACE(" - Open {}|{}", panelName, panelData);
                             } else {
                                 HWDLOG_UI_ERROR(" - Unknown panel: {}", panelName);
                             }
