@@ -28,7 +28,7 @@ namespace HWD {
         friend class ProjectManager;
         Q_OBJECT
 
-    public:
+    private:
         _ProjectManagerNotifier() = default;
 
     signals:

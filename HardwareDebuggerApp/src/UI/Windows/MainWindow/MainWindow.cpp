@@ -188,7 +188,7 @@ namespace HWD::UI {
                 }
 
                 switch (state[KEY_VERSION].toInt()) {
-                    case 1: {
+                    case 1: { // Window state format version 1
                         HWDLOG_UI_TRACE("MainWindow load state [version = {0}]", state[KEY_VERSION].toInt());
                         if (!state.contains(KEY_WINDOW_GEOMETRY) || !state.contains(KEY_WINDOW_STATE) || !state.contains(KEY_DOCK_STATE) ||
                             !state.contains(KEY_OPEN_PANELS)) {
