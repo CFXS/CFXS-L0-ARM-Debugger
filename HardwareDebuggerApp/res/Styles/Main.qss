@@ -87,14 +87,29 @@ QTreeView::branch:closed:has-children:has-siblings {
 
 /* QScrollBar */
 
-QScrollBar:vertical {
-    width: 16px;
-   border-left: 1px solid rgba(255, 255, 255, 32);
+QAbstractScrollArea {
+    background: none;
+    border: none;
+}
+
+QAbstractScrollArea::corner {
+    background: none;
+    border: none;
 }
 
 QScrollBar::handle {
     background: rgba(255, 255, 255, 32);
     border: none;
+}
+
+QScrollBar:vertical {
+    width: 16px;
+    border-left: 1px solid rgba(255, 255, 255, 32);
+}
+
+QScrollBar:horizontal {
+    height: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 32);
 }
 
 QScrollBar::add-line:vertical {
@@ -107,11 +122,6 @@ QScrollBar::sub-line:vertical {
     height: 0px;
     border: none;
     background: none;
-}
-
-QScrollBar:horizontal {
-    height: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 32);
 }
 
 QScrollBar::add-line:horizontal {
@@ -130,7 +140,6 @@ QScrollBar::add-line:vertical {
 }
 
 QScrollBar::sub-line:vertical {
-    height: 0px;
     border: none;
     background: none;
 }
@@ -141,6 +150,16 @@ QScrollBar:left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
 }
 
 QScrollBar:up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    border: none;
+    background: none;
+}
+
+QScrollBar:add-page:horizontal, QScrollBar::sub-page:horizontal {
+    border: none;
+    background: none;
+}
+
+QScrollBar:add-page:vertical, QScrollBar::sub-page:vertical {
     border: none;
     background: none;
 }
