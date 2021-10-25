@@ -1,3 +1,11 @@
+* {
+    font: 10pt "Segoe UI";
+}
+
+#codeField {
+    font: 12pt "Source Code Pro";
+}
+
 /* QMenuBar */
 
 QMenuBar {
@@ -59,9 +67,29 @@ QMenu::right-arrow {
   image: url(:/Image/SmallRightArrow.svg);
 }
 
+/* QTreeView */
+
+QTreeView::item  {
+    margin: 1px 2px;
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+    border-image: none;
+    image: url(:/Image/MidDownArrow.svg);
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    border-image: none;
+    image: url(:/Image/MidRightArrow.svg);
+}
+
+/* QScrollBar */
+
 QScrollBar:vertical {
     width: 16px;
-   border-left: 1px solid palette(mid);
+   border-left: 1px solid rgba(255, 255, 255, 32);
 }
 
 QScrollBar::handle {
@@ -81,20 +109,38 @@ QScrollBar::sub-line:vertical {
     background: none;
 }
 
-/* QTreeView */
-
-QTreeView::item  {
-    margin: 1px 2px;
+QScrollBar:horizontal {
+    height: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 32);
 }
 
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings  {
-    border-image: none;
-    image: url(:/Image/MidDownArrow.svg);
+QScrollBar::add-line:horizontal {
+    border: none;
+    background: none;
 }
 
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
-    border-image: none;
-    image: url(:/Image/MidRightArrow.svg);
+QScrollBar::sub-line:horizontal {
+    border: none;
+    background: none;
+}
+
+QScrollBar::add-line:vertical {
+    border: none;
+    background: none;
+}
+
+QScrollBar::sub-line:vertical {
+    height: 0px;
+    border: none;
+    background: none;
+}
+
+QScrollBar:left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
+    border: none;
+    background: none;
+}
+
+QScrollBar:up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    border: none;
+    background: none;
 }

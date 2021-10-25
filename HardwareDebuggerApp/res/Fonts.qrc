@@ -2,5 +2,16 @@
 <RCC version="1.0">
     <qresource>
         <file alias="Font/Code">Fonts/SourceCodePro-Regular.ttf</file>
+
+        <file alias="Font/OpenSans-Bold">Fonts/OpenSans-Bold.ttf</file>
+        <file alias="Font/OpenSans-BoldItalic">Fonts/OpenSans-BoldItalic.ttf</file>
+        <file alias="Font/OpenSans-ExtraBold">Fonts/OpenSans-ExtraBold.ttf</file>
+        <file alias="Font/OpenSans-ExtraBoldItalic">Fonts/OpenSans-ExtraBoldItalic.ttf</file>
+        <file alias="Font/OpenSans-Italic">Fonts/OpenSans-Italic.ttf</file>
+        <file alias="Font/OpenSans-Light">Fonts/OpenSans-Light.ttf</file>
+        <file alias="Font/OpenSans-LightItalic">Fonts/OpenSans-LightItalic.ttf</file>
+        <file alias="Font/OpenSans-Regular">Fonts/OpenSans-Regular.ttf</file>
+        <file alias="Font/OpenSans-SemiBold">Fonts/OpenSans-SemiBold.ttf</file>
+        <file alias="Font/OpenSans-SemiBoldItalic">Fonts/OpenSans-SemiBoldItalic.ttf</file>
     </qresource>
 </RCC>

@@ -148,6 +148,16 @@ namespace HWD::UI {
         } else {
             for (auto& path : recentList) {
                 ui->menuOpen_Recent->addAction(path, [=]() {
+                    // TODO: Check if everything saved
+
+                    if (ProjectManager::IsProjectOpen()) {
+                        if (ProjectManager::GetWorkspacePath() == path) { // don't open same project again
+                            HWDLOG_UI_TRACE("Trying to open same project");
+                            return;
+                        }
+
+                        SaveState();
+                    }
                     ProjectManager::OpenProject(path);
                 });
             }
@@ -193,7 +203,12 @@ namespace HWD::UI {
     void MainWindow::HideAllPanels() {
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
             if (panel->objectName() != CENTRAL_WIDGET_NAME) {
-                panel->toggleView(false);
+                if (panel->objectName().contains("TextEditPanel")) {
+                    GetDockManager()->removeDockWidget(panel);
+                    panel->deleteLater();
+                } else {
+                    panel->toggleView(false);
+                }
             }
         }
     }

@@ -29,9 +29,6 @@ namespace HWD::UI {
         ui->root->setLayout(layout);
 
         m_TextEdit = new QTextEdit;
-        QFont font("Source Code Pro", 12);
-        font.setStyleHint(QFont::Monospace);
-        m_TextEdit->setFont(font);
         m_TextEdit->setTextBackgroundColor(QColor{0, 0, 0, 0});
         m_TextEdit->setTextColor(QColor{255, 255, 255});
         m_TextEdit->setStyleSheet("background-color: rgb(28, 28, 28);");
@@ -40,7 +37,6 @@ namespace HWD::UI {
         m_TextEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
         m_LineWidget = new QTextEdit;
-        m_LineWidget->setFont(font);
         m_LineWidget->setTextBackgroundColor(QColor{0, 0, 0, 0});
         m_LineWidget->setTextColor(QColor{128, 128, 128});
         m_LineWidget->setStyleSheet("background-color: rgb(28, 28, 28);");
@@ -51,6 +47,9 @@ namespace HWD::UI {
         m_LineWidget->verticalScrollBar()->setVisible(false);
         m_LineWidget->horizontalScrollBar()->setVisible(false);
         m_LineWidget->setReadOnly(true);
+
+        m_TextEdit->setObjectName("codeField");
+        m_LineWidget->setObjectName("codeField");
 
         layout->addWidget(m_LineWidget);
         layout->addWidget(m_TextEdit);

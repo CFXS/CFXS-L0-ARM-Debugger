@@ -32,6 +32,16 @@ namespace HWD {
 
     void HWD_Application::OnCreate() {
         QFontDatabase::addApplicationFont(":/Font/Code");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-Bold");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-BoldItalic");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-ExtraBold");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-ExtraBoldItalic");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-Italic");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-Light");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-LightItalic");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-Regular");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-SemiBold");
+        QFontDatabase::addApplicationFont(":/Font/OpenSans-SemiBoldItalic");
 
         ProjectManager::HWD_Load();
         Load_Probe();
