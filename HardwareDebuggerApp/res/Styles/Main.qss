@@ -1,5 +1,5 @@
 * {
-    font: 10pt "Segoe UI";
+    font-size: 10.5pt;
 }
 
 #codeField {
