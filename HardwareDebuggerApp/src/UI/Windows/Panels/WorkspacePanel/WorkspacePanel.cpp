@@ -1,47 +1,45 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
 #include "WorkspacePanel.hpp"
 #include "ui_WorkspacePanel.h"
-#include <QDesktopServices>
 #include <Core/Project/ProjectManager.hpp>
+#include <QDesktopServices>
+#include <QScrollBar>
+#include <QTimer>
 
 #include <QDir>
 
 namespace HWD::UI {
 
     ////////////////////////////////////////////////////////////
-    const QStringList s_OpenWithExternalAppExtensionList = {
-        QStringLiteral("pdf"),
-        QStringLiteral("png"),
-        QStringLiteral("bmp"),
-        QStringLiteral("jpeg"),
-        QStringLiteral("jpg"),
-        QStringLiteral("webm"),
-        QStringLiteral("gif"),
+    const QStringList s_KnownExtensionList = {
+        QStringLiteral("c"),   QStringLiteral("cc"),    QStringLiteral("cpp"),  QStringLiteral("cxx"), QStringLiteral("c++"),
+        QStringLiteral("h"),   QStringLiteral("hh"),    QStringLiteral("hpp"),  QStringLiteral("hxx"), QStringLiteral("h++"),
+        QStringLiteral("asm"), QStringLiteral("s"),     QStringLiteral("inc"),  QStringLiteral("txt"), QStringLiteral("json"),
+        QStringLiteral("xml"), QStringLiteral("yml"),   QStringLiteral("yaml"), QStringLiteral("hwd"), QStringLiteral("ld"),
+        QStringLiteral("icf"), QStringLiteral("cmake"), QStringLiteral("map"),  QStringLiteral("lhg"),
     };
     ////////////////////////////////////////////////////////////
 
-    WorkspacePanel::WorkspacePanel() : ads::CDockWidget(QStringLiteral("Workspace")), ui(std::make_unique<Ui::WorkspacePanel>()) {
-        HWDLOG_CORE_TRACE("Create workspace panel");
+    WorkspacePanel::WorkspacePanel() : ads::CDockWidget(QStringLiteral("WorkspacePanel")), ui(std::make_unique<Ui::WorkspacePanel>()) {
+        HWDLOG_UI_TRACE("Create workspace panel");
         ui->setupUi(this);
-
-        setObjectName("WorkspacePanel");
 
         m_FB_Model = new FileBrowserModel(ui->tw_FileBrowser, this);
         m_FB_Model->setFilter(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
@@ -64,10 +62,10 @@ namespace HWD::UI {
             auto info = m_FB_Model->fileInfo(index);
             if (info.isFile()) {
                 // If extension matches external app list then open with external app
-                if (s_OpenWithExternalAppExtensionList.contains(info.suffix())) {
-                    QDesktopServices::openUrl(info.absoluteFilePath());
-                } else {
+                if (s_KnownExtensionList.contains(info.suffix().toLower())) {
                     emit RequestOpenFile(info.absoluteFilePath());
+                } else {
+                    QDesktopServices::openUrl(info.absoluteFilePath());
                 }
             }
         });
@@ -90,6 +88,66 @@ namespace HWD::UI {
         } else {
             ui->tw_FileBrowser->setVisible(false);
         }
+    }
+
+    void WorkspacePanel::SavePanelState(QSettings* cfg) {
+        QString cfgKey = objectName();
+        cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
+        HWDLOG_UI_TRACE("WorkspacePanel save state - {}", cfgKey);
+
+        cfg->beginGroup(cfgKey);
+        cfg->setValue("version", 1);
+        cfg->setValue("scroll_y", ui->tw_FileBrowser->verticalScrollBar()->value());
+
+        QStringList expandedEntries;
+        auto rootPathLen = m_FB_Model->rootPath().size();
+        for (auto& index : m_FB_Model->GetPersistendIndexList()) {
+            if (ui->tw_FileBrowser->isExpanded(index)) {
+                auto path = index.data(QFileSystemModel::Roles::FilePathRole).toString().mid(rootPathLen);
+                expandedEntries.append(path);
+            }
+        }
+
+        cfg->setValue("expandedEntries", expandedEntries);
+
+        cfg->endGroup();
+    }
+
+    void WorkspacePanel::LoadPanelState(QSettings* cfg) {
+        QString cfgKey = objectName();
+        cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
+        HWDLOG_UI_TRACE("WorkspacePanel load state - {}", objectName());
+
+        if (!cfg->childGroups().contains(cfgKey)) {
+            HWDLOG_UI_WARN(" - No config entry for {}", cfgKey);
+            return; // no cfg entry
+        }
+
+        cfg->beginGroup(cfgKey);
+        auto version = cfg->value("version").toInt();
+        if (version == 1) {
+            auto entries     = cfg->value("expandedEntries").toStringList();
+            QString rootPath = m_FB_Model->rootPath();
+
+            ui->tw_FileBrowser->setUpdatesEnabled(false);
+            ui->tw_FileBrowser->collapseAll();
+            for (auto entry : entries) {
+                ui->tw_FileBrowser->setExpanded(m_FB_Model->index(rootPath + entry), true);
+            }
+            ui->tw_FileBrowser->setUpdatesEnabled(true);
+
+            auto scroll_y = cfg->value("scroll_y").toInt();
+            if (scroll_y) {
+                QTimer::singleShot(
+                    1,
+                    [=]() { // TODO: find proper safe way to do this - instant set does not scroll, probably because model has not been updated
+                        ui->tw_FileBrowser->verticalScrollBar()->setValue(scroll_y);
+                    });
+            }
+        } else {
+            HWDLOG_UI_ERROR(" - Unsupported WorkspacePanel state data version {}", version);
+        }
+        cfg->endGroup();
     }
 
 } // namespace HWD::UI

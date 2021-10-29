@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -26,6 +26,7 @@
 #include <DockWidgetTab.h>
 #include <QBoxLayout>
 #include <QScrollBar>
+#include <QPoint>
 
 namespace HWD::UI {
 
@@ -37,7 +38,7 @@ namespace HWD::UI {
     //////////////////////////////////////////////
 
     TextEditPanel::TextEditPanel() : ads::CDockWidget(QStringLiteral("TextEditPanel")), ui(std::make_unique<Ui::TextEditPanel>()) {
-        HWDLOG_CORE_TRACE("Create text edit panel");
+        HWDLOG_UI_TRACE("Create text edit panel");
         ui->setupUi(this);
 
         auto layout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -146,6 +147,52 @@ namespace HWD::UI {
         m_LineWidget->setText(lineBar);
         m_TextEdit->setText(lines);
         m_File.close();
+    }
+
+    void TextEditPanel::SavePanelState(QSettings* cfg) {
+        QString cfgKey = objectName();
+        cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
+        HWDLOG_UI_TRACE("TextEditPanel save state - {}", cfgKey);
+
+        cfg->beginGroup(cfgKey);
+        cfg->setValue("version", 1);
+        cfg->setValue("scroll_x", m_TextEdit->horizontalScrollBar()->value());
+        cfg->setValue("scroll_y", m_TextEdit->verticalScrollBar()->value());
+        cfg->setValue("sel_start", m_TextEdit->textCursor().selectionStart());
+        cfg->setValue("sel_end", m_TextEdit->textCursor().selectionEnd());
+        cfg->endGroup();
+    }
+
+    void TextEditPanel::LoadPanelState(QSettings* cfg) {
+        QString cfgKey = objectName();
+        cfgKey.replace('/', '\\'); // QSettings does not like '/'
+        HWDLOG_UI_TRACE("TextEditPanel load state - {}", cfgKey);
+
+        if (!cfg->childGroups().contains(cfgKey)) {
+            HWDLOG_UI_WARN(" - No config entry for {}", cfgKey);
+            return; // no cfg entry
+        }
+
+        cfg->beginGroup(cfgKey);
+        auto version = cfg->value("version").toInt();
+        if (version == 1) {
+            auto scroll_x  = cfg->value("scroll_x").toInt();
+            auto scroll_y  = cfg->value("scroll_y").toInt();
+            auto sel_start = cfg->value("sel_start").toInt();
+            auto sel_end   = cfg->value("sel_end").toInt();
+
+            auto cursor = m_TextEdit->textCursor();
+            cursor.setPosition(sel_start, QTextCursor::MoveAnchor);
+            cursor.setPosition(sel_end, QTextCursor::KeepAnchor);
+            m_TextEdit->setTextCursor(cursor);
+
+            m_TextEdit->horizontalScrollBar()->setValue(scroll_x);
+            m_TextEdit->verticalScrollBar()->setValue(scroll_y);
+            m_LineWidget->verticalScrollBar()->setValue(scroll_y);
+        } else {
+            HWDLOG_UI_ERROR(" - Unsupported TextEditPanel state data version {}", version);
+        }
+        cfg->endGroup();
     }
 
 } // namespace HWD::UI

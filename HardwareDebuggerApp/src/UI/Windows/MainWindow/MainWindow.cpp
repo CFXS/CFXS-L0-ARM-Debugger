@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -30,6 +30,7 @@
 #include "CFXS_Center_Widget.hpp"
 
 #include <UI/Windows/AboutWindow/AboutWindow.hpp>
+#include <UI/Windows/Panels/WorkspacePanel/WorkspacePanel.hpp>
 #include <UI/Windows/Panels/TextEditPanel/TextEditPanel.hpp>
 #include <Core/Project/ProjectManager.hpp>
 
@@ -179,25 +180,26 @@ namespace HWD::UI {
 
         GetDockManager()->removePerspective(LAST_SESSION_PERSPECTIVE_NAME);
         GetDockManager()->addPerspective(LAST_SESSION_PERSPECTIVE_NAME);
-        QSettings s;
-        GetDockManager()->savePerspectives(s);
-
-        HWDLOG_UI_TRACE("Open panels:");
+        QSettings cfg;
+        GetDockManager()->savePerspectives(cfg);
 
         auto dockWidgets = GetDockManager()->dockWidgetsMap();
         for (auto w : dockWidgets) {
             // Don't store info about the central widget
             if (w->objectName() != CENTRAL_WIDGET_NAME) {
-                HWDLOG_UI_TRACE(" - {}", w->objectName());
                 openPanelList.append(w->objectName());
+                auto panel = dynamic_cast<I_Panel*>(w);
+                if (panel) {
+                    panel->SavePanelState(&cfg);
+                }
             }
         }
 
         state[KEY_OPEN_PANEL_DESCRIPTION] = openPanelList;
 
-        s.setValue(KEY_WINDOW_DATA, state);
+        cfg.setValue(KEY_WINDOW_DATA, state);
 
-        emit StateDataReady(&s);
+        emit StateDataReady(&cfg);
     }
 
     void MainWindow::HideAllPanels() {
@@ -252,16 +254,21 @@ namespace HWD::UI {
                             }
 
                             if (panelName == QStringLiteral("WorkspacePanel")) {
-                                OpenPanel_Workspace();
+                                auto workspacePanel = OpenPanel_Workspace();
+
+                                if (workspacePanel) {
+                                    workspacePanel->LoadPanelState(&stateData);
+                                }
                             } else if (panelName == QStringLiteral("TextEditPanel")) {
-                                OpenFile(panelData); // panelData for TextEditPanel is relative file path
+                                auto filePanel = OpenFilePanel(panelData); // panelData for TextEditPanel is relative file path
+                                if (filePanel) {
+                                    filePanel->LoadPanelState(&stateData);
+                                }
                             } else {
                                 known = false;
                             }
 
-                            if (known) {
-                                HWDLOG_UI_TRACE(" - Open {}|{}", panelName, panelData.isEmpty() ? "[No Data]" : panelData);
-                            } else {
+                            if (!known) {
                                 HWDLOG_UI_ERROR(" - Unknown panel: {}", panelName);
                             }
                         }
@@ -301,9 +308,9 @@ namespace HWD::UI {
                 this, QStringLiteral("Open Project"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
             if (dir.isEmpty()) {
-                HWDLOG_CORE_TRACE("Not opening project - no directory selected");
+                HWDLOG_UI_TRACE("Not opening project - no directory selected");
             } else {
-                HWDLOG_CORE_TRACE("Selected project directory - {}", dir);
+                HWDLOG_UI_TRACE("Selected project directory - {}", dir);
 
                 if (ProjectManager::IsProjectOpen()) {
                     SaveState();
@@ -350,28 +357,30 @@ namespace HWD::UI {
     ////////////////////////////////////////////////////////////////////
     // Panel opening
 
-    void MainWindow::OpenPanel_Workspace() {
+    I_Panel* MainWindow::OpenPanel_Workspace() {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
-            GetDockManager()->addDockWidgetFloating(m_Panel_Workspace);
+            GetDockManager()->addDockWidgetFloating(static_cast<WorkspacePanel*>(m_Panel_Workspace));
 
-            connect(m_Panel_Workspace, &WorkspacePanel::RequestOpenFile, [=](const QString& path) {
-                OpenFile(path);
+            connect(static_cast<WorkspacePanel*>(m_Panel_Workspace), &WorkspacePanel::RequestOpenFile, [=](const QString& path) {
+                OpenFilePanel(path);
             });
         } else {
-            m_Panel_Workspace->toggleView();
-            m_Panel_Workspace->raise();
+            static_cast<WorkspacePanel*>(m_Panel_Workspace)->toggleView();
+            static_cast<WorkspacePanel*>(m_Panel_Workspace)->raise();
         }
+
+        return m_Panel_Workspace;
     }
 
-    void MainWindow::OpenFile(const QString& path) {
+    I_Panel* MainWindow::OpenFilePanel(const QString& path) {
         QString newPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(path);
         auto fullPath   = ProjectManager::GetFullFilePath(newPath);
         QFileInfo fileInfo(fullPath);
 
         if (!fileInfo.exists()) {
-            HWDLOG_CORE_WARN("OpenFile file does not exist - {}", path);
-            return;
+            HWDLOG_UI_TRACE("OpenFile file does not exist - {}", path);
+            return nullptr;
         }
 
         TextEditPanel* existingEditor = nullptr;
@@ -386,16 +395,19 @@ namespace HWD::UI {
         // if exists, set as current tab
         if (existingEditor) {
             existingEditor->setAsCurrentTab();
+            return existingEditor;
         } else {
-            OpenPanel_TextEdit(fullPath);
+            return OpenPanel_TextEdit(fullPath);
         }
     }
 
-    void MainWindow::OpenPanel_TextEdit(const QString& path) {
+    I_Panel* MainWindow::OpenPanel_TextEdit(const QString& path) {
         auto textEditPanel = new TextEditPanel;
         textEditPanel->SetFilePath(path);
         GetDockManager()->addDockWidgetTabToArea(textEditPanel, GetDockManager()->centralWidget()->dockAreaWidget());
         textEditPanel->setFeature(CDockWidget::DockWidgetAlwaysCloseAndDelete, true); // delete on close
+
+        return textEditPanel;
     }
 
 } // namespace HWD::UI

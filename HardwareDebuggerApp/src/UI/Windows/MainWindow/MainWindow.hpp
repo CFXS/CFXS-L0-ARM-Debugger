@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -21,7 +21,7 @@
 #include <QMainWindow>
 #include "DockManager.h"
 
-#include <UI/Windows/Panels/WorkspacePanel/WorkspacePanel.hpp>
+#include <UI/Windows/Panels/I_Panel.hpp>
 
 namespace Ui {
     class MainWindow;
@@ -63,11 +63,11 @@ namespace HWD::UI {
         void RegisterActions_View();
         void RegisterActions_Help();
 
-        void OpenPanel_Workspace();                   // Open workspace panel
-        void OpenPanel_TextEdit(const QString &path); // Open text edit panel
+        I_Panel *OpenPanel_Workspace();                   // Open workspace panel
+        I_Panel *OpenPanel_TextEdit(const QString &path); // Open text edit panel
 
         /// Open file
-        void OpenFile(const QString &path);
+        I_Panel *OpenFilePanel(const QString &path);
 
     signals:
         void Closed();
@@ -84,7 +84,7 @@ namespace HWD::UI {
 
         // Panels
 
-        WorkspacePanel *m_Panel_Workspace = nullptr;
+        I_Panel *m_Panel_Workspace = nullptr;
     };
 
 } // namespace HWD::UI

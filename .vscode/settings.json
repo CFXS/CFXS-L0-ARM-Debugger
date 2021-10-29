@@ -108,6 +108,7 @@
         "qwindow": "cpp",
         "qstandardpaths": "cpp",
         "qfileinfo": "cpp",
-        "qdir": "cpp"
+        "qdir": "cpp",
+        "qfontdatabase": "cpp"
     }
 }
