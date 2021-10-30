@@ -140,7 +140,7 @@ namespace HWD::UI {
             if (scroll_y) {
                 QTimer::singleShot(
                     1,
-                    [=]() { // TODO: find proper safe way to do this - instant set does not scroll, probably because model has not been updated
+                    [=]() { // TODO(POTENTIAL_CRASH): find proper safe way to do this - instant set does not scroll, probably because model has not been updated
                         ui->tw_FileBrowser->verticalScrollBar()->setValue(scroll_y);
                     });
             }
