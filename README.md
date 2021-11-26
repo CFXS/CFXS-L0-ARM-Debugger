@@ -2,12 +2,7 @@
 ![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
 
 # Build/Development Requirements
-- `JLink_x64.dll` located in "C:\CFXS\JLink_x64.dll" (Temporary. DLL file can be found in the installation files of `SEGGER Embedded Studio`/`JLink Tools`/`IAR Embedded Workbench`)
-- `VSCode` or `Visual Studio`
-- `ninja-build` (https://ninja-build.org/)
-- `Visual Studio (Windows MSVC Compiler)` (https://visualstudio.microsoft.com/)
-- `CMake` (https://cmake.org/)
-- `Python` (https://www.python.org/)
+- Still working on these...
 
 # Planned Features
 - Will not crash every 5-15 minutes
@@ -26,19 +21,19 @@
 ---
 
 # Why this project exists
-The main reason is the existance of IAR
+The main reason is the existance of very expensive paid software like IAR that just does not work.
+We use IAR at work because from what we have tested - it is the best option (until this project reaches a working state)
 
-At work we use IAR Embedded Workbench for our hardware related projects. It truly is a sad excuse for an IDE/Debugger.
+Problems with IAR:
+- The whole screen flashes for ~10 seconds while it transforms all of its windows from editor to debugger mode
+- The LiveWatch window also just flashes constantly for no good reason (probably because of the outdated UI framework)
 - When a project gets very complicated, IAR decides to reset the CPU when trying to step/run after hitting a breakpoint or pausing execution.
+- In some cases it fails to understand its own ELF file and crashes instantly on load
 - The code editor/project part of IAR is just tragic
-- The debugger is the laggiest thing you will ever experience in your entire lifetime (upload to debug time is usually >30 seconds)
+- The debugger is the laggiest thing you will ever experience in your entire lifetime (upload to debug time is usually >30 seconds and not because of program size or debug probe flashing speed)
 - Hard to use, as it constantly crashes when you look at it the wrong way
-- Has cost us in total at least 6+ months of work time just from having to struggle with it being absolutely unusable with all the crashing and not showing some important debug data until the target CPU is halted (so what do you do in cases where the target is in a state where it is not able to be halted? This happened at work one time - as HWD was in still in early development, I threw together a quick test build of HWD and was able to solve the problem using a live Program Counter log to see where the CPU locked up and find + fix the problem **in 2 minutes instead of struggling for 2 hours with no results**)
 - IAR crashes at least a few times/day + exactly when you are about to catch a hard to repeat bug
-- Reporting issues to IAR result in them telling us to update to the latest IAR release, which still does not fix anything
-- A custom debugger has to be developed so we can move from the IAR compiler to an actual proper functional compiler like GCC
-- /r/softwaregore: `"Some things are better left unseen. You wouldn't be able to make a worse "IDE" even if you tried." (IAR)`
+- /r/softwaregore: `"Some things are better left unseen. You wouldn't be able to make a worse "IDE" even if you tried."`
+- A custom debugger has to be developed so we can move from the IAR compiler to an actual proper functional compiler like GCC or Clang
 
-Other debuggers probably are not as bad, but I have tried other debuggers and they are just not good enough for our debug flow (as fast and simple as possible with custom extendable functionality)
-
-Also other debuggers do not really support C++ good enough for our requirements. All of our ARM based projects are C++, so a debugger than can handle C++ data structure viewing is required (vector, map, list, other STL containers).
+Other debuggers probably are not as bad, but the debuggers I have tried using are just not good enough for our debug flow (as fast and simple as possible with custom extendable functionality, without 27.3 crashes/second and with a Watch window that works for C++ STL stuff)
