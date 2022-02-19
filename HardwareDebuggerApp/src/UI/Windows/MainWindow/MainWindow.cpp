@@ -202,16 +202,45 @@ namespace HWD::UI {
         emit StateDataReady(&cfg);
     }
 
-    void MainWindow::HideAllPanels() {
+    // TODO: refac to dynamic cast checks instead of object name
+    void MainWindow::HideAllPanels(bool leaveWorkspaceOpen) {
+        bool workspaceOpen = false;
+
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
             if (panel->objectName() != CENTRAL_WIDGET_NAME) {
+                // only delete text edit panels
                 if (panel->objectName().contains("TextEditPanel")) {
                     GetDockManager()->removeDockWidget(panel);
                     panel->deleteLater();
                 } else {
-                    panel->toggleView(false);
+                    if (panel->objectName().contains("WorkspacePanel")) {
+                        if (!leaveWorkspaceOpen) {
+                            panel->toggleView(false);
+                        } else {
+                            panel->toggleView(true);
+                            DockToLeftSideDefault(m_Panel_Workspace);
+                            workspaceOpen = true;
+                        }
+                    } else {
+                        panel->toggleView(false);
+                    }
                 }
             }
+        }
+
+        // if workspace was never open but requested to be visible
+        if (leaveWorkspaceOpen && !workspaceOpen) {
+            OpenPanel_Workspace();
+            DockToLeftSideDefault(m_Panel_Workspace);
+        }
+    }
+
+    void MainWindow::DockToLeftSideDefault(I_Panel* panel) {
+        if (auto dpanel = dynamic_cast<ads::CDockWidget*>(panel)) {
+            if (dpanel->dockManager()) {
+                GetDockManager()->removeDockWidget(dpanel);
+            }
+            GetDockManager()->addDockWidget(ads::DockWidgetArea::LeftDockWidgetArea, dpanel, GetDockManager()->dockArea(0));
         }
     }
 
@@ -360,7 +389,7 @@ namespace HWD::UI {
     I_Panel* MainWindow::OpenPanel_Workspace() {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
-            GetDockManager()->addDockWidgetFloating(static_cast<WorkspacePanel*>(m_Panel_Workspace));
+            DockToLeftSideDefault(m_Panel_Workspace);
 
             connect(static_cast<WorkspacePanel*>(m_Panel_Workspace), &WorkspacePanel::RequestOpenFile, [=](const QString& path) {
                 OpenFilePanel(path);
