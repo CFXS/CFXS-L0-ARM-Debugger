@@ -47,6 +47,10 @@ namespace HWD::UI {
         void RequestOpenFile(const QString& path);
 
     private:
+        /// Called on file/folder rightclick
+        void OpenEntryContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info);
+
+    private:
         std::unique_ptr<Ui::WorkspacePanel> ui;
         FileBrowserModel* m_FB_Model;
     };

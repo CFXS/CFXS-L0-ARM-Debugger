@@ -360,7 +360,8 @@ namespace HWD::UI {
     I_Panel* MainWindow::OpenPanel_Workspace() {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
-            GetDockManager()->addDockWidgetFloating(static_cast<WorkspacePanel*>(m_Panel_Workspace));
+            GetDockManager()->addDockWidget(
+                ads::DockWidgetArea::LeftDockWidgetArea, static_cast<WorkspacePanel*>(m_Panel_Workspace), GetDockManager()->dockArea(0));
 
             connect(static_cast<WorkspacePanel*>(m_Panel_Workspace), &WorkspacePanel::RequestOpenFile, [=](const QString& path) {
                 OpenFilePanel(path);

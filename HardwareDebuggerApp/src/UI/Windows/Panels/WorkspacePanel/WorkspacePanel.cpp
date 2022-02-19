@@ -22,6 +22,9 @@
 #include <QDesktopServices>
 #include <QScrollBar>
 #include <QTimer>
+#include <QMenu>
+#include <QAction>
+#include <QProcess>
 
 #include <QDir>
 
@@ -36,6 +39,21 @@ namespace HWD::UI {
         QStringLiteral("icf"), QStringLiteral("cmake"), QStringLiteral("map"),  QStringLiteral("lhg"),
     };
     ////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////
+    static void ShowInFileExplorer(const QString& path) {
+        QFileInfo info(path);
+#if defined(Q_OS_WIN)
+        QStringList args;
+        if (!info.isDir())
+            args << "/select,";
+        args << QDir::toNativeSeparators(path);
+        if (QProcess::startDetached("explorer", args))
+            return;
+#endif
+        QDesktopServices::openUrl(QUrl::fromLocalFile(info.isDir() ? path : info.path()));
+    }
+    //////////////////////////////////////////////////////////////
 
     WorkspacePanel::WorkspacePanel() : ads::CDockWidget(QStringLiteral("WorkspacePanel")), ui(std::make_unique<Ui::WorkspacePanel>()) {
         HWDLOG_UI_TRACE("Create workspace panel");
@@ -70,6 +88,18 @@ namespace HWD::UI {
             }
         });
 
+        ui->tw_FileBrowser->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(ui->tw_FileBrowser, &QTreeView::customContextMenuRequested, this, [=](const QPoint& point) {
+            QModelIndex index = ui->tw_FileBrowser->indexAt(point);
+            if (index.isValid()) {
+                auto info = m_FB_Model->fileInfo(index);
+                if (!info.isFile() && !info.isDir())
+                    return;
+
+                OpenEntryContextMenu(point, index, info);
+            }
+        });
+
         setWidget(ui->root);
 
         SetRootPath(ProjectManager::GetWorkspacePath());
@@ -78,6 +108,40 @@ namespace HWD::UI {
         connect(ProjectManager::GetNotifier(), &ProjectManager::Notifier::ProjectOpened, this, [=]() {
             SetRootPath(ProjectManager::GetWorkspacePath());
         });
+    }
+
+    void WorkspacePanel::OpenEntryContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info) {
+        auto menu = new QMenu(this);
+
+        auto showInExplorerAction = new QAction("Show in File Explorer", this);
+        menu->addAction(showInExplorerAction);
+        connect(showInExplorerAction, &QAction::triggered, this, [=]() {
+            if (info.isFile()) {
+                HWDLOG_UI_TRACE("Show File in File Explorer \"{}\"", info.absoluteFilePath());
+                ShowInFileExplorer(info.absoluteFilePath());
+            } else {
+                HWDLOG_UI_TRACE("Show Folder in File Explorer \"{}\"", info.absolutePath());
+                ShowInFileExplorer(info.absolutePath());
+            }
+        });
+
+        if (info.isFile()) {
+            menu->addSeparator();
+            auto openWithAction = new QAction("Open With...", this);
+            menu->addAction(openWithAction);
+            connect(openWithAction, &QAction::triggered, this, [=]() {
+#if defined(Q_OS_WIN)
+                HWDLOG_CORE_TRACE("Open With... \"{}\"", info.absoluteFilePath());
+                QProcess proc;
+                proc.startDetached("rundll32.exe",
+                                   {QStringLiteral("Shell32.dll,OpenAs_RunDLL"), info.absoluteFilePath().replace("/", "\\")});
+#else
+#error Open With... not implemented
+#endif
+            });
+        }
+
+        menu->popup(ui->tw_FileBrowser->viewport()->mapToGlobal(point));
     }
 
     void WorkspacePanel::SetRootPath(const QString& path) {

@@ -28,7 +28,7 @@
 namespace HWD {
 
     HWD_Application::HWD_Application(int argc, char** argv) : Application(argc, argv, CFXS_HWD_PROGRAM_NAME) {
-        qApp->setWindowIcon(QPixmap(":/HWD_Icon.png"));
+        qApp->setWindowIcon(QPixmap(":/HWD_Icon"));
     }
 
     void HWD_Application::OnCreate() {
