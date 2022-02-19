@@ -44,7 +44,7 @@ namespace HWD::UI {
         void LoadState(QSettings &stateData);
 
         /// Hide all panels - required for state load if new state contains less panels than current
-        void HideAllPanels(bool leaveWorkspaceOpen = false);
+        void HideAllPanels();
 
     private:
         /// getter for ui->dockManager
@@ -55,9 +55,6 @@ namespace HWD::UI {
 
         /// Update recent projects list
         void UpdateRecentProjects();
-
-        /// Dock panel to left side of main window at default size
-        void DockToLeftSideDefault(I_Panel *panel);
 
         /// connect actions to functions
         void RegisterActions();

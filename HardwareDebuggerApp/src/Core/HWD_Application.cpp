@@ -80,7 +80,7 @@ namespace HWD {
                     HWDLOG_CORE_ERROR("Failed to open window state file");
                 }
             } else {
-                GetMainWindow()->HideAllPanels(true);
+                GetMainWindow()->HideAllPanels();
                 HWDLOG_CORE_WARN("Window state file not found");
             }
         } else {
