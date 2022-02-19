@@ -163,3 +163,11 @@ QScrollBar:add-page:vertical, QScrollBar::sub-page:vertical {
     border: none;
     background: none;
 }
+
+/* QToolTip */
+
+QToolTip {
+    background: palette(dark);
+    border: 1px solid palette(mid);
+    color: rgb(255, 255, 255);
+}
