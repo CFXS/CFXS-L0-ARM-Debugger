@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
-// CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
-// Copyright (C) 2021 | CFXS
-//
+// CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
+// Copyright (C) 2022 | CFXS
+// 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -63,6 +63,7 @@ namespace L0::UI {
         FOLDER_LIB,
         FOLDER_RESOURCE,
         FOLDER_CFXS,
+        FOLDER_L0,
         // Open Folders
         FOLDER_OPEN,
         FOLDER_VSCODE_OPEN,
@@ -72,6 +73,7 @@ namespace L0::UI {
         FOLDER_LIB_OPEN,
         FOLDER_RESOURCE_OPEN,
         FOLDER_CFXS_OPEN,
+        FOLDER_L0_OPEN,
 
         _COUNT
     };
@@ -122,6 +124,7 @@ namespace L0::UI {
                 QPixmap(QStringLiteral(":/Icon/folder-lib")),
                 QPixmap(QStringLiteral(":/Icon/folder-resource")),
                 QPixmap(QStringLiteral(":/Icon/folder-cfxs")),
+                QPixmap(QStringLiteral(":/Icon/folder-l0")),
 
                 // Open folders
                 QPixmap(QStringLiteral(":/Icon/folder-open")),
@@ -132,6 +135,7 @@ namespace L0::UI {
                 QPixmap(QStringLiteral(":/Icon/folder-lib-open")),
                 QPixmap(QStringLiteral(":/Icon/folder-resource-open")),
                 QPixmap(QStringLiteral(":/Icon/folder-cfxs-open")),
+                QPixmap(QStringLiteral(":/Icon/folder-l0-open")),
             };
 
             if (s_IconTable.size() != _COUNT) {
@@ -167,8 +171,10 @@ namespace L0::UI {
                 return s_IconTable[isExpanded ? Icon::FOLDER_BUILD_OPEN : Icon::FOLDER_BUILD];
             } else if (suffix == QStringLiteral("git")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_GIT_OPEN : Icon::FOLDER_GIT];
-            } else if (suffix == QStringLiteral("cfxs") || suffix == QStringLiteral("l0") || suffix == QStringLiteral("cfxs_l0")) {
+            } else if (suffix == QStringLiteral("cfxs")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_CFXS_OPEN : Icon::FOLDER_CFXS];
+            } else if (name == QStringLiteral("l0") && info.absolutePath().toLower().contains(QStringLiteral(".cfxs"))) {
+                return s_IconTable[isExpanded ? Icon::FOLDER_L0_OPEN : Icon::FOLDER_L0];
             } else {
                 return s_IconTable[isExpanded ? Icon::FOLDER_OPEN : Icon::FOLDER];
             }

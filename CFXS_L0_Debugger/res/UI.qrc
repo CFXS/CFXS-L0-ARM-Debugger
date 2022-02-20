@@ -24,6 +24,8 @@
         <file alias="Icon/folder-resource-open">Images/UI/FileBrowser/folder-resource-open.svg</file>
         <file alias="Icon/folder-cfxs">Images/UI/FileBrowser/folder-cfxs.png</file>
         <file alias="Icon/folder-cfxs-open">Images/UI/FileBrowser/folder-cfxs-open.png</file>
+        <file alias="Icon/folder-l0">Images/UI/FileBrowser/folder-L0.png</file>
+        <file alias="Icon/folder-l0-open">Images/UI/FileBrowser/folder-L0-open.png</file>
 
         <file alias="Icon/file">Images/UI/FileBrowser/file.svg</file>
         <file alias="Icon/doc">Images/UI/FileBrowser/document.svg</file>
@@ -52,6 +54,6 @@
         <file alias="Icon/cfxs">Images/UI/FileBrowser/cfxs.png</file>
         <file alias="Icon/segger">Images/UI/FileBrowser/segger.png</file>
         <file alias="Icon/link">Images/UI/FileBrowser/link.png</file>
-        <file alias="Icon/l0">Images/UI/FileBrowser/CFXS_L0_SMALL.png</file>
+        <file alias="Icon/l0">Images/UI/FileBrowser/L0.png</file>
     </qresource>
 </RCC>

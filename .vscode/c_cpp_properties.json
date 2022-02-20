@@ -12,13 +12,13 @@
             "windowsSdkVersion": "10.0.18362.0",
             "compilerPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.25.28610\\bin\\Hostx64\\x86\\cl.exe",
             "includePath": [
-                "${workspaceFolder}/HardwareDebuggerApp/src/",
-                "${workspaceFolder}/HardwareDebuggerApp/vendor/",
-                "${workspaceFolder}/HardwareDebuggerApp/vendor/Lua/src",
-                "${workspaceFolder}/HardwareDebuggerApp/vendor/spdlog/include"
+                "${workspaceFolder}/CFXS_L0_Debugger/src/",
+                "${workspaceFolder}/CFXS_L0_Debugger/vendor/",
+                "${workspaceFolder}/CFXS_L0_Debugger/vendor/Lua/src",
+                "${workspaceFolder}/CFXS_L0_Debugger/vendor/spdlog/include"
             ],
             "forcedInclude": [
-                "${workspaceFolder}/build/HardwareDebuggerApp/CMakeFiles/HardwareDebuggerApp.dir/cmake_pch.hxx"
+                "${workspaceFolder}/build/CFXS_L0_Debugger/CMakeFiles/CFXS_L0_Debugger.dir/cmake_pch.hxx"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",

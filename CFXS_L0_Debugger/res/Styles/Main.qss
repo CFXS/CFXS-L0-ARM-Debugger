@@ -156,7 +156,7 @@ QScrollBar:up-arrow:vertical, QScrollBar::down-arrow:vertical {
 
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal,
 QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: rgba(255, 255, 255, 24);
+    background: none; /* rgba(255, 255, 255, 16); */
     border: none;
 }
 

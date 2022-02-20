@@ -35,4 +35,4 @@ set_project_warnings(project_warnings)
 include("CMake/Sanitizers.cmake")
 enable_sanitizers(project_options)
 
-add_subdirectory(HardwareDebuggerApp)
+add_subdirectory(CFXS_L0_Debugger)

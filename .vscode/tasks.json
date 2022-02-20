@@ -6,9 +6,9 @@
             "type": "shell",
             "command": "py",
             "args": [
-                "${workspaceRoot}/HardwareDebuggerApp/vendor/LicenseGen/UpdateHeaders_GPLv3.py",
-                "${workspaceRoot}/HardwareDebuggerApp/src",
-                "${workspaceRoot}/HardwareDebuggerApp/_License.lhg"
+                "${workspaceRoot}/CFXS_L0_Debugger/vendor/LicenseGen/UpdateHeaders_GPLv3.py",
+                "${workspaceRoot}/CFXS_L0_Debugger/src",
+                "${workspaceRoot}/CFXS_L0_Debugger/_License.lhg"
             ],
             "group": "test"
         },
