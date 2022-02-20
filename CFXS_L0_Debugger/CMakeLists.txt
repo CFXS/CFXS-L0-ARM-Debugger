@@ -67,6 +67,7 @@ target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 target_include_directories(${EXE_NAME} SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/llvm/include")
+target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/QCodeEditor/include")
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/QtAdvancedDockingSystem/src")
 
 if(MSVC)
@@ -77,8 +78,9 @@ target_link_libraries(
   ${EXE_NAME}
   PRIVATE project_options
           project_warnings
-          Lua
           qtadvanceddocking
+          QCodeEditor
+          Lua
           Qt::Core
           Qt::Widgets
           Qt::Network

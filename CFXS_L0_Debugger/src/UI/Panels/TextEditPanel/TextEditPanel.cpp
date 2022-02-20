@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -27,6 +27,11 @@
 #include <QBoxLayout>
 #include <QScrollBar>
 #include <QPoint>
+#include <QSyntaxStyle>
+
+#include <QCXXHighlighter>
+#include <QJSONHighlighter>
+#include <QXMLHighlighter>
 
 namespace L0::UI {
 
@@ -36,6 +41,10 @@ namespace L0::UI {
         return &fbip;
     };
     //////////////////////////////////////////////
+    QCXXHighlighter s_Highlighter_CXX;
+    QJSONHighlighter s_Highlighter_JSON;
+    QXMLHighlighter s_Highlighter_XML;
+    //////////////////////////////////////////////
 
     TextEditPanel::TextEditPanel() : ads::CDockWidget(GetPanelBaseName()), ui(std::make_unique<Ui::TextEditPanel>()) {
         LOG_UI_TRACE("Create {}", GetPanelBaseName());
@@ -43,38 +52,15 @@ namespace L0::UI {
 
         auto layout = new QBoxLayout(QBoxLayout::LeftToRight);
         layout->setContentsMargins({0, 0, 0, 0});
-        layout->setSpacing(1);
+        layout->setSpacing(0);
         ui->root->setLayout(layout);
 
-        m_TextEdit = new QTextEdit;
-        m_TextEdit->setTextBackgroundColor(QColor{0, 0, 0, 0});
-        m_TextEdit->setTextColor(QColor{255, 255, 255});
-        m_TextEdit->setStyleSheet("background-color: rgb(28, 28, 28);");
-        m_TextEdit->setLineWrapMode(QTextEdit::NoWrap);
-        m_TextEdit->setWordWrapMode(QTextOption::NoWrap);
-        m_TextEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        m_Editor = new QCodeEditor(this);
+        m_Editor->setSyntaxStyle(QSyntaxStyle::defaultStyle());
+        m_Editor->setWordWrapMode(QTextOption::NoWrap);
+        m_Editor->setObjectName("monospaceTextObject");
 
-        m_LineWidget = new QTextEdit;
-        m_LineWidget->setTextBackgroundColor(QColor{0, 0, 0, 0});
-        m_LineWidget->setTextColor(QColor{128, 128, 128});
-        m_LineWidget->setStyleSheet("background-color: rgb(28, 28, 28);");
-        m_LineWidget->setLineWrapMode(QTextEdit::NoWrap);
-        m_LineWidget->setWordWrapMode(QTextOption::NoWrap);
-        m_LineWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        m_LineWidget->setFixedWidth(58);
-        m_LineWidget->verticalScrollBar()->setVisible(false);
-        m_LineWidget->horizontalScrollBar()->setVisible(false);
-        m_LineWidget->setReadOnly(true);
-
-        m_TextEdit->setObjectName("monospaceTextObject");
-        m_LineWidget->setObjectName("monospaceTextObject");
-
-        layout->addWidget(m_LineWidget);
-        layout->addWidget(m_TextEdit);
-
-        // Link scrollbars
-        connect(m_TextEdit->verticalScrollBar(), SIGNAL(valueChanged(int)), m_LineWidget->verticalScrollBar(), SLOT(setValue(int)));
-        connect(m_LineWidget->verticalScrollBar(), SIGNAL(valueChanged(int)), m_TextEdit->verticalScrollBar(), SLOT(setValue(int)));
+        layout->addWidget(m_Editor);
 
         setWidget(ui->root);
     }
@@ -126,26 +112,20 @@ namespace L0::UI {
         m_File.open(QFile::ReadOnly | QFile::Text);
         QString lines = m_File.readAll();
 
-        auto lineCount  = lines.count('\n');
-        QString lineBar = "";
-        for (int i = 0; i <= lineCount; i++) {
-            if (i < 9) {
-                lineBar = lineBar + "   ";
-            } else if (i < 99) {
-                lineBar = lineBar + "  ";
-            } else {
-                lineBar = lineBar + " ";
-            }
-
-            if (i < lineCount) {
-                lineBar = lineBar + QString::number(i + 1) + "\n";
-            } else {
-                lineBar = lineBar + QString::number(i + 1);
-            }
+        auto ext = m_FileInfo.suffix().toLower();
+        if (ext == QStringLiteral("c") || ext == QStringLiteral("cc") || ext == QStringLiteral("cpp") || ext == QStringLiteral("cxx") ||
+            ext == QStringLiteral("c++") || ext == QStringLiteral("h") || ext == QStringLiteral("hh") || ext == QStringLiteral("hpp") ||
+            ext == QStringLiteral("hxx") || ext == QStringLiteral("h++")) {
+            m_Editor->setHighlighter(&s_Highlighter_CXX);
+        } else if (ext == QStringLiteral("json")) {
+            m_Editor->setHighlighter(&s_Highlighter_JSON);
+        } else if (ext == QStringLiteral("xml") || ext == QStringLiteral("emproject")) {
+            m_Editor->setHighlighter(&s_Highlighter_XML);
+        } else {
+            m_Editor->setHighlighter(nullptr);
         }
+        m_Editor->setPlainText(lines);
 
-        m_LineWidget->setText(lineBar);
-        m_TextEdit->setText(lines);
         m_File.close();
     }
 
@@ -156,10 +136,10 @@ namespace L0::UI {
 
         cfg->beginGroup(cfgKey);
         cfg->setValue("version", 1);
-        cfg->setValue("scroll_x", m_TextEdit->horizontalScrollBar()->value());
-        cfg->setValue("scroll_y", m_TextEdit->verticalScrollBar()->value());
-        cfg->setValue("sel_start", m_TextEdit->textCursor().selectionStart());
-        cfg->setValue("sel_end", m_TextEdit->textCursor().selectionEnd());
+        cfg->setValue("scroll_x", m_Editor->horizontalScrollBar()->value());
+        cfg->setValue("scroll_y", m_Editor->verticalScrollBar()->value());
+        cfg->setValue("sel_start", m_Editor->textCursor().selectionStart());
+        cfg->setValue("sel_end", m_Editor->textCursor().selectionEnd());
         cfg->endGroup();
     }
 
@@ -181,14 +161,13 @@ namespace L0::UI {
             auto sel_start = cfg->value("sel_start").toInt();
             auto sel_end   = cfg->value("sel_end").toInt();
 
-            auto cursor = m_TextEdit->textCursor();
+            auto cursor = m_Editor->textCursor();
             cursor.setPosition(sel_start, QTextCursor::MoveAnchor);
             cursor.setPosition(sel_end, QTextCursor::KeepAnchor);
-            m_TextEdit->setTextCursor(cursor);
+            m_Editor->setTextCursor(cursor);
 
-            m_TextEdit->horizontalScrollBar()->setValue(scroll_x);
-            m_TextEdit->verticalScrollBar()->setValue(scroll_y);
-            m_LineWidget->verticalScrollBar()->setValue(scroll_y);
+            m_Editor->horizontalScrollBar()->setValue(scroll_x);
+            m_Editor->verticalScrollBar()->setValue(scroll_y);
         } else {
             LOG_UI_ERROR(" - Unsupported TextEditPanel state data version {}", version);
         }

@@ -127,6 +127,11 @@
         "string_view": "cpp",
         "cinttypes": "cpp",
         "qpoint": "cpp",
-        "qtextcursor": "cpp"
+        "qtextcursor": "cpp",
+        "qcodeeditor": "cpp",
+        "qframedtextattribute": "cpp",
+        "qsyntaxstyle": "cpp",
+        "qcxxhighlighter": "cpp",
+        "qjsonhighlighter": "cpp"
     }
 }

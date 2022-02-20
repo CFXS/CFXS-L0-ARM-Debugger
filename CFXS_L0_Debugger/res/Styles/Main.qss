@@ -3,7 +3,9 @@
 }
 
 #monospaceTextObject {
-    font: 12pt "Source Code Pro";
+    font-size: 12pt;
+    font-family: "Consolas", "Courier New", monospace;
+    font-weight: 500;
 }
 
 /* QMenuBar */

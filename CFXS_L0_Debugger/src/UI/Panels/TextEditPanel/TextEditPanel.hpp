@@ -28,6 +28,7 @@
 #include <QFileInfo>
 #include <QTextEdit>
 #include <UI/Panels/I_Panel.hpp>
+#include <QCodeEditor>
 
 namespace Ui {
     class TextEditPanel;
@@ -61,8 +62,7 @@ namespace L0::UI {
         QString m_FilePath;
         QFile m_File;
         QFileInfo m_FileInfo;
-        QTextEdit* m_TextEdit;
-        QTextEdit* m_LineWidget;
+        QCodeEditor* m_Editor;
     };
 
 } // namespace L0::UI
