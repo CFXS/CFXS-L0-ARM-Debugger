@@ -98,18 +98,18 @@ QAbstractScrollArea::corner {
 }
 
 QScrollBar::handle {
-    background: rgba(255, 255, 255, 32);
+    background: rgba(255, 255, 255, 36);
     border: none;
 }
 
 QScrollBar:vertical {
     width: 16px;
-    border-left: 1px solid rgba(255, 255, 255, 32);
+    border-left: 1px solid rgba(255, 255, 255, 24);
 }
 
 QScrollBar:horizontal {
     height: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 32);
+    border-top: 1px solid rgba(255, 255, 255, 24);
 }
 
 QScrollBar::add-line:vertical {
@@ -154,14 +154,10 @@ QScrollBar:up-arrow:vertical, QScrollBar::down-arrow:vertical {
     background: none;
 }
 
-QScrollBar:add-page:horizontal, QScrollBar::sub-page:horizontal {
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal,
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: rgba(255, 255, 255, 24);
     border: none;
-    background: none;
-}
-
-QScrollBar:add-page:vertical, QScrollBar::sub-page:vertical {
-    border: none;
-    background: none;
 }
 
 /* QToolTip */

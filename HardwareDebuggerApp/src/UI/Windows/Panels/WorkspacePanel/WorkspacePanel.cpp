@@ -65,8 +65,10 @@ namespace L0::UI {
             if (info.isFile()) {
                 // If extension matches external app list then open with external app
                 if (s_KnownExtensionList.contains(info.suffix().toLower())) {
+                    LOG_CORE_TRACE("Open file internally \"{}\"", info.absoluteFilePath());
                     emit RequestOpenFile(info.absoluteFilePath());
                 } else {
+                    LOG_CORE_TRACE("Open file externally \"{}\"", info.absoluteFilePath());
                     QDesktopServices::openUrl(info.absoluteFilePath());
                 }
             }
@@ -111,6 +113,16 @@ namespace L0::UI {
 
         if (info.isFile()) {
             menu->addSeparator();
+
+            // Open as text file
+            auto openAsTextAction = new QAction("Open as Text", this);
+            menu->addAction(openAsTextAction);
+            connect(openAsTextAction, &QAction::triggered, this, [=]() {
+                LOG_CORE_TRACE("Open as Text \"{}\"", info.absoluteFilePath());
+                emit RequestOpenFile(info.absoluteFilePath());
+            });
+
+            // Open With...
             auto openWithAction = new QAction("Open With...", this);
             menu->addAction(openWithAction);
             connect(openWithAction, &QAction::triggered, this, [=]() {

@@ -59,8 +59,8 @@ namespace L0::UI {
                     ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
                 });
 
-        // 100ms delay for widget layouts
-        QTimer::singleShot(100, [=]() {
+        // >0ms delay for widget layouts
+        QTimer::singleShot(1, [=]() {
             ui->textEdit->verticalScrollBar()->setValue(ui->textEdit->verticalScrollBar()->maximum());
         });
 
