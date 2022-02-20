@@ -1,15 +1,15 @@
 [submodule "HardwareDebuggerApp/vendor/spdlog"]
-	path = HardwareDebuggerApp/vendor/spdlog
+	path = CFXS_L0_Debugger/vendor/spdlog
 	url = https://github.com/CFXS/spdlog.git
 [submodule "HardwareDebuggerApp/vendor/Lua"]
-	path = HardwareDebuggerApp/vendor/Lua
+	path = CFXS_L0_Debugger/vendor/Lua
 	url = https://github.com/CFXS/lua.git
 [submodule "Docs"]
 	path = Docs
 	url = https://github.com/CFXS/HWD-Private-Docs.git
 [submodule "HardwareDebuggerApp/vendor/LicenseGen"]
-	path = HardwareDebuggerApp/vendor/LicenseGen
+	path = CFXS_L0_Debugger/vendor/LicenseGen
 	url = https://github.com/CFXS/CFXS-License-Header-Generator.git
 [submodule "HardwareDebuggerApp/vendor/QtAdvancedDockingSystem"]
-	path = HardwareDebuggerApp/vendor/QtAdvancedDockingSystem
+	path = CFXS_L0_Debugger/vendor/QtAdvancedDockingSystem
 	url = https://github.com/CFXS/Qt-Advanced-Docking-System.git

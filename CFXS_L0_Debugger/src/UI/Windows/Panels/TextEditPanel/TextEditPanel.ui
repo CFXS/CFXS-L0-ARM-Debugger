@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>TextEditPanel</class>
+    <widget class="ads::CDockWidget" name="TextEditPanel">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>400</width>
+                <height>300</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>TextEditPanel</string>
+        </property>
+        <widget class="QWidget" name="root" native="true">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>256</width>
+                    <height>192</height>
+                </rect>
+            </property>
+        </widget>
+    </widget>
+    <customwidgets>
+        <customwidget>
+            <class>ads::CDockWidget</class>
+            <extends>QFrame</extends>
+            <header location="global">DockWidget.h</header>
+            <container>1</container>
+        </customwidget>
+    </customwidgets>
+    <resources />
+    <connections />
+</ui>
