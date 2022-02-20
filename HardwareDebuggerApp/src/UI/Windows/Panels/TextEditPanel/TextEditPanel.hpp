@@ -33,13 +33,19 @@ namespace Ui {
     class TextEditPanel;
 }
 
-namespace HWD::UI {
+namespace L0::UI {
 
     class TextEditPanel : public ads::CDockWidget, public I_Panel {
         Q_OBJECT
     public:
         TextEditPanel();
         virtual ~TextEditPanel() = default;
+
+        /// Get panel base name (for type matching from string)
+        static const QString& GetPanelBaseName() {
+            static const QString name = QStringLiteral("TextEditPanel");
+            return name;
+        }
 
         void SavePanelState(QSettings* cfg) override;
         void LoadPanelState(QSettings* cfg) override;
@@ -59,4 +65,4 @@ namespace HWD::UI {
         QTextEdit* m_LineWidget;
     };
 
-} // namespace HWD::UI
+} // namespace L0::UI

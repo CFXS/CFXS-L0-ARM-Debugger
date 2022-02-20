@@ -29,10 +29,11 @@
 #include <DockAreaWidget.h>
 #include "CFXS_Center_Widget.hpp"
 
+#include <Core/Project/ProjectManager.hpp>
 #include <UI/Windows/AboutWindow/AboutWindow.hpp>
 #include <UI/Windows/Panels/WorkspacePanel/WorkspacePanel.hpp>
 #include <UI/Windows/Panels/TextEditPanel/TextEditPanel.hpp>
-#include <Core/Project/ProjectManager.hpp>
+#include <UI/Windows/Panels/AppLogPanel/AppLogPanel.hpp>
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -48,7 +49,7 @@ using ads::DockWidgetArea;
 // Each main debugger function like MemoryView and LiveWatch will have it's own panel (including open source files - TextEditPanel)
 //
 // Panel names and descriptions are stored in it's objectName in this format: PanelName|PanelData
-// This is stored to the /.cfxs_hwd/WindowState.hwd file and when loaded, the PanelData string is passed to the constructed panel if necessary
+// This is stored to the /.cfxs_hwd/WindowState.L0 file and when loaded, the PanelData string is passed to the constructed panel if necessary
 // Right now this is the only idea I have to not make loading panels in LoadState() too messy
 // All panels with the same base panel name must have different PanelData values as the docking system uses a QMap<QString, ...> to store its dock widgets
 // If multiple panels with the same name are constructed, then saving and loading panels will not work right because of map key overlaps
@@ -59,7 +60,7 @@ using ads::DockWidgetArea;
 //    Panel #4 - TextEditPanel|./CFXS_RTOS_Test/src/main.cpp
 //    Panel #5 - TextEditPanel|./CFXS_RTOS_Test/src/_TM4C129X_Startup_RTOS.cpp
 
-namespace HWD::UI {
+namespace L0::UI {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     static constexpr int STATE_SERIALIZER_VERSION      = 1; // Used to track state loading differences
@@ -71,6 +72,26 @@ namespace HWD::UI {
     static const QString KEY_DOCK_STATE                = QStringLiteral("dockState");
     static const QString KEY_OPEN_PANEL_DESCRIPTION    = QStringLiteral("openPanels");
     static const QString KEY_WINDOW_DATA               = QStringLiteral("windowStateData");
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    // Actions
+    std::vector<MainWindow::ActionEntryDefinition> MainWindow::s_ActionDefinitions_View = {
+        // Open workspace panel
+        {false,
+         "Workspace",
+         [](MainWindow* dis) {
+             dis->OpenPanel_Workspace();
+         }},
+
+        // Seperator
+        {true},
+
+        // Open app log
+        {false,
+         "Appication Log",
+         [](MainWindow* dis) {
+             dis->OpenPanel_AppLog();
+         }},
+    };
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
     MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
@@ -99,7 +120,7 @@ namespace HWD::UI {
         auto centralDockArea = GetDockManager()->setCentralWidget(centralDockWidget);
         centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
 
-        RegisterActions();
+        InitializeActions();
 
         // Update title if project dir changed
         connect(ProjectManager::GetNotifier(), &ProjectManager::Notifier::ProjectOpened, this, [=]() {
@@ -121,7 +142,7 @@ namespace HWD::UI {
     }
 
     void MainWindow::closeEvent(QCloseEvent* event) {
-        HWDLOG_UI_TRACE("Close MainWindow");
+        LOG_UI_TRACE("Close MainWindow");
         SaveState();
         emit Closed();
         event->accept();
@@ -133,9 +154,9 @@ namespace HWD::UI {
         if (ProjectManager::IsProjectOpen()) {
             auto path           = ProjectManager::GetWorkspacePath();
             QString lastDirName = path.mid(path.lastIndexOf("/") + 1);
-            setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME) + " - " + lastDirName);
+            setWindowTitle(QStringLiteral(CFXS_PROGRAM_NAME) + " - " + lastDirName);
         } else {
-            setWindowTitle(QStringLiteral(CFXS_HWD_PROGRAM_NAME) + " - No project open");
+            setWindowTitle(QStringLiteral(CFXS_PROGRAM_NAME) + " - No project open");
         }
     }
 
@@ -149,11 +170,9 @@ namespace HWD::UI {
         } else {
             for (auto& path : recentList) {
                 ui->menuOpen_Recent->addAction(path, [=]() {
-                    // TODO: Check if everything saved
-
                     if (ProjectManager::IsProjectOpen()) {
                         if (ProjectManager::GetWorkspacePath() == path) { // don't open same project again
-                            HWDLOG_UI_TRACE("Trying to open same project");
+                            LOG_UI_TRACE("Trying to open same project");
                             return;
                         }
 
@@ -217,22 +236,22 @@ namespace HWD::UI {
 
     void MainWindow::LoadState(QSettings& stateData) {
         if (stateData.status() != QSettings::Status::NoError) {
-            HWDLOG_UI_ERROR("MainWindow failed to load state");
+            LOG_UI_ERROR("MainWindow failed to load state");
         } else {
             QMap<QString, QVariant> state = stateData.value(KEY_WINDOW_DATA).toMap();
 
             if (!state.isEmpty()) {
                 if (!state.contains(KEY_VERSION)) {
-                    HWDLOG_UI_ERROR("MainWindow failed to load state - no version field");
+                    LOG_UI_ERROR("MainWindow failed to load state - no version field");
                     return;
                 }
 
                 switch (state[KEY_VERSION].toInt()) {
                     case 1: { // Window state format version 1
-                        HWDLOG_UI_TRACE("MainWindow load state [version = {0}]", state[KEY_VERSION].toInt());
+                        LOG_UI_TRACE("MainWindow load state [version = {0}]", state[KEY_VERSION].toInt());
                         if (!state.contains(KEY_WINDOW_GEOMETRY) || !state.contains(KEY_WINDOW_STATE) || !state.contains(KEY_DOCK_STATE) ||
                             !state.contains(KEY_OPEN_PANEL_DESCRIPTION)) {
-                            HWDLOG_UI_ERROR("MainWindow failed to load state v{0} - invalid data", state[KEY_VERSION].toInt());
+                            LOG_UI_ERROR("MainWindow failed to load state v{0} - invalid data", state[KEY_VERSION].toInt());
                             return;
                         }
 
@@ -253,15 +272,17 @@ namespace HWD::UI {
                                 panelName = panelDescription;
                             }
 
-                            if (panelName == QStringLiteral("WorkspacePanel")) {
-                                auto workspacePanel = OpenPanel_Workspace();
-
-                                if (workspacePanel) {
+                            if (panelName == WorkspacePanel::GetPanelBaseName()) {
+                                if (auto workspacePanel = OpenPanel_Workspace()) {
                                     workspacePanel->LoadPanelState(&stateData);
                                 }
-                            } else if (panelName == QStringLiteral("TextEditPanel")) {
-                                auto filePanel = OpenFilePanel(panelData); // panelData for TextEditPanel is relative file path
-                                if (filePanel) {
+                            } else if (panelName == AppLogPanel::GetPanelBaseName()) {
+                                if (auto appLogPanel = OpenPanel_AppLog()) {
+                                    appLogPanel->LoadPanelState(&stateData);
+                                }
+                            } else if (panelName == TextEditPanel::GetPanelBaseName()) {
+                                // panelData for TextEditPanel is relative file path
+                                if (auto filePanel = OpenFilePanel(panelData)) {
                                     filePanel->LoadPanelState(&stateData);
                                 }
                             } else {
@@ -269,7 +290,7 @@ namespace HWD::UI {
                             }
 
                             if (!known) {
-                                HWDLOG_UI_ERROR(" - Unknown panel: {}", panelName);
+                                LOG_UI_ERROR(" - Unknown panel: {}", panelName);
                             }
                         }
 
@@ -283,10 +304,10 @@ namespace HWD::UI {
 
                         break;
                     }
-                    default: HWDLOG_UI_ERROR("MainWindow failed to load state - unsupported version"); return;
+                    default: LOG_UI_ERROR("MainWindow failed to load state - unsupported version"); return;
                 }
             } else {
-                HWDLOG_UI_ERROR("MainWindow failed to load state - corrupted data");
+                LOG_UI_ERROR("MainWindow failed to load state - corrupted data");
                 return;
             }
         }
@@ -294,23 +315,22 @@ namespace HWD::UI {
 
     ///////////////////////////////////////////////////////////////
 
-    void MainWindow::RegisterActions() {
-        RegisterActions_File();
-        RegisterActions_Edit();
-        RegisterActions_View();
-        RegisterActions_Help();
+    void MainWindow::InitializeActions() {
+        InitializeActions_File();
+        InitializeActions_View();
+        InitializeActions_Help();
     }
 
-    void MainWindow::RegisterActions_File() {
+    void MainWindow::InitializeActions_File() {
         // Open Project...
         connect(ui->actionOpen_Project, &QAction::triggered, this, [=]() {
             QString dir = QFileDialog::getExistingDirectory(
                 this, QStringLiteral("Open Project"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
             if (dir.isEmpty()) {
-                HWDLOG_UI_TRACE("Not opening project - no directory selected");
+                LOG_UI_TRACE("Not opening project - no directory selected");
             } else {
-                HWDLOG_UI_TRACE("Selected project directory - {}", dir);
+                LOG_UI_TRACE("Selected project directory - {}", dir);
 
                 if (ProjectManager::IsProjectOpen()) {
                     SaveState();
@@ -326,19 +346,24 @@ namespace HWD::UI {
         });
     }
 
-    void MainWindow::RegisterActions_Edit() {
+    void MainWindow::InitializeActions_View() {
+        for (auto& vae : s_ActionDefinitions_View) {
+            if (vae.isSeperator) {
+                ui->menuView->addSeparator();
+            } else {
+                auto action = new QAction(vae.icon, vae.name, this);
+                ui->menuView->addAction(action);
+                connect(action, &QAction::triggered, this, [=]() {
+                    if (vae.callback)
+                        vae.callback(this);
+                });
+            }
+        }
     }
 
-    void MainWindow::RegisterActions_View() {
-        // View > Workspace
-        connect(ui->actionWorkspace, &QAction::triggered, this, [=]() {
-            OpenPanel_Workspace();
-        });
-    }
-
-    void MainWindow::RegisterActions_Help() {
+    void MainWindow::InitializeActions_Help() {
         // CFXS HWD Github
-        connect(ui->actionCFXS_HWD_Github_Page, &QAction::triggered, this, [=]() {
+        connect(ui->actionCFXS_L0_Github_Page, &QAction::triggered, this, [=]() {
             QDesktopServices::openUrl(QStringLiteral("https://github.com/CFXS/CFXS-Hardware-Debugger"));
         });
 
@@ -357,30 +382,41 @@ namespace HWD::UI {
     ////////////////////////////////////////////////////////////////////
     // Panel opening
 
-    I_Panel* MainWindow::OpenPanel_Workspace() {
+    WorkspacePanel* MainWindow::OpenPanel_Workspace() {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
-            GetDockManager()->addDockWidget(
-                ads::DockWidgetArea::LeftDockWidgetArea, static_cast<WorkspacePanel*>(m_Panel_Workspace), GetDockManager()->dockArea(0));
+            GetDockManager()->addDockWidget(ads::DockWidgetArea::LeftDockWidgetArea, m_Panel_Workspace, GetDockManager()->dockArea(0));
 
             connect(static_cast<WorkspacePanel*>(m_Panel_Workspace), &WorkspacePanel::RequestOpenFile, [=](const QString& path) {
                 OpenFilePanel(path);
             });
         } else {
-            static_cast<WorkspacePanel*>(m_Panel_Workspace)->toggleView();
-            static_cast<WorkspacePanel*>(m_Panel_Workspace)->raise();
+            m_Panel_Workspace->toggleView();
+            m_Panel_Workspace->raise();
         }
 
         return m_Panel_Workspace;
     }
 
-    I_Panel* MainWindow::OpenFilePanel(const QString& path) {
+    AppLogPanel* MainWindow::OpenPanel_AppLog() {
+        if (!m_Panel_AppLog) {
+            m_Panel_AppLog = new AppLogPanel;
+            GetDockManager()->addDockWidget(ads::DockWidgetArea::BottomDockWidgetArea, m_Panel_AppLog, GetDockManager()->dockArea(0));
+        } else {
+            m_Panel_AppLog->toggleView();
+            m_Panel_AppLog->raise();
+        }
+
+        return m_Panel_AppLog;
+    }
+
+    TextEditPanel* MainWindow::OpenFilePanel(const QString& path) {
         QString newPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(path);
         auto fullPath   = ProjectManager::GetFullFilePath(newPath);
         QFileInfo fileInfo(fullPath);
 
         if (!fileInfo.exists()) {
-            HWDLOG_UI_TRACE("OpenFile file does not exist - {}", path);
+            LOG_UI_TRACE("OpenFile file does not exist - {}", path);
             return nullptr;
         }
 
@@ -402,7 +438,7 @@ namespace HWD::UI {
         }
     }
 
-    I_Panel* MainWindow::OpenPanel_TextEdit(const QString& path) {
+    TextEditPanel* MainWindow::OpenPanel_TextEdit(const QString& path) {
         auto textEditPanel = new TextEditPanel;
         textEditPanel->SetFilePath(path);
         GetDockManager()->addDockWidgetTabToArea(textEditPanel, GetDockManager()->centralWidget()->dockAreaWidget());
@@ -411,4 +447,4 @@ namespace HWD::UI {
         return textEditPanel;
     }
 
-} // namespace HWD::UI
+} // namespace L0::UI

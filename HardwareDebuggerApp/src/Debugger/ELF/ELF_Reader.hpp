@@ -2,7 +2,7 @@
 #include "ELF.hpp"
 #include "ELF32.hpp"
 
-namespace HWD::ELF {
+namespace L0::ELF {
 
     class ELF_Reader {
     public:
@@ -75,7 +75,7 @@ namespace HWD::ELF {
         template<typename T>
         inline const T* GetSectionData(size_t sectionIndex) const {
             if (sectionIndex >= m_SectionData.size()) {
-                HWDLOG_CORE_CRITICAL("Section index out of range ({0} >= {1})", sectionIndex, m_SectionData.size());
+                LOG_CORE_CRITICAL("Section index out of range ({0} >= {1})", sectionIndex, m_SectionData.size());
                 return nullptr;
             } else {
                 return reinterpret_cast<const T*>(m_SectionData[sectionIndex]);
@@ -102,4 +102,4 @@ namespace HWD::ELF {
         std::map<std::string, SymbolInfo> m_SymbolMap;
     };
 
-} // namespace HWD::ELF
+} // namespace L0::ELF

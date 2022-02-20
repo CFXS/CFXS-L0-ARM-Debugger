@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv);
 
-namespace HWD {
+namespace L0 {
 
     class Application {
     public:
@@ -37,4 +37,4 @@ namespace HWD {
         friend int ::main(int argc, char** argv);
     };
 
-} // namespace HWD
+} // namespace L0

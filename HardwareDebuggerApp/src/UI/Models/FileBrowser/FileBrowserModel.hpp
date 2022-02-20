@@ -18,10 +18,10 @@
 // [CFXS] //
 #pragma once
 #include <QFileSystemModel>
-#include "FileBrowserIconProvider.hpp"
+#include "FileIconProvider.hpp"
 #include <QTreeView>
 
-namespace HWD::UI {
+namespace L0::UI {
 
     class FileBrowserModel : public QFileSystemModel {
     public:
@@ -32,8 +32,8 @@ namespace HWD::UI {
         QList<QModelIndex> GetPersistendIndexList() const;
 
     private:
-        FileBrowserIconProvider m_IconProvider;
+        FileIconProvider m_IconProvider;
         QTreeView* m_WorkingTreeView;
     };
 
-} // namespace HWD::UI
+} // namespace L0::UI

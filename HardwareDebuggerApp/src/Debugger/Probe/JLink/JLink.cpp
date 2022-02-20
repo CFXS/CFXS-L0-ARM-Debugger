@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -23,7 +23,7 @@
 #include <set>
 #include <QString>
 
-namespace HWD::Probe {
+namespace L0::Probe {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     static constexpr bool LOG_ENABLED       = false;
@@ -35,7 +35,7 @@ namespace HWD::Probe {
     Driver::JLink_Driver* JLink::s_Driver = nullptr;
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    void JLink::HWD_Load() {
+    void JLink::L0_Load() {
         s_Driver = new Driver::JLink_Driver;
 
         if (!s_Driver->IsLoaded()) {
@@ -44,18 +44,18 @@ namespace HWD::Probe {
         }
     }
 
-    void JLink::HWD_Unload() {
+    void JLink::L0_Unload() {
         if (s_Driver)
             delete s_Driver;
     }
 
     JLink::JLink() {
-        HWDLOG_PROBE_TRACE("[JLink@{0}] Constructor", fmt::ptr(this));
+        LOG_PROBE_TRACE("[JLink@{0}] Constructor", fmt::ptr(this));
         m_DeviceAssigned = false;
     }
 
     JLink::~JLink() {
-        HWDLOG_PROBE_TRACE("[JLink@{0}] Destructor", fmt::ptr(this));
+        LOG_PROBE_TRACE("[JLink@{0}] Destructor", fmt::ptr(this));
 
         if (Probe_IsConnected())
             Probe_Disconnect();
@@ -64,17 +64,17 @@ namespace HWD::Probe {
     //////////////////////////////////////////////////////////////////////
 
     // Select working device by serial number
-    void JLink::HWD_SelectDevice(uint32_t serialNumber) {
+    void JLink::L0_SelectDevice(uint32_t serialNumber) {
         if (Probe_IsConnected())
             Probe_Disconnect();
 
         ErrorCode ec = GetDriver()->probe_SelectBySerialNumber_USB(serialNumber);
 
         if (ec != ErrorCode::OK) {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number {1} - {2}", fmt::ptr(this), serialNumber, ec);
+            LOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number {1} - {2}", fmt::ptr(this), serialNumber, ec);
             m_DeviceAssigned = false;
         } else {
-            HWDLOG_PROBE_TRACE("[JLink@{0}] Probe {1} selected", fmt::ptr(this), serialNumber);
+            LOG_PROBE_TRACE("[JLink@{0}] Probe {1} selected", fmt::ptr(this), serialNumber);
 
             m_SerialNumberString = std::to_string(serialNumber);
 
@@ -91,24 +91,24 @@ namespace HWD::Probe {
 
     void JLink::Probe_LogCallback(const char* message) {
         if constexpr (LOG_ENABLED) {
-            HWDLOG_PROBE_TRACE("[JLink@{0}][LOG] {1}", fmt::ptr(this), message ? message : "-");
+            LOG_PROBE_TRACE("[JLink@{0}][LOG] {1}", fmt::ptr(this), message ? message : "-");
         }
     }
 
     void JLink::Probe_WarningCallback(const char* message) {
         if constexpr (WARN_LOG_ENABLED) {
-            HWDLOG_PROBE_WARN("[JLink@{0}][WARN] >> {1}", fmt::ptr(this), message ? message : "-");
+            LOG_PROBE_WARN("[JLink@{0}][WARN] >> {1}", fmt::ptr(this), message ? message : "-");
         }
     }
 
     void JLink::Probe_ErrorCallback(const char* message) {
         if constexpr (ERROR_LOG_ENABLED) {
-            HWDLOG_PROBE_ERROR("[JLink@{0}][ERROR] >> {1}", fmt::ptr(this), message ? message : "-");
+            LOG_PROBE_ERROR("[JLink@{0}][ERROR] >> {1}", fmt::ptr(this), message ? message : "-");
         }
     }
 
     void JLink::Probe_FlashProgressCallback(const char* action, const char* prog, int percentage) {
-        //HWDLOG_PROBE_INFO("[JLink@{0}][PROG] >> {1} {2} {3}%", fmt::ptr(this), action ? action : "", prog ? prog : "", percentage);
+        //LOG_PROBE_INFO("[JLink@{0}][PROG] >> {1} {2} {3}%", fmt::ptr(this), action ? action : "", prog ? prog : "", percentage);
         //m_FlashProgress = percentage / 100.0f;
     }
 
@@ -129,17 +129,17 @@ namespace HWD::Probe {
             GetDriver()->probe_ExecuteCommand(Driver::JLink_Types::Commands::DISABLE_FLASH_PROGRESS_POPUP, charBuf, sizeof(charBuf) - 1);
 
         if (ret != ErrorCode::OK)
-            HWDLOG_PROBE_WARN("[JLink@{0}] Failed to disable internal flash progress popup: {1}", fmt::ptr(this), charBuf);
+            LOG_PROBE_WARN("[JLink@{0}] Failed to disable internal flash progress popup: {1}", fmt::ptr(this), charBuf);
     }
 
     bool JLink::Probe_Connect() {
         if (!Probe_IsReady()) {
-            HWDLOG_PROBE_WARN("[JLink@{0}] Not ready", fmt::ptr(this));
+            LOG_PROBE_WARN("[JLink@{0}] Not ready", fmt::ptr(this));
             return false;
         }
 
         if (Probe_IsConnected()) {
-            HWDLOG_PROBE_WARN("[JLink@{0}] Not connecting to probe - already connected", fmt::ptr(this));
+            LOG_PROBE_WARN("[JLink@{0}] Not connecting to probe - already connected", fmt::ptr(this));
             return true;
         }
 
@@ -147,7 +147,7 @@ namespace HWD::Probe {
         //probe_ConnectEx(s_ProbeCallbackEntries[m_ProbeIndex].log, s_ProbeCallbackEntries[m_ProbeIndex].error);
 
         if (openStatus) {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to connect to probe - {1}", fmt::ptr(this), openStatus);
+            LOG_PROBE_ERROR("[JLink@{0}] Failed to connect to probe - {1}", fmt::ptr(this), openStatus);
             return false;
         }
 
@@ -161,19 +161,19 @@ namespace HWD::Probe {
         // temporary
         GetDriver()->target_SetInterfaceSpeed(50000);
 
-        HWDLOG_PROBE_TRACE("[JLink@{0}] Connected", fmt::ptr(this));
+        LOG_PROBE_TRACE("[JLink@{0}] Connected", fmt::ptr(this));
 
         return true;
     }
 
     bool JLink::Probe_Disconnect() {
         if (!Probe_IsReady()) {
-            HWDLOG_PROBE_WARN("[JLink@{0}] Not ready", fmt::ptr(this));
+            LOG_PROBE_WARN("[JLink@{0}] Not ready", fmt::ptr(this));
             return false;
         }
 
         if (Probe_IsConnected()) {
-            HWDLOG_PROBE_TRACE("[JLink@{0}] Disconnect from probe", fmt::ptr(this));
+            LOG_PROBE_TRACE("[JLink@{0}] Disconnect from probe", fmt::ptr(this));
 
             // need to check if nullptr is a valid no callback value
             GetDriver()->probe_SetLogCallback([](const char*) {
@@ -185,7 +185,7 @@ namespace HWD::Probe {
 
             GetDriver()->probe_Disconnect();
         } else {
-            HWDLOG_PROBE_WARN("[JLink@{0}] Not disconnecting - already disconnected", fmt::ptr(this));
+            LOG_PROBE_WARN("[JLink@{0}] Not disconnecting - already disconnected", fmt::ptr(this));
         }
         return true;
     }
@@ -202,20 +202,20 @@ namespace HWD::Probe {
         char resp[256];
         ErrorCode ec = GetDriver()->probe_ExecuteCommand(fmt::format("Device = {0}\n", device.GetName()).c_str(), resp, 256);
 
-        HWDLOG_PROBE_TRACE("[JLink@{0}]:", fmt::ptr(this));
+        LOG_PROBE_TRACE("[JLink@{0}]:", fmt::ptr(this));
         if (ec == ErrorCode::OK) {
-            HWDLOG_PROBE_TRACE("Selected target device \"{0}\"", device.GetName());
-            HWDLOG_PROBE_TRACE("Target memory regions:");
+            LOG_PROBE_TRACE("Selected target device \"{0}\"", device.GetName());
+            LOG_PROBE_TRACE("Target memory regions:");
             for (auto& reg : device.GetMemoryRegions()) {
-                HWDLOG_PROBE_TRACE(" - {0:3}\t{1:6}\t0x{2:08X} - 0x{3:08X}",
-                                   To_C_String(reg.GetAccessPermissions()),
-                                   reg.GetName(),
-                                   reg.GetAddress(),
-                                   reg.GetAddress() + reg.GetSize());
+                LOG_PROBE_TRACE(" - {0:3}\t{1:6}\t0x{2:08X} - 0x{3:08X}",
+                                To_C_String(reg.GetAccessPermissions()),
+                                reg.GetName(),
+                                reg.GetAddress(),
+                                reg.GetAddress() + reg.GetSize());
             }
             return true;
         } else {
-            HWDLOG_PROBE_ERROR("Failed to select target device \"{0}\" - {1}", device.GetName(), ec);
+            LOG_PROBE_ERROR("Failed to select target device \"{0}\" - {1}", device.GetName(), ec);
             return false;
         }
     }
@@ -229,15 +229,15 @@ namespace HWD::Probe {
 
                 if (supportedInterfaces & TargetInterfaceMask::SWD) {
                     GetDriver()->target_SelectInterface(TargetInterface::SWD);
-                    HWDLOG_PROBE_TRACE("[JLink@{0}] Selected SWD target interface", fmt::ptr(this));
+                    LOG_PROBE_TRACE("[JLink@{0}] Selected SWD target interface", fmt::ptr(this));
                     return true;
                 } else {
-                    HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"SWD\" - not supported", fmt::ptr(this));
+                    LOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"SWD\" - not supported", fmt::ptr(this));
                     return false;
                 }
             }
             default:
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"{1}\" - unknown interface", fmt::ptr(this), interface);
+                LOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"{1}\" - unknown interface", fmt::ptr(this), interface);
                 return false;
         }
     }
@@ -251,14 +251,14 @@ namespace HWD::Probe {
         ErrorCode ec = GetDriver()->target_Connect();
 
         if (ec == ErrorCode::OK) {
-            HWDLOG_PROBE_TRACE("[JLink@{0}] Connected to target", fmt::ptr(this));
+            LOG_PROBE_TRACE("[JLink@{0}] Connected to target", fmt::ptr(this));
             PrepareTarget();
             return true;
         } else {
             if ((int)ec == -1) { // Unspecified error
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Could not connect to target - unspecified error", fmt::ptr(this));
+                LOG_PROBE_ERROR("[JLink@{0}] Could not connect to target - unspecified error", fmt::ptr(this));
             } else { // ErrorCode
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Could not connect to target - {1}", fmt::ptr(this), ec);
+                LOG_PROBE_ERROR("[JLink@{0}] Could not connect to target - {1}", fmt::ptr(this), ec);
             }
 
             return false;
@@ -270,10 +270,10 @@ namespace HWD::Probe {
         ErrorCode ec = GetDriver()->target_Erase();
 
         if (ec == ErrorCode::OK) {
-            HWDLOG_PROBE_TRACE("[JLink@{0}] Target program erased", fmt::ptr(this));
+            LOG_PROBE_TRACE("[JLink@{0}] Target program erased", fmt::ptr(this));
             return true;
         } else {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to erase target program - {1}", fmt::ptr(this), ec);
+            LOG_PROBE_ERROR("[JLink@{0}] Failed to erase target program - {1}", fmt::ptr(this), ec);
             return false;
         }
     }
@@ -287,7 +287,7 @@ namespace HWD::Probe {
             ret = GetDriver()->target_EndDownload();
 
             if ((int)ret >= 0 || (int)ret == -2) { // return code -2 is error code for target program matching requested program
-                HWDLOG_PROBE_TRACE("[JLink@{0}] Target programmed", fmt::ptr(this));
+                LOG_PROBE_TRACE("[JLink@{0}] Target programmed", fmt::ptr(this));
                 return true;
             } else {
                 const char* reason;
@@ -298,11 +298,11 @@ namespace HWD::Probe {
                     default: reason = "error";
                 }
 
-                HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to program target - {1}", fmt::ptr(this), reason);
+                LOG_PROBE_ERROR("[JLink@{0}] Failed to program target - {1}", fmt::ptr(this), reason);
                 return false;
             }
         } else {
-            HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to program target - {1}", fmt::ptr(this), ret);
+            LOG_PROBE_ERROR("[JLink@{0}] Failed to program target - {1}", fmt::ptr(this), ret);
             return false;
         }
     }
@@ -315,10 +315,10 @@ namespace HWD::Probe {
             if (m_ProbeCapabilities & ProbeCapabilities::RESET_STOP_TIMED) { // can halt immediately after reset
                 ec = GetDriver()->target_Reset();
                 if (ec != ErrorCode::OK) {
-                    HWDLOG_PROBE_ERROR("[JLink@{0}] Failed to reset target - {1}", fmt::ptr(this), ec);
+                    LOG_PROBE_ERROR("[JLink@{0}] Failed to reset target - {1}", fmt::ptr(this), ec);
                 }
             } else {
-                HWDLOG_PROBE_WARN("[JLink@{0}] Immediate reset and halt not supported - resetting and halting seperately", fmt::ptr(this));
+                LOG_PROBE_WARN("[JLink@{0}] Immediate reset and halt not supported - resetting and halting seperately", fmt::ptr(this));
                 GetDriver()->target_ResetAndRun();
                 GetDriver()->target_Halt();
             }
@@ -470,20 +470,20 @@ namespace HWD::Probe {
         switch (type) {
             case SWO_PacketType::OVER_FLOW:
                 s_SWO_Stats.Counters.Overflow++; //
-                //HWDLOG_PROBE_TRACE("[SWO Packet] OVERFLOW");
+                //LOG_PROBE_TRACE("[SWO Packet] OVERFLOW");
                 break;
             case SWO_PacketType::TIMESTAMP:
                 s_SWO_Stats.Counters.Timestamp++; //
-                //HWDLOG_PROBE_TRACE(
+                //LOG_PROBE_TRACE(
                 //    "[SWO Packet] TIMESTAMP: {0} C = {1}", s_SWO_Current_Timestamp_Value, s_SWO_Packet_Timestamp_ContinuationCount);
                 break;
             case SWO_PacketType::RESERVED:
                 s_SWO_Stats.Counters.Reserved++; //
-                HWDLOG_PROBE_TRACE("[SWO Packet] RESERVED");
+                LOG_PROBE_TRACE("[SWO Packet] RESERVED");
                 break;
             case SWO_PacketType::SWIT:
                 s_SWO_Stats.Counters.SWIT++; //
-                //HWDLOG_PROBE_TRACE("[SWO Packet] SWIT {0:#X} [{1} bytes] - PADDRDBG {2:#X}",
+                //LOG_PROBE_TRACE("[SWO Packet] SWIT {0:#X} [{1} bytes] - PADDRDBG {2:#X}",
                 //                   s_SWO_SWIT_Payload,
                 //                   s_SWO_SWIT_PayloadLength,
                 //                   s_SWO_SWIT_PADDRDBG);
@@ -530,7 +530,7 @@ namespace HWD::Probe {
     static void SWO_ARMv7M_ProcessData(SWO_PacketType type, uint8_t val) {
         switch (type) {
             case SWO_PacketType::EVENT_COUNTER: { // no payload
-                HWDLOG_PROBE_TRACE("[SWO ARMv7-M Packet] EVENT_COUNTER {0:#X}", val);
+                LOG_PROBE_TRACE("[SWO ARMv7-M Packet] EVENT_COUNTER {0:#X}", val);
                 SWO_ResetDecodeState(); // packet processed
                 break;
             }
@@ -560,7 +560,7 @@ namespace HWD::Probe {
                     //    snprintf(exDec, 16, "%u", exNum);
                     //}
 
-                    //HWDLOG_PROBE_ERROR("[SWO ARMv7-M Packet] EXCEPTION_TRACE {1} {0}",
+                    //LOG_PROBE_ERROR("[SWO ARMv7-M Packet] EXCEPTION_TRACE {1} {0}",
                     //                   exDec,
                     //                  decodeFunc(ARMv7M_EXCEPTION_TRACE_GET_FUNCTION(s_SWO_ARMv7M_ExceptionTraceData)));
                     SWO_ResetDecodeState(); // packet processed
@@ -575,7 +575,7 @@ namespace HWD::Probe {
                     //char pcs[16];
                     //snprintf(pcs, 16, "0x%08X", s_SWO_ARMv7M_ProgramCounter);
                     s_PC_Map[s_SWO_ARMv7M_ProgramCounter]++;
-                    //HWDLOG_PROBE_WARN("[SWO ARMv7-M Packet] PC_SAMPLE PC = {0}", pcs);
+                    //LOG_PROBE_WARN("[SWO ARMv7-M Packet] PC_SAMPLE PC = {0}", pcs);
                     SWO_ResetDecodeState(); // packet processed
                 }
                 break;
@@ -584,12 +584,12 @@ namespace HWD::Probe {
                 if (s_SWO_ARMv7M_ProgramCounterSleep_PayloadRead == false) {
                     s_SWO_ARMv7M_ProgramCounterSleep_PayloadRead = true;
                 } else {
-                    HWDLOG_PROBE_TRACE("[SWO ARMv7-M Packet] PC_SAMPLE_SLEEP");
+                    LOG_PROBE_TRACE("[SWO ARMv7-M Packet] PC_SAMPLE_SLEEP");
                     SWO_ResetDecodeState(); // packet processed
                 }
                 break;
             }
-            default: HWDLOG_PROBE_ERROR("UNKNOWN ARMv7 PACKET TYPE");
+            default: LOG_PROBE_ERROR("UNKNOWN ARMv7 PACKET TYPE");
         }
     }
     ////////////////////////////////////////////////////////////////////////////////////
@@ -637,7 +637,7 @@ namespace HWD::Probe {
                     // Regular SWO decoding
                     if (val == 0b01110000) { // [Overflow] CoreSight Components PDF Table 12-3
                         // no payload - don't set decoding to true
-                        //HWDLOG_PROBE_TRACE("SWO OVERFLOW");
+                        //LOG_PROBE_TRACE("SWO OVERFLOW");
                         SWO_ProcessPacket(SWO_PacketType::OVER_FLOW);
                     } else if ((val & 0b00001111) == 0 && (val & 0b01110000) != 0) { // [Timestamp] CoreSight Components PDF Table 12-4
                         bool continuation             = val & 0b10000000;
@@ -706,7 +706,7 @@ namespace HWD::Probe {
                             s_DecodingPacket     = true;
                         }
                     } else {
-                        HWDLOG_PROBE_CRITICAL("UNKNOWN SWO HEADER {0:#X}", val);
+                        LOG_PROBE_CRITICAL("UNKNOWN SWO HEADER {0:#X}", val);
                         //s_StopProcess = true;
                         SWO_ResetDecodeState();
                         s_Synced = false;
@@ -736,7 +736,7 @@ namespace HWD::Probe {
 
                             if (continuation) {
                                 if (s_SWO_Packet_Timestamp_ContinuationCount > MAX_SWO_TIMESTAMP_CONTINUATIONS) {
-                                    HWDLOG_PROBE_ERROR("SWO too many timestamp continuations");
+                                    LOG_PROBE_ERROR("SWO too many timestamp continuations");
                                     SWO_ResetDecodeState();
                                 } else {
                                     s_SWO_Packet_Timestamp_ContinuationCount++;
@@ -766,7 +766,7 @@ namespace HWD::Probe {
             // CoreSight Components PDF Table 12-1
             // Sync packet - 0x800000000000
             if (!s_Synced && val == 0x80 && s_Sync_ZeroCount == 5) {
-                HWDLOG_PROBE_WARN("SWO SYNC");
+                LOG_PROBE_WARN("SWO SYNC");
                 s_Synced = true;
             }
 
@@ -793,4 +793,4 @@ namespace HWD::Probe {
         }
     }
 
-} // namespace HWD::Probe
+} // namespace L0::Probe

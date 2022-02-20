@@ -3,7 +3,7 @@
 
 // This is not a general purpose ELF library. This is HWD specific stuff.
 
-namespace HWD::ELF32 {
+namespace L0::ELF32 {
 
     using Word       = uint32_t;
     using SignedWord = int32_t;
@@ -75,7 +75,7 @@ namespace HWD::ELF32 {
         ALLOC                   = 0x02,
         EXECUTABLE_INSTRUCTIONS = 0x04,
     };
-    HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(SectionFlags, Word);
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(SectionFlags, Word);
 
 #pragma pack(1)
     struct SectionHeader {
@@ -134,4 +134,4 @@ namespace HWD::ELF32 {
     };
 #pragma pack()
 
-} // namespace HWD::ELF32
+} // namespace L0::ELF32

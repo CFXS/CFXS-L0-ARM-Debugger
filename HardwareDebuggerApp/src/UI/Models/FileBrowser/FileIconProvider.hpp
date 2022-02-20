@@ -16,24 +16,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-#include "JLink.hpp"
+#pragma once
+#include <QFileIconProvider>
+#include <QTreeView>
 
-namespace L0::Probe {
+namespace L0::UI {
 
-    using namespace Driver::JLink_Types;
+    class FileIconProvider : public QFileIconProvider {
+    public:
+        FileIconProvider();
 
-    void JLink::UpdateProbeInfo() {
-        LOG_PROBE_TRACE("[JLink@{0}] UpdateProbeInfo:", fmt::ptr(this));
+        QIcon icon(IconType type) const override;
+        QIcon icon(const QFileInfo& info, bool isExpanded) const;
+        QIcon icon(const QFileInfo& info) const override {
+            return icon(info, false);
+        }
+    };
 
-        m_ProbeCapabilities = GetDriver()->probe_GetCapabilities();
-
-        LOG_PROBE_TRACE("{0} Capabilities:", GetModelName());
-        if (m_ProbeCapabilities & ProbeCapabilities::ADAPTIVE_CLOCKING)
-            LOG_PROBE_TRACE(" - Adaptive clocking");
-        if (m_ProbeCapabilities & ProbeCapabilities::RESET_STOP_TIMED)
-            LOG_PROBE_TRACE(" - Halt after reset");
-        if (m_ProbeCapabilities & ProbeCapabilities::SWO)
-            LOG_PROBE_TRACE(" - SWO");
-    }
-
-} // namespace L0::Probe
+} // namespace L0::UI

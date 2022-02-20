@@ -1,5 +1,5 @@
 # CFXS Embedded C/C++ Debugger [ARM Cortex-M/A]
-![CFXS HWD](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
+![CFXS L0](https://github.com/CFXS/CFXS-Hardware-Debugger/blob/master/Logo.png)
 
 # Build/Development Requirements
 - Still working on these...

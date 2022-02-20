@@ -16,24 +16,33 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-#include "JLink.hpp"
+#pragma once
 
-namespace L0::Probe {
+#include <QSettings>
 
-    using namespace Driver::JLink_Types;
+#include <Application.hpp>
 
-    void JLink::UpdateProbeInfo() {
-        LOG_PROBE_TRACE("[JLink@{0}] UpdateProbeInfo:", fmt::ptr(this));
+namespace L0 {
 
-        m_ProbeCapabilities = GetDriver()->probe_GetCapabilities();
+    class L0_Application : public Application {
+    public:
+        L0_Application(int argc, char** argv);
+        virtual ~L0_Application() = default;
 
-        LOG_PROBE_TRACE("{0} Capabilities:", GetModelName());
-        if (m_ProbeCapabilities & ProbeCapabilities::ADAPTIVE_CLOCKING)
-            LOG_PROBE_TRACE(" - Adaptive clocking");
-        if (m_ProbeCapabilities & ProbeCapabilities::RESET_STOP_TIMED)
-            LOG_PROBE_TRACE(" - Halt after reset");
-        if (m_ProbeCapabilities & ProbeCapabilities::SWO)
-            LOG_PROBE_TRACE(" - SWO");
-    }
+        virtual void OnCreate() override;
+        virtual void OnDestroy() override;
 
-} // namespace L0::Probe
+    private:
+        void LoadGlobalSettings(); // load user settings
+        void LoadWindowState();    // load state of window and panels
+
+        void Load_Probe();   // load probe stuff
+        void Unload_Probe(); // unload probe stuff
+
+        void Load_Window(); // initialize window stuff
+
+    private:
+        static void SaveWindowState(QSettings* stateData);
+    };
+
+} // namespace L0

@@ -5,6 +5,7 @@
         "*.ui": "xml",
         "*.qrc": "xml",
         "*.hwd": "xml",
+        "*.L0": "xml",
         "*.qss": "css",
         "unordered_map": "cpp",
         "xstddef": "cpp",
@@ -111,6 +112,21 @@
         "qdir": "cpp",
         "qfontdatabase": "cpp",
         "qtimer": "cpp",
-        "qaction": "cpp"
+        "qaction": "cpp",
+        "qprocess": "cpp",
+        "qobject": "cpp",
+        "*.tcc": "cpp",
+        "*.def": "cpp",
+        "*.inc": "cpp",
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "cwctype": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "memory_resource": "cpp",
+        "string_view": "cpp",
+        "cinttypes": "cpp",
+        "qpoint": "cpp",
+        "qtextcursor": "cpp"
     }
 }

@@ -8,7 +8,7 @@
 
 using ads::CDockManager;
 
-namespace HWD {
+namespace L0 {
 
     Application* Application::s_Instance = nullptr;
 
@@ -17,7 +17,7 @@ namespace HWD {
     }
 
     Application::Application(int argc, char** argv, const std::string& name) {
-        HWD_ASSERT(!s_Instance, "Application already exists!");
+        L0_ASSERT(!s_Instance, "Application already exists!");
         s_Instance = this;
 
         SetQtAttributes();
@@ -79,13 +79,13 @@ namespace HWD {
     }
 
     void Application::Run() {
-        HWDLOG_CORE_INFO("Running application");
+        LOG_CORE_INFO("Running application");
         OnCreate();
 
         qApp->exec();
 
-        HWDLOG_CORE_INFO("Stopping application");
+        LOG_CORE_INFO("Stopping application");
         OnDestroy();
     }
 
-} // namespace HWD
+} // namespace L0

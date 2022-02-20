@@ -2,7 +2,7 @@
 #include <QLibrary>
 #include "JLink_Types.hpp"
 
-namespace HWD::Probe::Driver {
+namespace L0::Probe::Driver {
 
     class JLink_Driver {
     public:
@@ -209,4 +209,4 @@ namespace HWD::Probe::Driver {
         void (*probe_SetFlashProgProgressCallback)(JLink_Types::FlashProgressCallback pfOnFlashProgess)                           = nullptr;
     };
 
-} // namespace HWD::Probe::Driver
+} // namespace L0::Probe::Driver

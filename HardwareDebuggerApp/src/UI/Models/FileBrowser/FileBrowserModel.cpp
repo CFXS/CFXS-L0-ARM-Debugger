@@ -19,7 +19,7 @@
 #include "FileBrowserModel.hpp"
 #include <QTreeView>
 
-namespace HWD::UI {
+namespace L0::UI {
 
     FileBrowserModel::FileBrowserModel(QTreeView* workingTreeView, QObject* parent) :
         QFileSystemModel(parent), m_WorkingTreeView(workingTreeView) {
@@ -43,4 +43,4 @@ namespace HWD::UI {
         return persistentIndexList();
     }
 
-} // namespace HWD::UI
+} // namespace L0::UI

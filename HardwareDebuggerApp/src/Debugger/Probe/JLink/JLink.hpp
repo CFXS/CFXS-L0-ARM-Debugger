@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -21,7 +21,7 @@
 #include <Debugger/Probe/I_Probe.hpp>
 #include "Driver/JLink_Driver.hpp"
 
-namespace HWD::Probe {
+namespace L0::Probe {
 
     class JLink final : public I_Probe {
         friend struct ProbeCallbackEntry;
@@ -31,17 +31,17 @@ namespace HWD::Probe {
 
     public:
         /// HWD load all probe types on app init
-        static void HWD_Load();
+        static void L0_Load();
 
         // HWD unload all probe types before app exit
-        static void HWD_Unload();
+        static void L0_Unload();
 
     public:
         virtual ~JLink();
 
         /// Select working device by serial number
         /// \param serialNumber serial number of probe. default 0 = first detected probe
-        void HWD_SelectDevice(uint32_t serialNumber = 0);
+        void L0_SelectDevice(uint32_t serialNumber = 0);
 
         /////////////////////////////////////////
 
@@ -90,7 +90,7 @@ namespace HWD::Probe {
     private:
         static Driver::JLink_Driver* GetDriver() {
             if (!s_Driver)
-                HWDLOG_PROBE_ERROR("Driver not initialized");
+                LOG_PROBE_ERROR("Driver not initialized");
 
             return s_Driver;
         }
@@ -129,4 +129,4 @@ namespace HWD::Probe {
         std::string m_SerialNumberString = "?";
     };
 
-} // namespace HWD::Probe
+} // namespace L0::Probe

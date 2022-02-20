@@ -6,13 +6,13 @@
 
 #include "ELF32.hpp"
 
-namespace HWD::ELF {
+namespace L0::ELF {
 
     ELF_Reader::ELF_Reader(const std::string& path) : m_Path(path) {
     }
 
     bool ELF_Reader::LoadFile() {
-        HWDLOG_CORE_TRACE("Load ELF file {0}", m_Path);
+        LOG_CORE_TRACE("Load ELF file {0}", m_Path);
 
         std::ifstream fileStream(m_Path, std::ios::in | std::ios::binary);
         m_DataVector = std::vector<uint8_t>(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
@@ -21,25 +21,25 @@ namespace HWD::ELF {
         m_ELF_Header.ptr = reinterpret_cast<const void*>(m_RawData);
 
         if (m_RawData == nullptr) {
-            HWDLOG_CORE_ERROR(" - Failed to open file ({0})", strerror(errno));
+            LOG_CORE_ERROR(" - Failed to open file ({0})", strerror(errno));
             return false;
         }
 
-        HWDLOG_CORE_TRACE(" - File size: {0} bytes", m_DataVector.size());
+        LOG_CORE_TRACE(" - File size: {0} bytes", m_DataVector.size());
 
         auto header = m_ELF_Header.elf32;
 
         // check if header is good
         if (header->identifier.magicNumber == ELF32::MAGIC_NUMBER) {
-            HWDLOG_CORE_TRACE(" - Valid ELF header");
+            LOG_CORE_TRACE(" - Valid ELF header");
             if (ParseFile()) {
                 m_Valid = true;
             } else {
-                HWDLOG_CORE_ERROR(" - Failed to parse ELF file");
+                LOG_CORE_ERROR(" - Failed to parse ELF file");
                 m_Valid = false;
             }
         } else {
-            HWDLOG_CORE_ERROR(
+            LOG_CORE_ERROR(
                 " - File is not a valid ELF file. magicNumber[0x{0:4X} != 0x{1:4X}]", ELF32::MAGIC_NUMBER, header->identifier.magicNumber);
             m_Valid = false;
         }
@@ -55,7 +55,7 @@ namespace HWD::ELF {
 
         // check identifier version
         if (header->identifier.version != 1) {
-            HWDLOG_CORE_ERROR(" - Invalid identifier version ({0})", header->identifier.version);
+            LOG_CORE_ERROR(" - Invalid identifier version ({0})", header->identifier.version);
             return false;
         }
 
@@ -63,26 +63,26 @@ namespace HWD::ELF {
         m_DataEncoding = header->identifier.dataEncoding;
 
         if (m_DataEncoding != ELF::DataEncoding::LSB && m_DataEncoding != ELF::DataEncoding::MSB) {
-            HWDLOG_CORE_ERROR(" - Invalid data encoding ({0})", (uint8_t)m_DataEncoding);
+            LOG_CORE_ERROR(" - Invalid data encoding ({0})", (uint8_t)m_DataEncoding);
             return false;
         }
 
         if (m_DataEncoding == ELF::DataEncoding::LSB) {
-            HWDLOG_CORE_TRACE(" - Little endian");
+            LOG_CORE_TRACE(" - Little endian");
         } else {
-            HWDLOG_CORE_TRACE(" - Big endian");
+            LOG_CORE_TRACE(" - Big endian");
         }
 
         // check if this is a 32bit or a 64bit file
         m_FileClass = header->identifier.fileClass;
         if (m_FileClass == ELF::FileClass::_32) {
-            HWDLOG_CORE_TRACE(" - 32bit file");
+            LOG_CORE_TRACE(" - 32bit file");
             return ParseFile32();
         } else if (m_FileClass == ELF::FileClass::_64) {
-            HWDLOG_CORE_TRACE(" - 64bit file");
+            LOG_CORE_TRACE(" - 64bit file");
             return ParseFile64();
         } else {
-            HWDLOG_CORE_ERROR(" - Invalid file class ({0})", (uint8_t)m_FileClass);
+            LOG_CORE_ERROR(" - Invalid file class ({0})", (uint8_t)m_FileClass);
             return false;
         }
     }
@@ -92,30 +92,30 @@ namespace HWD::ELF {
 
         // check if file type is executable
         if (header->type != ELF32::FileType::EXECUTABLE) {
-            HWDLOG_CORE_ERROR(" - Not an executable file");
+            LOG_CORE_ERROR(" - Not an executable file");
             return false;
         }
 
         // check if machine is AARCH32 (Arm 32bit architecture)
         if (header->machine != 0x0028) {
-            HWDLOG_CORE_ERROR(" - ELF files for machine types other than ARM32 are not supported (0x{0:04X})", header->machine);
+            LOG_CORE_ERROR(" - ELF files for machine types other than ARM32 are not supported (0x{0:04X})", header->machine);
             return false;
         }
 
         // check if version is current or above
         if (header->version != 1) {
-            HWDLOG_CORE_ERROR(" - Invalid ELF file version ({0})", header->version);
+            LOG_CORE_ERROR(" - Invalid ELF file version ({0})", header->version);
             return false;
         }
 
-        HWDLOG_CORE_TRACE(" - Program Table: {0} entries of size {1} at offset 0x{2:X}",
-                          header->programTableEntryCount,
-                          header->programTableEntrySize,
-                          header->programHeaderOffset);
-        HWDLOG_CORE_TRACE(" - Section Table: {0} entries of size {1} at offset 0x{2:X}",
-                          header->sectionTableEntryCount,
-                          header->sectionTableEntrySize,
-                          header->sectionHeaderOffset);
+        LOG_CORE_TRACE(" - Program Table: {0} entries of size {1} at offset 0x{2:X}",
+                       header->programTableEntryCount,
+                       header->programTableEntrySize,
+                       header->programHeaderOffset);
+        LOG_CORE_TRACE(" - Section Table: {0} entries of size {1} at offset 0x{2:X}",
+                       header->sectionTableEntryCount,
+                       header->sectionTableEntrySize,
+                       header->sectionHeaderOffset);
 
         // section name table
         if (header->sectionTableNameEntryIndex) {
@@ -139,14 +139,14 @@ namespace HWD::ELF {
             for (int section_index = 0; section_index < header->sectionTableEntryCount; section_index++) {
                 auto sectionHeader = GetSection<ELF32::SectionHeader>(section_index);
 
-                HWDLOG_CORE_TRACE("Section {0} \"{1}\" at offset {2:X}",
-                                  section_index,
-                                  GetSectionName(sectionHeader->nameOffset),
-                                  sectionHeader->offsetInFile);
+                LOG_CORE_TRACE("Section {0} \"{1}\" at offset {2:X}",
+                               section_index,
+                               GetSectionName(sectionHeader->nameOffset),
+                               sectionHeader->offsetInFile);
 
                 if (sectionHeader->type == ELF32::SectionType::SYMBOL_TABLE) {
                     if (!LoadSymbols32(sectionHeader)) {
-                        HWDLOG_CORE_ERROR(" - Failed to load symbols");
+                        LOG_CORE_ERROR(" - Failed to load symbols");
                         return false;
                     }
                 }
@@ -160,10 +160,10 @@ namespace HWD::ELF {
     }
 
     bool ELF_Reader::LoadSymbols32(const ELF32::SectionHeader* section) {
-        HWDLOG_CORE_TRACE(" - Load symbol table");
+        LOG_CORE_TRACE(" - Load symbol table");
         size_t entryCount = section->size / section->entrySize;
 
-        HWDLOG_CORE_TRACE("   > Symbol table contains {0} symbols", entryCount);
+        LOG_CORE_TRACE("   > Symbol table contains {0} symbols", entryCount);
 
         for (int symbol_index = 0; symbol_index < entryCount; symbol_index++) {
             auto symbolEntry =
@@ -198,7 +198,7 @@ namespace HWD::ELF {
                 case ELF::SymbolBinding::WEAK: type = "WEAK"; break;
             }
 
-            /*HWDLOG_CORE_INFO("   > Symbol {0:5} {1:8} size {2:6} name {3} at 0x{4:08X} type {5}",
+            /*LOG_CORE_INFO("   > Symbol {0:5} {1:8} size {2:6} name {3} at 0x{4:08X} type {5}",
                                  symbol_index,
                                  symbolEntry->info.GetType() == ELF::SymbolType::FUNCTION ? "Function" : "Object",
                                  symbolEntry->size,
@@ -233,7 +233,7 @@ namespace HWD::ELF {
             }
         }
 
-        HWDLOG_CORE_TRACE("   > {0} symbols loaded", m_SymbolMap.size());
+        LOG_CORE_TRACE("   > {0} symbols loaded", m_SymbolMap.size());
 
         return true;
     }
@@ -241,7 +241,7 @@ namespace HWD::ELF {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     bool ELF_Reader::ParseFile64() {
-        HWDLOG_CORE_ERROR(" - 64bit files are not supported yet");
+        LOG_CORE_ERROR(" - 64bit files are not supported yet");
         return false;
     }
 
@@ -274,4 +274,4 @@ namespace HWD::ELF {
         return nullptr;
     }
 
-} // namespace HWD::ELF
+} // namespace L0::ELF

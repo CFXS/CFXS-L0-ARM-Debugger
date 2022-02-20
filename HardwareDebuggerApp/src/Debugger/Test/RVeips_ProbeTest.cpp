@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -28,11 +28,11 @@
 
 static bool s_Stopped = false;
 
-namespace HWD::Probe {
+namespace L0::Probe {
     I_Probe* s_Probe;
 }
 
-namespace HWD::Test {
+namespace L0::Test {
 
     using namespace Cortex::M4;
     using namespace Probe;
@@ -64,7 +64,7 @@ namespace HWD::Test {
     }
 
     RVeips_ProbeTest::RVeips_ProbeTest() {
-        HWDLOG_CORE_INFO("RVeips_ProbeTest()");
+        LOG_CORE_INFO("RVeips_ProbeTest()");
 
         ProbeTest();
     }
@@ -77,7 +77,7 @@ namespace HWD::Test {
         auto& testDevice = SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
 
         auto jl = new JLink;
-        jl->HWD_SelectDevice(801022602);
+        jl->L0_SelectDevice(801022602);
         jl->Probe_Connect();
         jl->Target_SelectDebugInterface(I_Probe::DebugInterface::SWD);
         jl->Target_SelectDevice(testDevice);
@@ -119,11 +119,11 @@ namespace HWD::Test {
                     uint32_t rom_table_address;
                     rom_table_address = 0xE00FF000;
 
-                    HWDLOG_PROBE_TRACE("Target [Debug]");
+                    LOG_PROBE_TRACE("Target [Debug]");
                     if (rom_table_address) {
-                        HWDLOG_PROBE_TRACE("\tROM Table: @ {0:#X}", rom_table_address);
+                        LOG_PROBE_TRACE("\tROM Table: @ {0:#X}", rom_table_address);
                     } else {
-                        HWDLOG_PROBE_CRITICAL("\tROM Table: @ {0:#X}", rom_table_address);
+                        LOG_PROBE_CRITICAL("\tROM Table: @ {0:#X}", rom_table_address);
                     }
 
                     int bytesRead;
@@ -137,21 +137,21 @@ namespace HWD::Test {
 
                         bytesRead =
                             probe->Target_ReadMemoryTo(rom_table_address, rom_table_data, sizeof(rom_table_data), I_Probe::AccessWidth::_4);
-                        HWDLOG_PROBE_INFO("rom table read {0} bytes", bytesRead);
+                        LOG_PROBE_INFO("rom table read {0} bytes", bytesRead);
 
                         if (bytesRead == 4096) {
                             Cortex::M4::ROM_Table_Entry* rtEntry = (Cortex::M4::ROM_Table_Entry*)rom_table_data;
                             int entryIndex                       = 0;
                             do {
                                 if (rtEntry->Is8bit()) {
-                                    HWDLOG_PROBE_CRITICAL("8bit ROM Table entries not supported yet");
+                                    LOG_PROBE_CRITICAL("8bit ROM Table entries not supported yet");
                                     break;
                                 }
 
                                 uint32_t componentAddress = rtEntry->GetComponentAddress(rom_table_address);
                                 uint32_t componentBaseAddress;
 
-                                HWDLOG_PROBE_INFO(" - {0} {1}",
+                                LOG_PROBE_INFO(" - {0} {1}",
                                                   Cortex::M4::ROM_Table_EntryName[entryIndex],
                                                   rtEntry->IsPresent() ? "Present" : "Not present");
 
@@ -161,7 +161,7 @@ namespace HWD::Test {
                                     componentBaseAddress         = componentAddress - (4096 * (pid4.GetBlockCount() - 1));
                                     rtOffsets._table[entryIndex] = componentBaseAddress;
 
-                                    HWDLOG_PROBE_INFO("\tComponent Base Address: {0:#X}", componentBaseAddress);
+                                    LOG_PROBE_INFO("\tComponent Base Address: {0:#X}", componentBaseAddress);
 
                                     uint32_t cs_class =
                                         (probe->Target_ReadMemory_32(componentBaseAddress + Cortex::CoreSight::OFFSET_COMPONENT_ID1) >> 4) &
@@ -175,7 +175,7 @@ namespace HWD::Test {
                                             default: return "Unknown";
                                         }
                                     };
-                                    HWDLOG_PROBE_INFO("\tComponent Class: {0}", getClassString(cs_class));
+                                    LOG_PROBE_INFO("\tComponent Class: {0}", getClassString(cs_class));
                                 }
 
                                 rtEntry++;
@@ -185,33 +185,33 @@ namespace HWD::Test {
                             if (rtOffsets.SCS) {
                                 if (probe->Target_WriteMemory_32(rtOffsets.SCS + Cortex::CoreSight::OFFSET_LOCK_ACCESS,
                                                                  Cortex::CoreSight::VAL_UNLOCK_KEY)) {
-                                    HWDLOG_PROBE_TRACE("Unlocked SCS");
+                                    LOG_PROBE_TRACE("Unlocked SCS");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to unlock SCS");
+                                    LOG_PROBE_ERROR("Failed to unlock SCS");
                                 }
                             }
                             if (rtOffsets.DWT) {
                                 if (probe->Target_WriteMemory_32(rtOffsets.DWT + Cortex::CoreSight::OFFSET_LOCK_ACCESS,
                                                                  Cortex::CoreSight::VAL_UNLOCK_KEY)) {
-                                    HWDLOG_PROBE_TRACE("Unlocked DWT");
+                                    LOG_PROBE_TRACE("Unlocked DWT");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to unlock DWT");
+                                    LOG_PROBE_ERROR("Failed to unlock DWT");
                                 }
                             }
                             if (rtOffsets.ITM) {
                                 if (probe->Target_WriteMemory_32(rtOffsets.ITM + Cortex::CoreSight::OFFSET_LOCK_ACCESS,
                                                                  Cortex::CoreSight::VAL_UNLOCK_KEY)) {
-                                    HWDLOG_PROBE_TRACE("Unlocked ITM");
+                                    LOG_PROBE_TRACE("Unlocked ITM");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to unlock ITM");
+                                    LOG_PROBE_ERROR("Failed to unlock ITM");
                                 }
                             }
                             if (rtOffsets.TPIU) {
                                 if (probe->Target_WriteMemory_32(rtOffsets.TPIU + Cortex::CoreSight::OFFSET_LOCK_ACCESS,
                                                                  Cortex::CoreSight::VAL_UNLOCK_KEY)) {
-                                    HWDLOG_PROBE_TRACE("Unlocked TPIU");
+                                    LOG_PROBE_TRACE("Unlocked TPIU");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to unlock TPIU");
+                                    LOG_PROBE_ERROR("Failed to unlock TPIU");
                                 }
                             }
 
@@ -220,9 +220,9 @@ namespace HWD::Test {
                                 // CoreDebug offset = 0xDF0
 
                                 if (probe->Target_WriteMemory_32(rtOffsets.SCS + 0xDF0 + 0x00C, (1 << 24))) {
-                                    HWDLOG_PROBE_TRACE("Enabled trace");
+                                    LOG_PROBE_TRACE("Enabled trace");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to enable trace");
+                                    LOG_PROBE_ERROR("Failed to enable trace");
                                 }
 
                                 // configure pc sampling
@@ -242,21 +242,21 @@ namespace HWD::Test {
                                 //tpiu_acpr.Set_Prescaler(((int)(120000000.0 / (4000000.0 * 2) + 0.5)) - 1);
 
                                 if (probe->Target_WriteMemory_32(rtOffsets.TPIU + TPIU::OFFSET_CSPSR, 1)) { // port size = 1bit
-                                    HWDLOG_PROBE_TRACE("Configured CSPSR");
+                                    LOG_PROBE_TRACE("Configured CSPSR");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to configure CSPSR");
+                                    LOG_PROBE_ERROR("Failed to configure CSPSR");
                                 }
 
                                 if (probe->Target_WriteMemory_32(rtOffsets.TPIU + 0x304, 0x100)) {
-                                    HWDLOG_PROBE_TRACE("Configured TPIU FFCR");
+                                    LOG_PROBE_TRACE("Configured TPIU FFCR");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to configure TPIU FFCR");
+                                    LOG_PROBE_ERROR("Failed to configure TPIU FFCR");
                                 }
 
                                 if (probe->Target_WriteMemory_32(rtOffsets.TPIU + 0xE40, 0x0F)) {
-                                    HWDLOG_PROBE_TRACE("Configured TPIU TPR");
+                                    LOG_PROBE_TRACE("Configured TPIU TPR");
                                 } else {
-                                    HWDLOG_PROBE_ERROR("Failed to configure TPIU TPR");
+                                    LOG_PROBE_ERROR("Failed to configure TPIU TPR");
                                 }
 
                                 auto sampleRateDivider = DWT::REG_CTRL::SampleRateDivider::_2048;
@@ -265,9 +265,9 @@ namespace HWD::Test {
                                 dwt_ctrl.Set_PC_Sampling_Enabled(true);
                                 dwt_ctrl.Set_Exception_Trace_Enabled(true);
                                 dwt_ctrl.Set_Sync(DWT::REG_CTRL::SyncInterval::MEDIUM);
-                                HWDLOG_PROBE_TRACE("DWT_CTRL = {0:#X}", dwt_ctrl.GetRaw());
+                                LOG_PROBE_TRACE("DWT_CTRL = {0:#X}", dwt_ctrl.GetRaw());
 
-                                HWDLOG_PROBE_TRACE("Sampling frequency: {0}kHz",
+                                LOG_PROBE_TRACE("Sampling frequency: {0}kHz",
                                                    decltype(dwt_ctrl)::SampleRateDividerToSampleRate(120e6, sampleRateDivider));
 
                                 itm_tcr = ((0 << ITM::REG_TCR::SHIFT_TRACE_BUS_ID) |                            //
@@ -277,13 +277,13 @@ namespace HWD::Test {
                                            (1 << ITM::REG_TCR::SHIFT_ITMENA) |                                  //
                                            (ITM::REG_TCR::VAL_TSPRESCALE_1 << ITM::REG_TCR::SHIFT_TSPRESCALE)); //
 
-                                HWDLOG_PROBE_TRACE("ITM_TCR = {0:#X}", itm_tcr.GetRaw());
+                                LOG_PROBE_TRACE("ITM_TCR = {0:#X}", itm_tcr.GetRaw());
 
                                 itm_ter.Set_Enabled(0xFFFFFFFF, true);
                                 probe->Target_WriteMemory_32(rtOffsets.ITM + ITM::OFFSET_TPR, 0xFFFFFFFF);
                             }
                         } else {
-                            HWDLOG_PROBE_CRITICAL("Failed to read ROM Table");
+                            LOG_PROBE_CRITICAL("Failed to read ROM Table");
                         }
                     }
 
@@ -309,4 +309,4 @@ namespace HWD::Test {
     RVeips_ProbeTest::~RVeips_ProbeTest() {
     }
 
-} // namespace HWD::Test
+} // namespace L0::Test

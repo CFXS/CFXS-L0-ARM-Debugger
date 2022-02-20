@@ -19,44 +19,28 @@
 #include "WorkspacePanel.hpp"
 #include "ui_WorkspacePanel.h"
 #include <Core/Project/ProjectManager.hpp>
-#include <QDesktopServices>
+#include <Core/PlatformUtils.hpp>
 #include <QScrollBar>
 #include <QTimer>
 #include <QMenu>
 #include <QAction>
 #include <QProcess>
-
 #include <QDir>
 
-namespace HWD::UI {
+namespace L0::UI {
 
     ////////////////////////////////////////////////////////////
     const QStringList s_KnownExtensionList = {
         QStringLiteral("c"),   QStringLiteral("cc"),    QStringLiteral("cpp"),  QStringLiteral("cxx"), QStringLiteral("c++"),
         QStringLiteral("h"),   QStringLiteral("hh"),    QStringLiteral("hpp"),  QStringLiteral("hxx"), QStringLiteral("h++"),
         QStringLiteral("asm"), QStringLiteral("s"),     QStringLiteral("inc"),  QStringLiteral("txt"), QStringLiteral("json"),
-        QStringLiteral("xml"), QStringLiteral("yml"),   QStringLiteral("yaml"), QStringLiteral("hwd"), QStringLiteral("ld"),
+        QStringLiteral("xml"), QStringLiteral("yml"),   QStringLiteral("yaml"), QStringLiteral("l0"),  QStringLiteral("ld"),
         QStringLiteral("icf"), QStringLiteral("cmake"), QStringLiteral("map"),  QStringLiteral("lhg"),
     };
     ////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////
-    static void ShowInFileExplorer(const QString& path) {
-        QFileInfo info(path);
-#if defined(Q_OS_WIN)
-        QStringList args;
-        if (!info.isDir())
-            args << "/select,";
-        args << QDir::toNativeSeparators(path);
-        if (QProcess::startDetached("explorer", args))
-            return;
-#endif
-        QDesktopServices::openUrl(QUrl::fromLocalFile(info.isDir() ? path : info.path()));
-    }
-    //////////////////////////////////////////////////////////////
-
-    WorkspacePanel::WorkspacePanel() : ads::CDockWidget(QStringLiteral("WorkspacePanel")), ui(std::make_unique<Ui::WorkspacePanel>()) {
-        HWDLOG_UI_TRACE("Create workspace panel");
+    WorkspacePanel::WorkspacePanel() : ads::CDockWidget(GetPanelBaseName()), ui(std::make_unique<Ui::WorkspacePanel>()) {
+        LOG_UI_TRACE("Create {}", GetPanelBaseName());
         ui->setupUi(this);
 
         m_FB_Model = new FileBrowserModel(ui->tw_FileBrowser, this);
@@ -96,7 +80,7 @@ namespace HWD::UI {
                 if (!info.isFile() && !info.isDir())
                     return;
 
-                OpenEntryContextMenu(point, index, info);
+                OpenItemContextMenu(point, index, info);
             }
         });
 
@@ -110,18 +94,18 @@ namespace HWD::UI {
         });
     }
 
-    void WorkspacePanel::OpenEntryContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info) {
+    void WorkspacePanel::OpenItemContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info) {
         auto menu = new QMenu(this);
 
         auto showInExplorerAction = new QAction("Show in File Explorer", this);
         menu->addAction(showInExplorerAction);
         connect(showInExplorerAction, &QAction::triggered, this, [=]() {
             if (info.isFile()) {
-                HWDLOG_UI_TRACE("Show File in File Explorer \"{}\"", info.absoluteFilePath());
-                ShowInFileExplorer(info.absoluteFilePath());
+                LOG_UI_TRACE("Show File in File Explorer \"{}\"", info.absoluteFilePath());
+                PlatformUtils::ShowInFileExplorer(info.absoluteFilePath());
             } else {
-                HWDLOG_UI_TRACE("Show Folder in File Explorer \"{}\"", info.absolutePath());
-                ShowInFileExplorer(info.absolutePath());
+                LOG_UI_TRACE("Show Folder in File Explorer \"{}\"", info.absolutePath());
+                PlatformUtils::ShowInFileExplorer(info.absolutePath());
             }
         });
 
@@ -131,7 +115,7 @@ namespace HWD::UI {
             menu->addAction(openWithAction);
             connect(openWithAction, &QAction::triggered, this, [=]() {
 #if defined(Q_OS_WIN)
-                HWDLOG_CORE_TRACE("Open With... \"{}\"", info.absoluteFilePath());
+                LOG_CORE_TRACE("Open With... \"{}\"", info.absoluteFilePath());
                 QProcess proc;
                 proc.startDetached("rundll32.exe",
                                    {QStringLiteral("Shell32.dll,OpenAs_RunDLL"), info.absoluteFilePath().replace("/", "\\")});
@@ -157,7 +141,7 @@ namespace HWD::UI {
     void WorkspacePanel::SavePanelState(QSettings* cfg) {
         QString cfgKey = objectName();
         cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
-        HWDLOG_UI_TRACE("WorkspacePanel save state - {}", cfgKey);
+        LOG_UI_TRACE("WorkspacePanel save state - {}", cfgKey);
 
         cfg->beginGroup(cfgKey);
         cfg->setValue("version", 1);
@@ -180,10 +164,10 @@ namespace HWD::UI {
     void WorkspacePanel::LoadPanelState(QSettings* cfg) {
         QString cfgKey = objectName();
         cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
-        HWDLOG_UI_TRACE("WorkspacePanel load state - {}", objectName());
+        LOG_UI_TRACE("WorkspacePanel load state - {}", objectName());
 
         if (!cfg->childGroups().contains(cfgKey)) {
-            HWDLOG_UI_WARN(" - No config entry for {}", cfgKey);
+            LOG_UI_WARN(" - No config entry for {}", cfgKey);
             return; // no cfg entry
         }
 
@@ -209,9 +193,9 @@ namespace HWD::UI {
                     });
             }
         } else {
-            HWDLOG_UI_ERROR(" - Unsupported WorkspacePanel state data version {}", version);
+            LOG_UI_ERROR(" - Unsupported WorkspacePanel state data version {}", version);
         }
         cfg->endGroup();
     }
 
-} // namespace HWD::UI
+} // namespace L0::UI

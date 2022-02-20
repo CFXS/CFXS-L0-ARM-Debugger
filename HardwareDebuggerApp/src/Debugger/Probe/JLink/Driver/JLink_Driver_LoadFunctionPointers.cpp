@@ -1,6 +1,6 @@
 #include "JLink_Driver.hpp"
 
-namespace HWD::Probe::Driver {
+namespace L0::Probe::Driver {
 
     void JLink_Driver::LoadFunctionPointers() {
         probe_GetAvailableLicense = reinterpret_cast<decltype(probe_GetAvailableLicense)>(m_Library->resolve("JLINK_GetAvailableLicense"));
@@ -196,4 +196,4 @@ namespace HWD::Probe::Driver {
             reinterpret_cast<decltype(probe_SetFlashProgProgressCallback)>(m_Library->resolve("JLINK_SetFlashProgProgressCallback"));
     }
 
-} // namespace HWD::Probe::Driver
+} // namespace L0::Probe::Driver

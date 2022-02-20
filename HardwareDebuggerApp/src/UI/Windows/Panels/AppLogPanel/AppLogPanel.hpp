@@ -16,24 +16,41 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-#include "JLink.hpp"
 
-namespace L0::Probe {
+#pragma once
 
-    using namespace Driver::JLink_Types;
+#include <DockWidget.h>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextEdit>
+#include <UI/Windows/Panels/I_Panel.hpp>
 
-    void JLink::UpdateProbeInfo() {
-        LOG_PROBE_TRACE("[JLink@{0}] UpdateProbeInfo:", fmt::ptr(this));
+namespace Ui {
+    class AppLogPanel;
+}
 
-        m_ProbeCapabilities = GetDriver()->probe_GetCapabilities();
+namespace L0::UI {
 
-        LOG_PROBE_TRACE("{0} Capabilities:", GetModelName());
-        if (m_ProbeCapabilities & ProbeCapabilities::ADAPTIVE_CLOCKING)
-            LOG_PROBE_TRACE(" - Adaptive clocking");
-        if (m_ProbeCapabilities & ProbeCapabilities::RESET_STOP_TIMED)
-            LOG_PROBE_TRACE(" - Halt after reset");
-        if (m_ProbeCapabilities & ProbeCapabilities::SWO)
-            LOG_PROBE_TRACE(" - SWO");
-    }
+    class AppLogPanel : public ads::CDockWidget, public I_Panel {
+        Q_OBJECT
+    public:
+        AppLogPanel();
+        virtual ~AppLogPanel() = default;
 
-} // namespace L0::Probe
+        /// Get panel base name (for type matching from string)
+        static const QString& GetPanelBaseName() {
+            static const QString name = QStringLiteral("AppLogPanel");
+            return name;
+        }
+
+        void SavePanelState(QSettings* cfg) override;
+        void LoadPanelState(QSettings* cfg) override;
+
+    private:
+        void FormatAndAppend(const QString& str);
+
+    private:
+        std::unique_ptr<Ui::AppLogPanel> ui;
+    };
+
+} // namespace L0::UI

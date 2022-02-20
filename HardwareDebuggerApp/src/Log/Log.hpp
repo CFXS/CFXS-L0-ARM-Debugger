@@ -8,7 +8,7 @@
 
 #include <QString>
 
-namespace HWD {
+namespace L0 {
 
     class Log {
     public:
@@ -37,7 +37,7 @@ namespace HWD {
         static std::shared_ptr<spdlog::logger> s_ProbeLogger;
     };
 
-} // namespace HWD
+} // namespace L0
 
 template<>
 struct fmt::formatter<QString> {
@@ -52,29 +52,29 @@ struct fmt::formatter<QString> {
 };
 
 // Core log macros
-#define HWDLOG_CORE_TRACE(...)    ::HWD::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define HWDLOG_CORE_INFO(...)     ::HWD::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define HWDLOG_CORE_WARN(...)     ::HWD::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define HWDLOG_CORE_ERROR(...)    ::HWD::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define HWDLOG_CORE_CRITICAL(...) ::HWD::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define LOG_CORE_TRACE(...)    ::L0::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define LOG_CORE_INFO(...)     ::L0::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define LOG_CORE_WARN(...)     ::L0::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define LOG_CORE_ERROR(...)    ::L0::Log::GetCoreLogger()->error(__VA_ARGS__)
+#define LOG_CORE_CRITICAL(...) ::L0::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
 // UI log macros
-#define HWDLOG_UI_TRACE(...)    ::HWD::Log::GetUILogger()->trace(__VA_ARGS__)
-#define HWDLOG_UI_INFO(...)     ::HWD::Log::GetUILogger()->info(__VA_ARGS__)
-#define HWDLOG_UI_WARN(...)     ::HWD::Log::GetUILogger()->warn(__VA_ARGS__)
-#define HWDLOG_UI_ERROR(...)    ::HWD::Log::GetUILogger()->error(__VA_ARGS__)
-#define HWDLOG_UI_CRITICAL(...) ::HWD::Log::GetUILogger()->critical(__VA_ARGS__)
+#define LOG_UI_TRACE(...)    ::L0::Log::GetUILogger()->trace(__VA_ARGS__)
+#define LOG_UI_INFO(...)     ::L0::Log::GetUILogger()->info(__VA_ARGS__)
+#define LOG_UI_WARN(...)     ::L0::Log::GetUILogger()->warn(__VA_ARGS__)
+#define LOG_UI_ERROR(...)    ::L0::Log::GetUILogger()->error(__VA_ARGS__)
+#define LOG_UI_CRITICAL(...) ::L0::Log::GetUILogger()->critical(__VA_ARGS__)
 
 // Project log macros
-#define HWDLOG_PROJECT_TRACE(...)    ::HWD::Log::GetProjectLogger()->trace(__VA_ARGS__)
-#define HWDLOG_PROJECT_INFO(...)     ::HWD::Log::GetProjectLogger()->info(__VA_ARGS__)
-#define HWDLOG_PROJECT_WARN(...)     ::HWD::Log::GetProjectLogger()->warn(__VA_ARGS__)
-#define HWDLOG_PROJECT_ERROR(...)    ::HWD::Log::GetProjectLogger()->error(__VA_ARGS__)
-#define HWDLOG_PROJECT_CRITICAL(...) ::HWD::Log::GetProjectLogger()->critical(__VA_ARGS__)
+#define LOG_PROJECT_TRACE(...)    ::L0::Log::GetProjectLogger()->trace(__VA_ARGS__)
+#define LOG_PROJECT_INFO(...)     ::L0::Log::GetProjectLogger()->info(__VA_ARGS__)
+#define LOG_PROJECT_WARN(...)     ::L0::Log::GetProjectLogger()->warn(__VA_ARGS__)
+#define LOG_PROJECT_ERROR(...)    ::L0::Log::GetProjectLogger()->error(__VA_ARGS__)
+#define LOG_PROJECT_CRITICAL(...) ::L0::Log::GetProjectLogger()->critical(__VA_ARGS__)
 
 // Probe log macros
-#define HWDLOG_PROBE_TRACE(...)    ::HWD::Log::GetProbeLogger()->trace(__VA_ARGS__)
-#define HWDLOG_PROBE_INFO(...)     ::HWD::Log::GetProbeLogger()->info(__VA_ARGS__)
-#define HWDLOG_PROBE_WARN(...)     ::HWD::Log::GetProbeLogger()->warn(__VA_ARGS__)
-#define HWDLOG_PROBE_ERROR(...)    ::HWD::Log::GetProbeLogger()->error(__VA_ARGS__)
-#define HWDLOG_PROBE_CRITICAL(...) ::HWD::Log::GetProbeLogger()->critical(__VA_ARGS__)
+#define LOG_PROBE_TRACE(...)    ::L0::Log::GetProbeLogger()->trace(__VA_ARGS__)
+#define LOG_PROBE_INFO(...)     ::L0::Log::GetProbeLogger()->info(__VA_ARGS__)
+#define LOG_PROBE_WARN(...)     ::L0::Log::GetProbeLogger()->warn(__VA_ARGS__)
+#define LOG_PROBE_ERROR(...)    ::L0::Log::GetProbeLogger()->error(__VA_ARGS__)
+#define LOG_PROBE_CRITICAL(...) ::L0::Log::GetProbeLogger()->critical(__VA_ARGS__)

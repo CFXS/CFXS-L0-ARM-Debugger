@@ -30,13 +30,19 @@ namespace Ui {
     class WorkspacePanel;
 }
 
-namespace HWD::UI {
+namespace L0::UI {
 
     class WorkspacePanel : public ads::CDockWidget, public I_Panel {
         Q_OBJECT
     public:
         WorkspacePanel();
         virtual ~WorkspacePanel() = default;
+
+        /// Get panel base name (for type matching from string)
+        static const QString& GetPanelBaseName() {
+            static const QString name = QStringLiteral("WorkspacePanel");
+            return name;
+        }
 
         void SavePanelState(QSettings* cfg) override;
         void LoadPanelState(QSettings* cfg) override;
@@ -48,11 +54,11 @@ namespace HWD::UI {
 
     private:
         /// Called on file/folder rightclick
-        void OpenEntryContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info);
+        void OpenItemContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info);
 
     private:
         std::unique_ptr<Ui::WorkspacePanel> ui;
         FileBrowserModel* m_FB_Model;
     };
 
-} // namespace HWD::UI
+} // namespace L0::UI

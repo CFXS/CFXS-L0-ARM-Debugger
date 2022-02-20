@@ -1,7 +1,7 @@
 #pragma once
 #include <Utils.hpp>
 
-namespace HWD::Probe::Driver::JLink_Types {
+namespace L0::Probe::Driver::JLink_Types {
 
     using FlashProgressCallback = void (*)(const char* action, const char* prog, int percentage);
     using LogCallback           = void (*)(const char* str);
@@ -158,7 +158,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         JTAG = 1 << 0,
         SWD  = 1 << 1,
     };
-    HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(TargetInterfaceMask, uint32_t)
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(TargetInterfaceMask, uint32_t)
 
     static constexpr auto HSS_FLAG_TIMESTAMP_US = 1UL << 0;
 
@@ -354,7 +354,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         RAWTRACE          = 1 << 30,   // supports rawtrace
         GET_CAPS_EX       = 1ul << 31, // has extended capabilities
     };
-    HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(ProbeCapabilities, uint32_t)
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(ProbeCapabilities, uint32_t)
 
     enum class ProbeExtendedCapabilities : uint8_t {
         RESERVED                  = 0,
@@ -418,7 +418,7 @@ namespace HWD::Probe::Driver::JLink_Types {
         USB      = 1 << 0,
         ETHERNET = 1 << 1,
     };
-    HWD_OVERLOAD_ENUM_BITWISE_OPERATORS(HostInterfaceType, int)
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(HostInterfaceType, int)
 
     namespace Breakpoint {
 
@@ -1186,30 +1186,30 @@ namespace HWD::Probe::Driver::JLink_Types {
         SET_BUFFERSIZE_EMU  = 21,
     };
 
-} // namespace HWD::Probe::Driver::JLink_Types
+} // namespace L0::Probe::Driver::JLink_Types
 
 template<>
-struct fmt::formatter<HWD::Probe::Driver::JLink_Types::ErrorCode> {
+struct fmt::formatter<L0::Probe::Driver::JLink_Types::ErrorCode> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext& ctx) {
         return ctx.begin();
     }
 
     template<typename FormatContext>
-    auto format(HWD::Probe::Driver::JLink_Types::ErrorCode const& ec, FormatContext& ctx) {
-        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::Driver::JLink_Types::ErrorCodeToString(ec));
+    auto format(L0::Probe::Driver::JLink_Types::ErrorCode const& ec, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{0}", L0::Probe::Driver::JLink_Types::ErrorCodeToString(ec));
     }
 };
 
 template<>
-struct fmt::formatter<HWD::Probe::Driver::JLink_Types::DeviceCore> {
+struct fmt::formatter<L0::Probe::Driver::JLink_Types::DeviceCore> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext& ctx) {
         return ctx.begin();
     }
 
     template<typename FormatContext>
-    auto format(HWD::Probe::Driver::JLink_Types::DeviceCore const& core, FormatContext& ctx) {
-        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::Driver::JLink_Types::DeviceCoreToString(core));
+    auto format(L0::Probe::Driver::JLink_Types::DeviceCore const& core, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{0}", L0::Probe::Driver::JLink_Types::DeviceCoreToString(core));
     }
 };

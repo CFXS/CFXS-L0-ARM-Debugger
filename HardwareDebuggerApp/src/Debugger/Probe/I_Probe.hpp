@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS Hardware Debugger <https://github.com/CFXS/CFXS-Hardware-Debugger>
 // Copyright (C) 2021 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -20,7 +20,7 @@
 
 #include <Debugger/Target/SupportedDevices.hpp>
 
-namespace HWD::Probe {
+namespace L0::Probe {
 
     class I_Probe {
         static I_Probe*& GetCurrentProbeRef() {
@@ -44,7 +44,7 @@ namespace HWD::Probe {
         }
 
         static void SetCurrentProbe(I_Probe* probe) {
-            HWDLOG_PROBE_INFO("Set current probe to {0} from thread {1}", fmt::ptr(probe), std::this_thread::get_id());
+            LOG_PROBE_INFO("Set current probe to {0} from thread {1}", fmt::ptr(probe), std::this_thread::get_id());
             GetCurrentProbeRef() = probe;
         }
 
@@ -138,17 +138,17 @@ namespace HWD::Probe {
     private:
     };
 
-} // namespace HWD::Probe
+} // namespace L0::Probe
 
 template<>
-struct fmt::formatter<HWD::Probe::I_Probe::DebugInterface> {
+struct fmt::formatter<L0::Probe::I_Probe::DebugInterface> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext& ctx) {
         return ctx.begin();
     }
 
     template<typename FormatContext>
-    auto format(HWD::Probe::I_Probe::DebugInterface const& ifc, FormatContext& ctx) {
-        return fmt::format_to(ctx.out(), "{0}", HWD::Probe::I_Probe::DebugInterfaceToString(ifc));
+    auto format(L0::Probe::I_Probe::DebugInterface const& ifc, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{0}", L0::Probe::I_Probe::DebugInterfaceToString(ifc));
     }
 };

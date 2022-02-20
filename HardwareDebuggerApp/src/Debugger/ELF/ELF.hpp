@@ -1,6 +1,6 @@
 #pragma once
 
-namespace HWD::ELF {
+namespace L0::ELF {
 
     enum class FileClass : uint8_t {
         NONE = 0, // Invalid
@@ -30,4 +30,4 @@ namespace HWD::ELF {
         // processor specific values are ignored for this project
     };
 
-} // namespace HWD::ELF
+} // namespace L0::ELF

@@ -1,8 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource>
-        <file alias="HWD_Icon">Images/CFXS_L0_BIG.png</file>
-        <file alias="HWD_Full_Icon">Images/HWD_Full_Icon.png</file>
+        <file alias="L0_Icon">Images/CFXS_L0_BIG.png</file>
         <file alias="Image/CFXS">Images/CFXS_NotPerfect.svg</file>
         <file alias="Image/SmallRightArrow.svg">Images/UI/smooth-arrow-right-small.svg</file>
         <file alias="Image/SmallDownArrow.svg">Images/UI/smooth-arrow-down-small.svg</file>
@@ -53,6 +52,6 @@
         <file alias="Icon/cfxs">Images/UI/FileBrowser/cfxs.png</file>
         <file alias="Icon/segger">Images/UI/FileBrowser/segger.png</file>
         <file alias="Icon/link">Images/UI/FileBrowser/link.png</file>
-        <file alias="Icon/hwd">Images/UI/FileBrowser/CFXS_L0_SMALL.png</file>
+        <file alias="Icon/l0">Images/UI/FileBrowser/CFXS_L0_SMALL.png</file>
     </qresource>
 </RCC>

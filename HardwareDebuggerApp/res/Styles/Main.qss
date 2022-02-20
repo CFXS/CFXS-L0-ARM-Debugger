@@ -2,7 +2,7 @@
     font-size: 10.5pt;
 }
 
-#codeField {
+#monospaceTextObject {
     font: 12pt "Source Code Pro";
 }
 

@@ -19,7 +19,7 @@
 #include "TextEditPanel.hpp"
 #include "ui_TextEditPanel.h"
 #include <Core/Project/ProjectManager.hpp>
-#include <UI/Models/FileBrowser/FileBrowserIconProvider.hpp>
+#include <UI/Models/FileBrowser/FileIconProvider.hpp>
 #include <QFileInfo>
 #include <QDir>
 #include <QPixmap>
@@ -28,17 +28,17 @@
 #include <QScrollBar>
 #include <QPoint>
 
-namespace HWD::UI {
+namespace L0::UI {
 
     //////////////////////////////////////////////
-    static FileBrowserIconProvider* GetIconProvider() {
-        static FileBrowserIconProvider fbip;
+    static FileIconProvider* GetIconProvider() {
+        static FileIconProvider fbip;
         return &fbip;
     };
     //////////////////////////////////////////////
 
-    TextEditPanel::TextEditPanel() : ads::CDockWidget(QStringLiteral("TextEditPanel")), ui(std::make_unique<Ui::TextEditPanel>()) {
-        HWDLOG_UI_TRACE("Create text edit panel");
+    TextEditPanel::TextEditPanel() : ads::CDockWidget(GetPanelBaseName()), ui(std::make_unique<Ui::TextEditPanel>()) {
+        LOG_UI_TRACE("Create {}", GetPanelBaseName());
         ui->setupUi(this);
 
         auto layout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -66,8 +66,8 @@ namespace HWD::UI {
         m_LineWidget->horizontalScrollBar()->setVisible(false);
         m_LineWidget->setReadOnly(true);
 
-        m_TextEdit->setObjectName("codeField");
-        m_LineWidget->setObjectName("codeField");
+        m_TextEdit->setObjectName("monospaceTextObject");
+        m_LineWidget->setObjectName("monospaceTextObject");
 
         layout->addWidget(m_LineWidget);
         layout->addWidget(m_TextEdit);
@@ -115,7 +115,7 @@ namespace HWD::UI {
                 tabWidget()->setToolTip(filePath);
             }
         } else {
-            HWDLOG_UI_ERROR("TextEditPanel deleting panel: file does not exit - {}", filePath);
+            LOG_UI_ERROR("TextEditPanel deleting panel: file does not exit - {}", filePath);
             deleteLater();
         }
 
@@ -152,7 +152,7 @@ namespace HWD::UI {
     void TextEditPanel::SavePanelState(QSettings* cfg) {
         QString cfgKey = objectName();
         cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
-        HWDLOG_UI_TRACE("TextEditPanel save state - {}", cfgKey);
+        LOG_UI_TRACE("TextEditPanel save state - {}", cfgKey);
 
         cfg->beginGroup(cfgKey);
         cfg->setValue("version", 1);
@@ -166,10 +166,10 @@ namespace HWD::UI {
     void TextEditPanel::LoadPanelState(QSettings* cfg) {
         QString cfgKey = objectName();
         cfgKey.replace('/', '\\'); // QSettings does not like '/'
-        HWDLOG_UI_TRACE("TextEditPanel load state - {}", cfgKey);
+        LOG_UI_TRACE("TextEditPanel load state - {}", cfgKey);
 
         if (!cfg->childGroups().contains(cfgKey)) {
-            HWDLOG_UI_WARN(" - No config entry for {}", cfgKey);
+            LOG_UI_WARN(" - No config entry for {}", cfgKey);
             return; // no cfg entry
         }
 
@@ -190,9 +190,9 @@ namespace HWD::UI {
             m_TextEdit->verticalScrollBar()->setValue(scroll_y);
             m_LineWidget->verticalScrollBar()->setValue(scroll_y);
         } else {
-            HWDLOG_UI_ERROR(" - Unsupported TextEditPanel state data version {}", version);
+            LOG_UI_ERROR(" - Unsupported TextEditPanel state data version {}", version);
         }
         cfg->endGroup();
     }
 
-} // namespace HWD::UI
+} // namespace L0::UI

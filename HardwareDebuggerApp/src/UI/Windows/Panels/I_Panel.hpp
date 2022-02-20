@@ -3,7 +3,7 @@
 
 #include <QSettings>
 
-namespace HWD::UI {
+namespace L0::UI {
 
     class I_Panel {
     public:
@@ -17,4 +17,4 @@ namespace HWD::UI {
         virtual void LoadPanelState(QSettings* cfg) = 0;
     };
 
-} // namespace HWD::UI
+} // namespace L0::UI

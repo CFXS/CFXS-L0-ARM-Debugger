@@ -27,10 +27,21 @@ namespace Ui {
     class MainWindow;
 }
 
-namespace HWD::UI {
+namespace L0::UI {
+
+    class WorkspacePanel;
+    class TextEditPanel;
+    class AppLogPanel;
 
     class MainWindow : public QMainWindow {
         Q_OBJECT
+
+        struct ActionEntryDefinition {
+            bool isSeperator;
+            QString name                               = QStringLiteral("");
+            std::function<void(MainWindow *)> callback = nullptr;
+            QIcon icon                                 = QIcon{};
+        };
 
     public:
         /// \param rawStateToLoad state data received from SaveState signal on window close
@@ -57,17 +68,20 @@ namespace HWD::UI {
         void UpdateRecentProjects();
 
         /// connect actions to functions
-        void RegisterActions();
-        void RegisterActions_File();
-        void RegisterActions_Edit();
-        void RegisterActions_View();
-        void RegisterActions_Help();
+        void InitializeActions();
+        void InitializeActions_File();
+        void InitializeActions_View();
+        void InitializeActions_Help();
 
-        I_Panel *OpenPanel_Workspace();                   // Open workspace panel
-        I_Panel *OpenPanel_TextEdit(const QString &path); // Open text edit panel
+        // Normal panels
+        WorkspacePanel *OpenPanel_Workspace();
+        TextEditPanel *OpenPanel_TextEdit(const QString &path);
 
-        /// Open file
-        I_Panel *OpenFilePanel(const QString &path);
+        // Dev panels
+        AppLogPanel *OpenPanel_AppLog();
+
+        /// Open/show file panel with file
+        TextEditPanel *OpenFilePanel(const QString &path);
 
     signals:
         void Closed();
@@ -82,9 +96,11 @@ namespace HWD::UI {
         std::unique_ptr<Ui::MainWindow> ui;
         ads::CDockManager *m_DockManager;
 
-        // Panels
+        static std::vector<ActionEntryDefinition> s_ActionDefinitions_View;
 
-        I_Panel *m_Panel_Workspace = nullptr;
+        // Panels
+        WorkspacePanel *m_Panel_Workspace = nullptr;
+        AppLogPanel *m_Panel_AppLog       = nullptr;
     };
 
-} // namespace HWD::UI
+} // namespace L0::UI
