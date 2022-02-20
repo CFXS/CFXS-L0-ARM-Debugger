@@ -13,8 +13,8 @@ add_compile_definitions("CFXS_VERSION_STRING=\"v0.1-dev\"")
 add_compile_definitions("CFXS_PROGRAM_NAME=\"CFXS L0 ARM Debugger\"")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/QtAdvancedDockingSystem)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/QCodeEditor)
 
 set(CMAKE_AUTOMOC ON) 
 set(CMAKE_AUTORCC ON)
