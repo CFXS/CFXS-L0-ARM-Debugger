@@ -1,0 +1,15 @@
+[submodule "CFXS_L0_Debugger/vendor/LicenseGen"]
+	path = CFXS_L0_Debugger/vendor/LicenseGen
+	url = https://github.com/CFXS/CFXS-License-Header-Generator/
+[submodule "CFXS_L0_Debugger/vendor/Lua"]
+	path = CFXS_L0_Debugger/vendor/Lua
+	url = https://github.com/CFXS/lua/
+[submodule "CFXS_L0_Debugger/vendor/QtAdvancedDockingSystem"]
+	path = CFXS_L0_Debugger/vendor/QtAdvancedDockingSystem
+	url = https://github.com/CFXS/Qt-Advanced-Docking-System/
+[submodule "CFXS_L0_Debugger/vendor/spdlog"]
+	path = CFXS_L0_Debugger/vendor/spdlog
+	url = https://github.com/CFXS/spdlog/
+[submodule "CFXS_L0_Debugger/vendor/QCodeEditor"]
+	path = CFXS_L0_Debugger/vendor/QCodeEditor
+	url = https://github.com/CFXS/QCodeEditor
