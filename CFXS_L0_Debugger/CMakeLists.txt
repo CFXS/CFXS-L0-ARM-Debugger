@@ -24,7 +24,9 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControl
 
 add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files}
 "${ROOT_DIR}/vendor/llvm/lib/Demangle/Demangle.cpp"
-"${ROOT_DIR}/vendor/llvm/lib/Demangle/ItaniumDemangle.cpp")
+"${ROOT_DIR}/vendor/llvm/lib/Demangle/ItaniumDemangle.cpp"
+"${ROOT_DIR}/src/win.rc"
+)
 
 target_precompile_headers(
   ${EXE_NAME}
