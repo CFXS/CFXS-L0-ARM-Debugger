@@ -1,31 +1,45 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
 #include "WorkspacePanel.hpp"
-#include "ui_WorkspacePanel.h"
-#include <Core/Project/ProjectManager.hpp>
+
+#include <Windows.h>
+
 #include <Core/PlatformUtils.hpp>
+#include <Core/Project/ProjectManager.hpp>
+#include <QAction>
+#include <QDir>
+#include <QMenu>
+#include <QProcess>
 #include <QScrollBar>
 #include <QTimer>
-#include <QMenu>
-#include <QAction>
-#include <QProcess>
-#include <QDir>
+
+#include "ui_WorkspacePanel.h"
+std::wstring getSystemDefaultFontName() {
+    NONCLIENTMETRICS ncm;
+    ncm.cbSize = sizeof(ncm);
+    HRESULT hr;
+    hr = SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
+    if (hr == 0)
+        return std::wstring();
+    return std::wstring(
+        ncm.lfMenuFont.lfFaceName); //There are different fonts for each section. I choose menu font but something else may be better?
+}
 
 namespace L0::UI {
 
@@ -59,6 +73,7 @@ namespace L0::UI {
         ui->tw_FileBrowser->setUniformRowHeights(true);
 
         ui->tw_FileBrowser->setIndentation(16);
+        ui->tw_FileBrowser->setStyleSheet("font-size: 13px; font-family: \"Segoe WPC\";");
 
         connect(ui->tw_FileBrowser, &QTreeView::doubleClicked, this, [=](const QModelIndex& index) {
             auto info = m_FB_Model->fileInfo(index);

@@ -1,6 +1,6 @@
 set(EXE_NAME CFXS_L0_Debugger)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
-set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.0\\msvc2019_64\\lib\\cmake")
+set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.3\\msvc2019_64\\lib\\cmake")
 
 #set(CMAKE_UNITY_BUILD true)
 #set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
@@ -20,7 +20,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui Svg Xml Core5Compat)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui Svg Xml)
 
 add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files}
 "${ROOT_DIR}/vendor/llvm/lib/Demangle/Demangle.cpp"
@@ -92,7 +92,6 @@ target_link_libraries(
           Qt::Gui
           Qt::Svg
           Qt::Xml
-          Qt::Core5Compat # for QRegExp
 )
 
 if(BUILD_PROFILER)
@@ -117,8 +116,6 @@ add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E cop
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Svgd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Xml.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Xmld.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
-add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Core5Compat.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
-add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\bin\\Qt6Core5Compatd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\platforms\\qwindows.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindows.dll)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PREFIX_PATH}\\..\\..\\plugins\\platforms\\qwindowsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindowsd.dll)

@@ -13,3 +13,6 @@
 [submodule "CFXS_L0_Debugger/vendor/QCodeEditor"]
 	path = CFXS_L0_Debugger/vendor/QCodeEditor
 	url = https://github.com/CFXS/QCodeEditor
+[submodule "Docs"]
+	path = Docs
+	url = https://github.com/CFXS/HWD-Private-Docs

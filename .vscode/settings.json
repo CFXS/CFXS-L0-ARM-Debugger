@@ -1,6 +1,7 @@
 {
     "cmake.generator": "Ninja",
     "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.buildTask": false,
     "files.associations": {
         "*.ui": "xml",
         "*.qrc": "xml",
