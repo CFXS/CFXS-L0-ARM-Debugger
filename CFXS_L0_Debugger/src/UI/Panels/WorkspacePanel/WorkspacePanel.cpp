@@ -18,8 +18,6 @@
 // [CFXS] //
 #include "WorkspacePanel.hpp"
 
-#include <Windows.h>
-
 #include <Core/PlatformUtils.hpp>
 #include <Core/Project/ProjectManager.hpp>
 #include <QAction>
@@ -30,16 +28,6 @@
 #include <QTimer>
 
 #include "ui_WorkspacePanel.h"
-std::wstring getSystemDefaultFontName() {
-    NONCLIENTMETRICS ncm;
-    ncm.cbSize = sizeof(ncm);
-    HRESULT hr;
-    hr = SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
-    if (hr == 0)
-        return std::wstring();
-    return std::wstring(
-        ncm.lfMenuFont.lfFaceName); //There are different fonts for each section. I choose menu font but something else may be better?
-}
 
 namespace L0::UI {
 
@@ -73,7 +61,6 @@ namespace L0::UI {
         ui->tw_FileBrowser->setUniformRowHeights(true);
 
         ui->tw_FileBrowser->setIndentation(16);
-        ui->tw_FileBrowser->setStyleSheet("font-size: 13px; font-family: \"Segoe WPC\";");
 
         connect(ui->tw_FileBrowser, &QTreeView::doubleClicked, this, [=](const QModelIndex& index) {
             auto info = m_FB_Model->fileInfo(index);

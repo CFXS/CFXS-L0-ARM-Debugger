@@ -1,6 +1,6 @@
 set(EXE_NAME CFXS_L0_Debugger)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
-set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.3\\msvc2019_64\\lib\\cmake")
+set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.0\\msvc2019_64\\lib\\cmake")
 
 #set(CMAKE_UNITY_BUILD true)
 #set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
