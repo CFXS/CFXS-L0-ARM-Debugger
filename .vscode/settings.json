@@ -133,6 +133,10 @@
         "qframedtextattribute": "cpp",
         "qsyntaxstyle": "cpp",
         "qcxxhighlighter": "cpp",
-        "qjsonhighlighter": "cpp"
+        "qjsonhighlighter": "cpp",
+        "qxmlhighlighter": "cpp",
+        "qldhighlighter": "cpp",
+        "qcmakehighlighter": "cpp",
+        "qluahighlighter": "cpp"
     }
 }

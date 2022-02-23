@@ -32,6 +32,10 @@
 #include <QCXXHighlighter>
 #include <QJSONHighlighter>
 #include <QXMLHighlighter>
+#include <QLDHighlighter>
+#include <QCMakeHighlighter>
+#include <QLuaHighlighter>
+#include <QPythonHighlighter>
 
 namespace L0::UI {
 
@@ -40,10 +44,6 @@ namespace L0::UI {
         static FileIconProvider fbip;
         return &fbip;
     };
-    //////////////////////////////////////////////
-    QCXXHighlighter s_Highlighter_CXX;
-    QJSONHighlighter s_Highlighter_JSON;
-    QXMLHighlighter s_Highlighter_XML;
     //////////////////////////////////////////////
 
     TextEditPanel::TextEditPanel() : ads::CDockWidget(GetPanelBaseName()), ui(std::make_unique<Ui::TextEditPanel>()) {
@@ -112,17 +112,31 @@ namespace L0::UI {
         m_File.open(QFile::ReadOnly | QFile::Text);
         QString lines = m_File.readAll();
 
-        auto ext = m_FileInfo.suffix().toLower();
+        auto ext  = m_FileInfo.suffix().toLower();
+        auto name = m_FileInfo.fileName().toLower();
+
+        // TODO: optimize - preallocate and swap instead of new/delete
+        if (m_Editor->highlighter()) {
+            delete m_Editor->highlighter();
+            m_Editor->setHighlighter(nullptr);
+        }
+
         if (ext == QStringLiteral("c") || ext == QStringLiteral("cc") || ext == QStringLiteral("cpp") || ext == QStringLiteral("cxx") ||
             ext == QStringLiteral("c++") || ext == QStringLiteral("h") || ext == QStringLiteral("hh") || ext == QStringLiteral("hpp") ||
             ext == QStringLiteral("hxx") || ext == QStringLiteral("h++")) {
-            m_Editor->setHighlighter(&s_Highlighter_CXX);
+            m_Editor->setHighlighter(new QCXXHighlighter);
         } else if (ext == QStringLiteral("json")) {
-            m_Editor->setHighlighter(&s_Highlighter_JSON);
+            m_Editor->setHighlighter(new QJSONHighlighter);
         } else if (ext == QStringLiteral("xml") || ext == QStringLiteral("emproject")) {
-            m_Editor->setHighlighter(&s_Highlighter_XML);
-        } else {
-            m_Editor->setHighlighter(nullptr);
+            m_Editor->setHighlighter(new QXMLHighlighter);
+        } else if (ext == QStringLiteral("ld")) {
+            m_Editor->setHighlighter(new QLDHighlighter);
+        } else if (ext == QStringLiteral("cmake") || name == QStringLiteral("cmakelists.txt")) {
+            m_Editor->setHighlighter(new QCMakeHighlighter);
+        } else if (ext == QStringLiteral("lua")) {
+            m_Editor->setHighlighter(new QLuaHighlighter);
+        } else if (ext == QStringLiteral("py")) {
+            m_Editor->setHighlighter(new QPythonHighlighter);
         }
         m_Editor->setPlainText(lines);
 

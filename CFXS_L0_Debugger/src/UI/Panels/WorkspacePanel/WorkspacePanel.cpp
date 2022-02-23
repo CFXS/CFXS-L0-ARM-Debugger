@@ -33,12 +33,14 @@ namespace L0::UI {
 
     ////////////////////////////////////////////////////////////
     const QStringList s_KnownExtensionList = {
-        QStringLiteral("c"),   QStringLiteral("cc"),    QStringLiteral("cpp"),  QStringLiteral("cxx"), QStringLiteral("c++"),
-        QStringLiteral("h"),   QStringLiteral("hh"),    QStringLiteral("hpp"),  QStringLiteral("hxx"), QStringLiteral("h++"),
-        QStringLiteral("asm"), QStringLiteral("s"),     QStringLiteral("inc"),  QStringLiteral("txt"), QStringLiteral("json"),
-        QStringLiteral("xml"), QStringLiteral("yml"),   QStringLiteral("yaml"), QStringLiteral("l0"),  QStringLiteral("ld"),
-        QStringLiteral("icf"), QStringLiteral("cmake"), QStringLiteral("map"),  QStringLiteral("lhg"),
-    };
+        QStringLiteral("c"),         QStringLiteral("cc"),          QStringLiteral("cpp"),   QStringLiteral("cxx"),
+        QStringLiteral("c++"),       QStringLiteral("h"),           QStringLiteral("hh"),    QStringLiteral("hpp"),
+        QStringLiteral("hxx"),       QStringLiteral("h++"),         QStringLiteral("asm"),   QStringLiteral("s"),
+        QStringLiteral("inc"),       QStringLiteral("txt"),         QStringLiteral("json"),  QStringLiteral("xml"),
+        QStringLiteral("yml"),       QStringLiteral("yaml"),        QStringLiteral("l0"),    QStringLiteral("ld"),
+        QStringLiteral("py"),        QStringLiteral("icf"),         QStringLiteral("cmake"), QStringLiteral("map"),
+        QStringLiteral("lhg"),       QStringLiteral("clangformat"), QStringLiteral("lua"),   QStringLiteral("md"),
+        QStringLiteral("gitignore"), QStringLiteral("gitmodules")};
     ////////////////////////////////////////////////////////////
 
     WorkspacePanel::WorkspacePanel() : ads::CDockWidget(GetPanelBaseName()), ui(std::make_unique<Ui::WorkspacePanel>()) {
