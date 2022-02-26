@@ -12,21 +12,15 @@ add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
 add_compile_definitions("CFXS_VERSION_STRING=\"v0.1-dev\"")
 add_compile_definitions("CFXS_PROGRAM_NAME=\"CFXS L0 ARM Debugger\"")
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/QtAdvancedDockingSystem)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor/QCodeEditor)
-
 set(CMAKE_AUTOMOC ON) 
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui Svg Xml)
 
-add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files}
-"${ROOT_DIR}/vendor/llvm/lib/Demangle/Demangle.cpp"
-"${ROOT_DIR}/vendor/llvm/lib/Demangle/ItaniumDemangle.cpp"
-"${ROOT_DIR}/src/win.rc"
-)
+add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files} "${ROOT_DIR}/src/win.rc")
+
+include("_Modules.cmake")
 
 target_precompile_headers(
   ${EXE_NAME}
@@ -67,10 +61,6 @@ endif()
 
 target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(${EXE_NAME} SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
-target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include")
-target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/llvm/include")
-target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/QCodeEditor/include")
-target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/QtAdvancedDockingSystem/src")
 
 if(MSVC)
   target_compile_options(${EXE_NAME} PRIVATE "/MP")
@@ -80,9 +70,6 @@ target_link_libraries(
   ${EXE_NAME}
   PRIVATE project_options
           project_warnings
-          qtadvanceddocking
-          QCodeEditor
-          Lua
           Qt::Core
           Qt::Widgets
           Qt::Network
