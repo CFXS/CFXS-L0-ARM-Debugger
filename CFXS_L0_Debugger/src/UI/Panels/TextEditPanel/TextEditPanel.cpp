@@ -115,7 +115,6 @@ namespace L0::UI {
         auto ext  = m_FileInfo.suffix().toLower();
         auto name = m_FileInfo.fileName().toLower();
 
-        // TODO: optimize - preallocate and swap instead of new/delete
         if (m_Editor->highlighter()) {
             delete m_Editor->highlighter();
             m_Editor->setHighlighter(nullptr);

@@ -137,6 +137,7 @@
         "qxmlhighlighter": "cpp",
         "qldhighlighter": "cpp",
         "qcmakehighlighter": "cpp",
-        "qluahighlighter": "cpp"
+        "qluahighlighter": "cpp",
+        "qtextedit": "cpp"
     }
 }

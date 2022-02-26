@@ -105,7 +105,7 @@ namespace L0::UI {
     void WorkspacePanel::OpenItemContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info) {
         auto menu = new QMenu(this);
 
-        auto showInExplorerAction = new QAction("Show in File Explorer", this);
+        auto showInExplorerAction = new QAction(QPixmap(QStringLiteral(":/Icon/folder-open")), "Show in File Explorer", this);
         menu->addAction(showInExplorerAction);
         connect(showInExplorerAction, &QAction::triggered, this, [=]() {
             if (info.isFile()) {
@@ -121,7 +121,7 @@ namespace L0::UI {
             menu->addSeparator();
 
             // Open as text file
-            auto openAsTextAction = new QAction("Open as Text", this);
+            auto openAsTextAction = new QAction(QPixmap(QStringLiteral(":/Icon/doc")), "Open as Text", this);
             menu->addAction(openAsTextAction);
             connect(openAsTextAction, &QAction::triggered, this, [=]() {
                 LOG_CORE_TRACE("Open as Text \"{}\"", info.absoluteFilePath());
@@ -129,7 +129,7 @@ namespace L0::UI {
             });
 
             // Open With...
-            auto openWithAction = new QAction("Open With...", this);
+            auto openWithAction = new QAction(QPixmap(QStringLiteral(":/Icon/file")), "Open With...", this);
             menu->addAction(openWithAction);
             connect(openWithAction, &QAction::triggered, this, [=]() {
 #if defined(Q_OS_WIN)
@@ -138,9 +138,10 @@ namespace L0::UI {
                 proc.startDetached("rundll32.exe",
                                    {QStringLiteral("Shell32.dll,OpenAs_RunDLL"), info.absoluteFilePath().replace("/", "\\")});
 #else
-#error Open With... not implemented
+#error Open With... not implemented for this platform
 #endif
             });
+        } else if (info.isDir()) {
         }
 
         menu->popup(ui->tw_FileBrowser->viewport()->mapToGlobal(point));
