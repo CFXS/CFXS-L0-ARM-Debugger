@@ -12,7 +12,7 @@
 - STL container support in Watch window
 - User definable custom data structure decoding in Watch window
 - Macros and plugins for custom extended functionality (`Lua`)
-- External memory view/watch data interfaces (Internal JTAG/SWD and possibility to add external interfaces like a custom serial or network protocol for use with devices that don't allow RAM reads while the core is running. In that case it would be possible to set up a blocking memory read function on the target device that would send a block of memory to L0 through serial or network for live watch use or whatever else)
+- External memory view/watch data interfaces (Internal JTAG/SWD and option to add external interfaces like a custom serial or network protocol for use with devices that don't allow RAM reads while the core is running. In that case it would be possible to set up a blocking memory read function on the target device that would send a block of memory to L0 through serial or network for live watch use or whatever else)
  
 # Debug Probe Support
 - `SEGGER J-Link`
