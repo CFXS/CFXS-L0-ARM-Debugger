@@ -6,13 +6,13 @@
 
 # Planned Features
 - Will not crash every 5-15 minutes
-- Dark theme enabled by default
+- Dark theme because it's not 2010 anymore
 - Live variable/expression Watch
 - Option to translate values in a Stack View window to function names (match stack value to function code ranges to obtain possible function name from a value in the stack. This is useful when you are not able to obtain the call stack because of a corrupted stack or whatever else, so you have to go through the stack and manually find Link Register values)
 - STL container support in Watch window
 - User definable custom data structure decoding in Watch window
 - Macros and plugins for custom extended functionality (`Lua`)
-- Some type of VSCode integration somehow? (at least "Open current file in VSCode")
+- External memory view/watch data interfaces (Internal JTAG/SWD and possibility to add external interfaces like a custom serial or network protocol for use with devices that don't allow RAM reads while the core is running. In that case it would be possible to set up a blocking memory read function on the target device that would send a block of memory to L0 through serial or network for live watch use or whatever else)
  
 # Debug Probe Support
 - `SEGGER J-Link`
