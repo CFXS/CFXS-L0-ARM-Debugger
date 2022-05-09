@@ -158,7 +158,7 @@ namespace L0::Probe::Driver::JLink_Types {
         JTAG = 1 << 0,
         SWD  = 1 << 1,
     };
-    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(TargetInterfaceMask, uint32_t)
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(TargetInterfaceMask)
 
     static constexpr auto HSS_FLAG_TIMESTAMP_US = 1UL << 0;
 
@@ -354,7 +354,7 @@ namespace L0::Probe::Driver::JLink_Types {
         RAWTRACE          = 1 << 30,   // supports rawtrace
         GET_CAPS_EX       = 1ul << 31, // has extended capabilities
     };
-    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(ProbeCapabilities, uint32_t)
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(ProbeCapabilities)
 
     enum class ProbeExtendedCapabilities : uint8_t {
         RESERVED                  = 0,
@@ -418,7 +418,7 @@ namespace L0::Probe::Driver::JLink_Types {
         USB      = 1 << 0,
         ETHERNET = 1 << 1,
     };
-    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(HostInterfaceType, int)
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(HostInterfaceType)
 
     namespace Breakpoint {
 

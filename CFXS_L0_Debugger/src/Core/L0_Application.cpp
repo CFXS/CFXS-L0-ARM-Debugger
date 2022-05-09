@@ -18,7 +18,6 @@
 // [CFXS] //
 #include "L0_Application.hpp"
 #include <QString>
-#include <QStringLiteral>
 #include <QStandardPaths>
 #include <Debugger/Probe/JLink/JLink.hpp>
 #include "Project/ProjectManager.hpp"

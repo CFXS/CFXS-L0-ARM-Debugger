@@ -44,7 +44,7 @@ namespace L0::UI {
 
         /// Get panel base name (for type matching from string)
         static const QString& GetPanelBaseName() {
-            static const QString name = QStringLiteral("TextEditPanel");
+            static const QString name = QSL("TextEditPanel");
             return name;
         }
 

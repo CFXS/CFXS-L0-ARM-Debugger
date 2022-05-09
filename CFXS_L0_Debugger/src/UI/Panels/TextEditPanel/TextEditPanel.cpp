@@ -38,8 +38,9 @@
 #include <QPythonHighlighter>
 
 #include <iostream>
-#include <clang-c/Index.h>
-#include <clang/Lex/Lexer.h>
+//#include <clang-c/Index.h>
+//#include <clang/Lex/Lexer.h>
+//#include <clang/Format/Format.h>
 
 namespace L0::UI {
 
@@ -77,9 +78,9 @@ namespace L0::UI {
         QString relPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(filePath);
 
         if (relPath != filePath) {
-            setObjectName(QStringLiteral("TextEditPanel|./") + relPath);
+            setObjectName(QSL("TextEditPanel|./") + relPath);
         } else {
-            setObjectName(QStringLiteral("TextEditPanel|") + filePath);
+            setObjectName(QSL("TextEditPanel|") + filePath);
         }
 
         setProperty("absoluteFilePath", filePath);
@@ -100,7 +101,7 @@ namespace L0::UI {
             setIcon(icon);
 
             if (relPath != filePath) {
-                tabWidget()->setToolTip(QStringLiteral("./") + relPath);
+                tabWidget()->setToolTip(QSL("./") + relPath);
             } else {
                 tabWidget()->setToolTip(filePath);
             }
@@ -112,16 +113,16 @@ namespace L0::UI {
         UpdateContent();
     }
 
-    std::string TakeTempString(CXString str) {
-        auto cs = clang_getCString(str);
-        if (cs) {
-            std::string s{cs};
-            clang_disposeString(str);
-            return s;
-        } else {
-            return "???";
-        }
-    }
+    //std::string TakeTempString(CXString str) {
+    //    auto cs = clang_getCString(str);
+    //    if (cs) {
+    //        std::string s{cs};
+    //        clang_disposeString(str);
+    //        return s;
+    //    } else {
+    //        return "???";
+    //    }
+    //}
 
     void TextEditPanel::UpdateContent() {
         m_File.open(QFile::ReadOnly | QFile::Text);
@@ -135,75 +136,75 @@ namespace L0::UI {
             m_Editor->setHighlighter(nullptr);
         }
 
-        if (ext == QStringLiteral("c") || ext == QStringLiteral("cc") || ext == QStringLiteral("cpp") || ext == QStringLiteral("cxx") ||
-            ext == QStringLiteral("c++") || ext == QStringLiteral("h") || ext == QStringLiteral("hh") || ext == QStringLiteral("hpp") ||
-            ext == QStringLiteral("hxx") || ext == QStringLiteral("h++")) {
+        if (ext == QSL("c") || ext == QSL("cc") || ext == QSL("cpp") || ext == QSL("cxx") || ext == QSL("c++") || ext == QSL("h") ||
+            ext == QSL("hh") || ext == QSL("hpp") || ext == QSL("hxx") || ext == QSL("h++")) {
             m_Editor->setHighlighter(new QCXXHighlighter);
-        } else if (ext == QStringLiteral("json")) {
+        } else if (ext == QSL("json")) {
             m_Editor->setHighlighter(new QJSONHighlighter);
-        } else if (ext == QStringLiteral("xml") || ext == QStringLiteral("emproject")) {
+        } else if (ext == QSL("xml") || ext == QSL("emproject")) {
             m_Editor->setHighlighter(new QXMLHighlighter);
-        } else if (ext == QStringLiteral("ld")) {
+        } else if (ext == QSL("ld")) {
             m_Editor->setHighlighter(new QLDHighlighter);
-        } else if (ext == QStringLiteral("cmake") || name == QStringLiteral("cmakelists.txt")) {
+        } else if (ext == QSL("cmake") || name == QSL("cmakelists.txt")) {
             m_Editor->setHighlighter(new QCMakeHighlighter);
-        } else if (ext == QStringLiteral("lua")) {
+        } else if (ext == QSL("lua")) {
             m_Editor->setHighlighter(new QLuaHighlighter);
-        } else if (ext == QStringLiteral("py")) {
+        } else if (ext == QSL("py")) {
             m_Editor->setHighlighter(new QPythonHighlighter);
         }
+
         m_Editor->setPlainText(lines);
 
-        using std::chrono::duration;
-        using std::chrono::duration_cast;
-        using std::chrono::high_resolution_clock;
-        using std::chrono::milliseconds;
-
-        auto t1                = high_resolution_clock::now();
-        CXIndex index          = clang_createIndex(0, 0);
-        CXTranslationUnit unit = clang_parseTranslationUnit(
-            index, m_FileInfo.absoluteFilePath().toStdString().c_str(), nullptr, 0, nullptr, 0, CXTranslationUnit_None);
-        auto t2 = high_resolution_clock::now();
-
-        if (!unit) {
-            LOG_CORE_ERROR("Parse failed");
-        } else {
-            auto ms_int                            = duration_cast<milliseconds>(t2 - t1);
-            duration<double, std::milli> ms_double = t2 - t1;
-
-            LOG_CORE_INFO("File parsed in {:.3f}ms", ms_double.count());
-
-            CXCursor cursor = clang_getTranslationUnitCursor(unit);
-            clang_visitChildren(
-                cursor,
-                [](CXCursor c, CXCursor parent, CXClientData client_data) {
-                    CXFile file;
-                    uint32_t line, col, offset;
-                    clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &col, &offset);
-                    auto fname = TakeTempString(clang_getFileName(file));
-                    if (fname == ((QFileInfo*)client_data)->absoluteFilePath().toStdString()) {
-                        LOG_CORE_TRACE("Cursor {}:{}:{}.{} {} {}",
-                                       fname,
-                                       line,
-                                       col,
-                                       offset,
-                                       TakeTempString(clang_getCursorSpelling(c)),
-                                       TakeTempString(clang_getCursorKindSpelling(clang_getCursorKind(c))));
-                    }
-                    return CXChildVisit_Recurse;
-                },
-                &m_FileInfo);
-
-            clang_disposeTranslationUnit(unit);
-            clang_disposeIndex(index);
-            unit  = nullptr;
-            index = nullptr;
-        }
-
-        if (unit)
-            clang_disposeTranslationUnit(unit);
-        if (index)
-            clang_disposeIndex(index);
+        //using std::chrono::duration;
+        //using std::chrono::duration_cast;
+        //using std::chrono::high_resolution_clock;
+        //using std::chrono::milliseconds;
+        //
+        //auto t1                = high_resolution_clock::now();
+        //CXIndex index          = clang_createIndex(0, 0);
+        //CXTranslationUnit unit = clang_parseTranslationUnit(
+        //    index, m_FileInfo.absoluteFilePath().toStdString().c_str(), nullptr, 0, nullptr, 0, CXTranslationUnit_None);
+        //auto t2 = high_resolution_clock::now();
+        //
+        //if (!unit) {
+        //    LOG_CORE_ERROR("Parse failed");
+        //} else {
+        //    auto ms_int                            = duration_cast<milliseconds>(t2 - t1);
+        //    duration<double, std::milli> ms_double = t2 - t1;
+        //
+        //    LOG_CORE_INFO("File parsed in {:.3f}ms", ms_double.count());
+        //
+        //    CXCursor cursor = clang_getTranslationUnitCursor(unit);
+        //    clang_visitChildren(
+        //        cursor,
+        //        [](CXCursor c, CXCursor parent, CXClientData client_data) {
+        //            CXFile file;
+        //            uint32_t line, col, offset;
+        //            clang_getSpellingLocation(clang_getCursorLocation(c), &file, &line, &col, &offset);
+        //            auto fname = TakeTempString(clang_getFileName(file));
+        //            if (fname == ((QFileInfo*)client_data)->absoluteFilePath().toStdString()) {
+        //                LOG_CORE_TRACE("Cursor {}:{}:{}.{} {} {}",
+        //                               fname,
+        //                               line,
+        //                               col,
+        //                               offset,
+        //                               TakeTempString(clang_getCursorSpelling(c)),
+        //                               TakeTempString(clang_getCursorKindSpelling(clang_getCursorKind(c))));
+        //            }
+        //            return CXChildVisit_Continue;
+        //        },
+        //        &m_FileInfo);
+        //
+        //    clang_disposeTranslationUnit(unit);
+        //    clang_disposeIndex(index);
+        //    unit  = nullptr;
+        //    index = nullptr;
+        //}
+        //
+        //if (unit)
+        //    clang_disposeTranslationUnit(unit);
+        //if (index)
+        //    clang_disposeIndex(index);
 
         m_File.close();
     }

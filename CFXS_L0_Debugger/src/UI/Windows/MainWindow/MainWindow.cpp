@@ -35,6 +35,8 @@
 #include <UI/Panels/TextEditPanel/TextEditPanel.hpp>
 #include <UI/Panels/AppLogPanel/AppLogPanel.hpp>
 
+#include <Debugger/ELF/ELF_Reader.hpp>
+
 using ads::CDockManager;
 using ads::CDockWidget;
 using ads::DockWidgetArea;
@@ -64,14 +66,14 @@ namespace L0::UI {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     static constexpr int STATE_SERIALIZER_VERSION      = 1; // Used to track state loading differences
-    static const QString LAST_SESSION_PERSPECTIVE_NAME = QStringLiteral("__LastSession");
-    static const QString CENTRAL_WIDGET_NAME           = QStringLiteral("__CentralWidget");
-    static const QString KEY_VERSION                   = QStringLiteral("version");
-    static const QString KEY_WINDOW_GEOMETRY           = QStringLiteral("windowGeometry");
-    static const QString KEY_WINDOW_STATE              = QStringLiteral("windowState");
-    static const QString KEY_DOCK_STATE                = QStringLiteral("dockState");
-    static const QString KEY_OPEN_PANEL_DESCRIPTION    = QStringLiteral("openPanels");
-    static const QString KEY_WINDOW_DATA               = QStringLiteral("windowStateData");
+    static const QString LAST_SESSION_PERSPECTIVE_NAME = QSL("__LastSession");
+    static const QString CENTRAL_WIDGET_NAME           = QSL("__CentralWidget");
+    static const QString KEY_VERSION                   = QSL("version");
+    static const QString KEY_WINDOW_GEOMETRY           = QSL("windowGeometry");
+    static const QString KEY_WINDOW_STATE              = QSL("windowState");
+    static const QString KEY_DOCK_STATE                = QSL("dockState");
+    static const QString KEY_OPEN_PANEL_DESCRIPTION    = QSL("openPanels");
+    static const QString KEY_WINDOW_DATA               = QSL("windowStateData");
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // Actions
     std::vector<MainWindow::ActionEntryDefinition> MainWindow::s_ActionDefinitions_View = {
@@ -154,9 +156,9 @@ namespace L0::UI {
         if (ProjectManager::IsProjectOpen()) {
             auto path           = ProjectManager::GetWorkspacePath();
             QString lastDirName = path.mid(path.lastIndexOf("/") + 1);
-            setWindowTitle(QStringLiteral(CFXS_PROGRAM_NAME) + " - " + lastDirName);
+            setWindowTitle(QSL(CFXS_PROGRAM_NAME) + " - " + lastDirName);
         } else {
-            setWindowTitle(QStringLiteral(CFXS_PROGRAM_NAME) + " - No project open");
+            setWindowTitle(QSL(CFXS_PROGRAM_NAME) + " - No project open");
         }
     }
 
@@ -325,7 +327,7 @@ namespace L0::UI {
         // Open Project...
         connect(ui->actionOpen_Project, &QAction::triggered, this, [=]() {
             QString dir = QFileDialog::getExistingDirectory(
-                this, QStringLiteral("Open Project"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+                this, QSL("Open Project"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
             if (dir.isEmpty()) {
                 LOG_UI_TRACE("Not opening project - no directory selected");
@@ -364,12 +366,12 @@ namespace L0::UI {
     void MainWindow::InitializeActions_Help() {
         // CFXS HWD Github
         connect(ui->actionCFXS_L0_Github_Page, &QAction::triggered, this, [=]() {
-            QDesktopServices::openUrl(QStringLiteral("https://github.com/CFXS/CFXS-Hardware-Debugger"));
+            QDesktopServices::openUrl(QSL("https://github.com/CFXS/CFXS-Hardware-Debugger"));
         });
 
         // CFXS Discord
         connect(ui->actionCFXS_Discord, &QAction::triggered, this, [=]() {
-            QDesktopServices::openUrl(QStringLiteral("https://discord.gg/ZdhfzQAC4S"));
+            QDesktopServices::openUrl(QSL("https://discord.gg/ZdhfzQAC4S"));
         });
 
         // About
@@ -386,10 +388,7 @@ namespace L0::UI {
         if (!m_Panel_Workspace) {
             m_Panel_Workspace = new WorkspacePanel;
             GetDockManager()->addDockWidget(ads::DockWidgetArea::LeftDockWidgetArea, m_Panel_Workspace, GetDockManager()->dockArea(0));
-
-            connect(static_cast<WorkspacePanel*>(m_Panel_Workspace), &WorkspacePanel::RequestOpenFile, [=](const QString& path) {
-                OpenFilePanel(path);
-            });
+            connect(static_cast<WorkspacePanel*>(m_Panel_Workspace), &WorkspacePanel::RequestOpenFile, this, &MainWindow::OpenFileHandler);
         } else {
             m_Panel_Workspace->toggleView();
             m_Panel_Workspace->raise();
@@ -422,8 +421,7 @@ namespace L0::UI {
 
         TextEditPanel* existingEditor = nullptr;
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
-            if (panel->objectName().contains(QStringLiteral("TextEditPanel")) &&
-                panel->property("absoluteFilePath").toString() == fullPath) {
+            if (panel->objectName().contains(QSL("TextEditPanel")) && panel->property("absoluteFilePath").toString() == fullPath) {
                 existingEditor = static_cast<TextEditPanel*>(panel);
                 break;
             }
@@ -445,6 +443,16 @@ namespace L0::UI {
         textEditPanel->setFeature(CDockWidget::DockWidgetAlwaysCloseAndDelete, true); // delete on close
 
         return textEditPanel;
+    }
+
+    // Check what type of file this is and open it in either the text editor or a special editor
+    void MainWindow::OpenFileHandler(const QString& path, const QString& type) {
+        if (type == QSL("elf") || type == QSL("out")) {
+            auto obj = ELF::ELF_Reader(path.toStdString());
+            obj.LoadFile();
+        } else {
+            OpenFilePanel(path);
+        }
     }
 
 } // namespace L0::UI

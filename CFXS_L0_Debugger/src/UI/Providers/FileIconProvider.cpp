@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -86,56 +86,56 @@ namespace L0::UI {
             s_Initialized = true;
             s_IconTable   = {
                 // Files
-                QPixmap(QStringLiteral(":/Icon/file")),
-                QPixmap(QStringLiteral(":/Icon/doc")),
-                QPixmap(QStringLiteral(":/Icon/asm")),
-                QPixmap(QStringLiteral(":/Icon/bin")),
-                QPixmap(QStringLiteral(":/Icon/c")),
-                QPixmap(QStringLiteral(":/Icon/cert")),
-                QPixmap(QStringLiteral(":/Icon/cmake")),
-                QPixmap(QStringLiteral(":/Icon/compressed")),
-                QPixmap(QStringLiteral(":/Icon/cpp")),
-                QPixmap(QStringLiteral(":/Icon/exe")),
-                QPixmap(QStringLiteral(":/Icon/font")),
-                QPixmap(QStringLiteral(":/Icon/gear")),
-                QPixmap(QStringLiteral(":/Icon/git")),
-                QPixmap(QStringLiteral(":/Icon/h")),
-                QPixmap(QStringLiteral(":/Icon/hpp")),
-                QPixmap(QStringLiteral(":/Icon/image")),
-                QPixmap(QStringLiteral(":/Icon/json")),
-                QPixmap(QStringLiteral(":/Icon/lib")),
-                QPixmap(QStringLiteral(":/Icon/lua")),
-                QPixmap(QStringLiteral(":/Icon/pdf")),
-                QPixmap(QStringLiteral(":/Icon/py")),
-                QPixmap(QStringLiteral(":/Icon/xml")),
-                QPixmap(QStringLiteral(":/Icon/info")),
-                QPixmap(QStringLiteral(":/Icon/log")),
-                QPixmap(QStringLiteral(":/Icon/cfxs")),
-                QPixmap(QStringLiteral(":/Icon/segger")),
-                QPixmap(QStringLiteral(":/Icon/link")),
-                QPixmap(QStringLiteral(":/Icon/l0")),
+                QPixmap(QSL(":/Icon/file")),
+                QPixmap(QSL(":/Icon/doc")),
+                QPixmap(QSL(":/Icon/asm")),
+                QPixmap(QSL(":/Icon/bin")),
+                QPixmap(QSL(":/Icon/c")),
+                QPixmap(QSL(":/Icon/cert")),
+                QPixmap(QSL(":/Icon/cmake")),
+                QPixmap(QSL(":/Icon/compressed")),
+                QPixmap(QSL(":/Icon/cpp")),
+                QPixmap(QSL(":/Icon/exe")),
+                QPixmap(QSL(":/Icon/font")),
+                QPixmap(QSL(":/Icon/gear")),
+                QPixmap(QSL(":/Icon/git")),
+                QPixmap(QSL(":/Icon/h")),
+                QPixmap(QSL(":/Icon/hpp")),
+                QPixmap(QSL(":/Icon/image")),
+                QPixmap(QSL(":/Icon/json")),
+                QPixmap(QSL(":/Icon/lib")),
+                QPixmap(QSL(":/Icon/lua")),
+                QPixmap(QSL(":/Icon/pdf")),
+                QPixmap(QSL(":/Icon/py")),
+                QPixmap(QSL(":/Icon/xml")),
+                QPixmap(QSL(":/Icon/info")),
+                QPixmap(QSL(":/Icon/log")),
+                QPixmap(QSL(":/Icon/cfxs")),
+                QPixmap(QSL(":/Icon/segger")),
+                QPixmap(QSL(":/Icon/link")),
+                QPixmap(QSL(":/Icon/l0")),
 
                 // Closed folders
-                QPixmap(QStringLiteral(":/Icon/folder")),
-                QPixmap(QStringLiteral(":/Icon/folder-vscode")),
-                QPixmap(QStringLiteral(":/Icon/folder-git")),
-                QPixmap(QStringLiteral(":/Icon/folder-build")),
-                QPixmap(QStringLiteral(":/Icon/folder-src")),
-                QPixmap(QStringLiteral(":/Icon/folder-lib")),
-                QPixmap(QStringLiteral(":/Icon/folder-resource")),
-                QPixmap(QStringLiteral(":/Icon/folder-cfxs")),
-                QPixmap(QStringLiteral(":/Icon/folder-l0")),
+                QPixmap(QSL(":/Icon/folder")),
+                QPixmap(QSL(":/Icon/folder-vscode")),
+                QPixmap(QSL(":/Icon/folder-git")),
+                QPixmap(QSL(":/Icon/folder-build")),
+                QPixmap(QSL(":/Icon/folder-src")),
+                QPixmap(QSL(":/Icon/folder-lib")),
+                QPixmap(QSL(":/Icon/folder-resource")),
+                QPixmap(QSL(":/Icon/folder-cfxs")),
+                QPixmap(QSL(":/Icon/folder-l0")),
 
                 // Open folders
-                QPixmap(QStringLiteral(":/Icon/folder-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-vscode-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-git-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-build-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-src-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-lib-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-resource-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-cfxs-open")),
-                QPixmap(QStringLiteral(":/Icon/folder-l0-open")),
+                QPixmap(QSL(":/Icon/folder-open")),
+                QPixmap(QSL(":/Icon/folder-vscode-open")),
+                QPixmap(QSL(":/Icon/folder-git-open")),
+                QPixmap(QSL(":/Icon/folder-build-open")),
+                QPixmap(QSL(":/Icon/folder-src-open")),
+                QPixmap(QSL(":/Icon/folder-lib-open")),
+                QPixmap(QSL(":/Icon/folder-resource-open")),
+                QPixmap(QSL(":/Icon/folder-cfxs-open")),
+                QPixmap(QSL(":/Icon/folder-l0-open")),
             };
 
             if (s_IconTable.size() != _COUNT) {
@@ -158,99 +158,92 @@ namespace L0::UI {
         QString name   = info.baseName().toLower();
 
         if (info.isDir()) {
-            if (name == QStringLiteral("src") || name == QStringLiteral("source")) {
+            if (name == QSL("src") || name == QSL("source")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_SRC_OPEN : Icon::FOLDER_SRC];
-            } else if (name == QStringLiteral("vendor") || name == QStringLiteral("lib") || name == QStringLiteral("library") ||
-                       name == QStringLiteral("extern")) {
+            } else if (name == QSL("vendor") || name == QSL("lib") || name == QSL("library") || name == QSL("extern")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_LIB_OPEN : Icon::FOLDER_LIB];
-            } else if (name == QStringLiteral("res") || name == QStringLiteral("resource") || name == QStringLiteral("resources")) {
+            } else if (name == QSL("res") || name == QSL("resource") || name == QSL("resources")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_RESOURCE_OPEN : Icon::FOLDER_RESOURCE];
-            } else if (suffix == QStringLiteral("vscode")) {
+            } else if (suffix == QSL("vscode")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_VSCODE_OPEN : Icon::FOLDER_VSCODE];
-            } else if (name == QStringLiteral("build") || name == QStringLiteral("out")) {
+            } else if (name == QSL("build") || name == QSL("out")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_BUILD_OPEN : Icon::FOLDER_BUILD];
-            } else if (suffix == QStringLiteral("git")) {
+            } else if (suffix == QSL("git")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_GIT_OPEN : Icon::FOLDER_GIT];
-            } else if (suffix == QStringLiteral("cfxs")) {
+            } else if (suffix == QSL("cfxs")) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_CFXS_OPEN : Icon::FOLDER_CFXS];
-            } else if (name == QStringLiteral("l0") && info.absolutePath().toLower().contains(QStringLiteral(".cfxs"))) {
+            } else if (name == QSL("l0") && info.absolutePath().toLower().contains(QSL(".cfxs"))) {
                 return s_IconTable[isExpanded ? Icon::FOLDER_L0_OPEN : Icon::FOLDER_L0];
             } else {
                 return s_IconTable[isExpanded ? Icon::FOLDER_OPEN : Icon::FOLDER];
             }
         } else {
-            if (name == QStringLiteral("license")) {
+            if (name == QSL("license")) {
                 return s_IconTable[Icon::CERT];
             }
 
-            if (suffix.contains(QStringLiteral("cfxs"))) {
+            if (suffix.contains(QSL("cfxs"))) {
                 return s_IconTable[Icon::CFXS];
-            } else if (suffix.contains(QStringLiteral("l0"))) {
+            } else if (suffix.contains(QSL("l0"))) {
                 return s_IconTable[Icon::L0];
             }
 
-            if (suffix == QStringLiteral("txt")) {
-                if (name == QStringLiteral("cmakelists") || name == QStringLiteral("cmakecache")) {
+            if (suffix == QSL("txt")) {
+                if (name == QSL("cmakelists") || name == QSL("cmakecache")) {
                     return s_IconTable[Icon::CMAKE];
                 } else {
                     return s_IconTable[Icon::DOC];
                 }
-            } else if (suffix == QStringLiteral("c")) {
+            } else if (suffix == QSL("c")) {
                 return s_IconTable[Icon::C];
-            } else if (suffix == QStringLiteral("cpp") || suffix == QStringLiteral("cc") || suffix == QStringLiteral("cxx") ||
-                       suffix == QStringLiteral("c++")) {
+            } else if (suffix == QSL("cpp") || suffix == QSL("cc") || suffix == QSL("cxx") || suffix == QSL("c++")) {
                 return s_IconTable[Icon::CPP];
-            } else if (suffix == QStringLiteral("h")) {
+            } else if (suffix == QSL("h")) {
                 return s_IconTable[Icon::H];
-            } else if (suffix == QStringLiteral("hpp") || suffix == QStringLiteral("hh") || suffix == QStringLiteral("hxx") ||
-                       suffix == QStringLiteral("h++")) {
+            } else if (suffix == QSL("hpp") || suffix == QSL("hh") || suffix == QSL("hxx") || suffix == QSL("h++")) {
                 return s_IconTable[Icon::HPP];
-            } else if (suffix == QStringLiteral("cmake")) {
+            } else if (suffix == QSL("cmake")) {
                 return s_IconTable[Icon::CMAKE];
-            } else if (suffix == QStringLiteral("s") || suffix == QStringLiteral("asm") || suffix == QStringLiteral("o") ||
-                       suffix == QStringLiteral("o")) {
+            } else if (suffix == QSL("s") || suffix == QSL("asm") || suffix == QSL("a") || suffix == QSL("o") || suffix == QSL("bin") ||
+                       suffix == QSL("raw")) {
                 return s_IconTable[Icon::ASM];
-            } else if (suffix == QStringLiteral("hex") || suffix == QStringLiteral("bin") || suffix == QStringLiteral("raw")) {
+            } else if (suffix == QSL("hex")) {
                 return s_IconTable[Icon::BIN];
-            } else if (suffix == QStringLiteral("lhg")) {
+            } else if (suffix == QSL("lhg")) {
                 return s_IconTable[Icon::CERT];
-            } else if (suffix == QStringLiteral("zip") || suffix == QStringLiteral("rar") || suffix == QStringLiteral("gz") ||
-                       suffix == QStringLiteral("tar") || suffix == QStringLiteral("7z")) {
+            } else if (suffix == QSL("zip") || suffix == QSL("rar") || suffix == QSL("gz") || suffix == QSL("tar") || suffix == QSL("7z")) {
                 return s_IconTable[Icon::COMPRESSED];
-            } else if (suffix == QStringLiteral("out") || suffix == QStringLiteral("elf")) {
+            } else if (suffix == QSL("out") || suffix == QSL("elf")) {
                 return s_IconTable[Icon::EXE];
-            } else if (suffix == QStringLiteral("ld") || suffix == QStringLiteral("icf")) {
+            } else if (suffix == QSL("ld") || suffix == QSL("icf")) {
                 return s_IconTable[Icon::LINK];
-            } else if (suffix == QStringLiteral("fnt")) {
+            } else if (suffix == QSL("fnt")) {
                 return s_IconTable[Icon::FONT];
-            } else if (suffix == QStringLiteral("cfg") || suffix == QStringLiteral("config") || suffix == QStringLiteral("clang-format") ||
-                       suffix == QStringLiteral("clang-tidy")) {
+            } else if (suffix == QSL("cfg") || suffix == QSL("config") || suffix == QSL("clang-format") || suffix == QSL("clang-tidy")) {
                 return s_IconTable[Icon::GEAR];
-            } else if (suffix == QStringLiteral("git") || suffix == QStringLiteral("gitmodules") || suffix == QStringLiteral("gitignore") ||
-                       suffix == QStringLiteral("gitattributes")) {
+            } else if (suffix == QSL("git") || suffix == QSL("gitmodules") || suffix == QSL("gitignore") ||
+                       suffix == QSL("gitattributes")) {
                 return s_IconTable[Icon::GIT];
-            } else if (suffix == QStringLiteral("png") || suffix == QStringLiteral("jpg") || suffix == QStringLiteral("jpeg") ||
-                       suffix == QStringLiteral("bmp") || suffix == QStringLiteral("webm") || suffix == QStringLiteral("gif")) {
+            } else if (suffix == QSL("png") || suffix == QSL("jpg") || suffix == QSL("jpeg") || suffix == QSL("bmp") ||
+                       suffix == QSL("webm") || suffix == QSL("gif")) {
                 return s_IconTable[Icon::IMAGE];
-            } else if (suffix == QStringLiteral("md")) {
+            } else if (suffix == QSL("md")) {
                 return s_IconTable[Icon::INFO];
-            } else if (suffix == QStringLiteral("json")) {
+            } else if (suffix == QSL("json")) {
                 return s_IconTable[Icon::JSON];
-            } else if (suffix == QStringLiteral("a") || suffix == QStringLiteral("lib") || suffix == QStringLiteral("dll")) {
+            } else if (suffix == QSL("a") || suffix == QSL("lib") || suffix == QSL("dll")) {
                 return s_IconTable[Icon::LIB];
-            } else if (suffix == QStringLiteral("log")) {
+            } else if (suffix == QSL("log")) {
                 return s_IconTable[Icon::LOG];
-            } else if (suffix == QStringLiteral("lua")) {
+            } else if (suffix == QSL("lua")) {
                 return s_IconTable[Icon::LUA];
-            } else if (suffix == QStringLiteral("pdf")) {
+            } else if (suffix == QSL("pdf")) {
                 return s_IconTable[Icon::PDF];
-            } else if (suffix == QStringLiteral("py")) {
+            } else if (suffix == QSL("py")) {
                 return s_IconTable[Icon::PY];
-            } else if (suffix == QStringLiteral("xml") || suffix == QStringLiteral("htm") || suffix == QStringLiteral("html") ||
-                       suffix == QStringLiteral("qrc")) {
+            } else if (suffix == QSL("xml") || suffix == QSL("htm") || suffix == QSL("html") || suffix == QSL("qrc")) {
                 return s_IconTable[Icon::XML];
-            } else if (suffix == QStringLiteral("emproject") || suffix == QStringLiteral("emsession") ||
-                       suffix == QStringLiteral("jlink")) {
+            } else if (suffix == QSL("emproject") || suffix == QSL("emsession") || suffix == QSL("jlink")) {
                 return s_IconTable[Icon::SEGGER];
             }
 

@@ -1,23 +1,24 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
 #pragma once
 #include "ELF.hpp"
+#include <type_traits>
 
 // This is not a general purpose ELF library. This is HWD specific stuff.
 
@@ -89,11 +90,23 @@ namespace L0::ELF32 {
     };
 
     enum class SectionFlags : Word {
-        WRITE                   = 0x01,
-        ALLOC                   = 0x02,
-        EXECUTABLE_INSTRUCTIONS = 0x04,
+        NONE = 0x00,
+
+        WRITE   = 0x01,
+        READ    = 0x02,
+        EXECUTE = 0x04,
+
+        R   = READ,
+        W   = WRITE,
+        X   = EXECUTE,
+        RW  = 0x02 | 0x01,
+        RX  = 0x02 | 0x04,
+        WX  = 0x01 | 0x04,
+        RWX = 0x01 | 0x02 | 0x04,
+
+        ACCESS_PERMISSIONS_MASK = RWX,
     };
-    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(SectionFlags, Word);
+    L0_OVERLOAD_ENUM_BITWISE_OPERATORS(SectionFlags);
 
 #pragma pack(1)
     struct SectionHeader {
@@ -153,3 +166,42 @@ namespace L0::ELF32 {
 #pragma pack()
 
 } // namespace L0::ELF32
+
+namespace L0 {
+    /// Section type to string
+    inline const char* ToString(ELF32::SectionType type) {
+        switch (type) {
+            case ELF32::SectionType::_NULL: return "NULL";
+            case ELF32::SectionType::PROGBITS: return "PROGBITS";
+            case ELF32::SectionType::SYMBOL_TABLE: return "SYMBOL_TABLE";
+            case ELF32::SectionType::STRING_TABLE: return "STRING_TABLE";
+            case ELF32::SectionType::RELA: return "RELA";
+            case ELF32::SectionType::HASH: return "HASH_TABLE";
+            case ELF32::SectionType::DYNAMIC: return "DYNAMIC";
+            case ELF32::SectionType::NOTE: return "NOTE";
+            case ELF32::SectionType::NOBITS: return "NOBITS";
+            case ELF32::SectionType::REL: return "REL";
+            case ELF32::SectionType::SHLIB: return "SHLIB";
+            case ELF32::SectionType::DYNNAMIC_SYMBOL_TABLE: return "DYNNAMIC_SYMBOL_TABLE";
+            default: return "???";
+        }
+    }
+
+    /// Section flags to string
+    inline const char* ToString(ELF32::SectionFlags flags) {
+        using ELF32::SectionFlags;
+        //using UT = std::underlying_type<ELF32::SectionFlags>::type;
+
+        switch (flags) {
+            case SectionFlags::NONE: return "0";
+            case SectionFlags::R: return "r--";
+            case SectionFlags::W: return "-w-";
+            case SectionFlags::X: return "--x";
+            case SectionFlags::RW: return "rw-";
+            case SectionFlags::RX: return "r-x";
+            case SectionFlags::WX: return "-wx";
+            case SectionFlags::RWX: return "rwx";
+            default: return "???";
+        }
+    }
+} // namespace L0

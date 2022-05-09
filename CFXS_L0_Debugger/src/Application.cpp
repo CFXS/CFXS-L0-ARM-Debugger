@@ -40,7 +40,7 @@ namespace L0 {
 
         SetQtAttributes();
         m_QtApplication = std::make_unique<QApplication>(argc, argv);
-        m_QtApplication->setOrganizationName(QStringLiteral("CFXS"));
+        m_QtApplication->setOrganizationName(QSL("CFXS"));
         m_QtApplication->setApplicationName(QString::fromStdString(name));
 
         // DockManager disabled flags
@@ -82,7 +82,7 @@ namespace L0 {
         darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
 
         QApplication::setPalette(darkPalette);
-        QApplication::setStyle(QStyleFactory::create(QStringLiteral("fusion")));
+        QApplication::setStyle(QStyleFactory::create(QSL("fusion")));
 
         QFile file(":/Style/Main");
         file.open(QFile::ReadOnly);

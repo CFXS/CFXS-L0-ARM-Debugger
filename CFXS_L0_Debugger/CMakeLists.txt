@@ -48,6 +48,9 @@ target_precompile_headers(
   "src/Log/Log.hpp"
   "src/Utils.hpp")
 
+
+target_compile_definitions(${EXE_NAME} PRIVATE "QSL=QStringLiteral")
+
 if(WIN32)
   target_compile_definitions(${EXE_NAME} PRIVATE "CFXS_PLATFORM_WINDOWS")
 elseif(UNIX)

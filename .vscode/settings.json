@@ -138,6 +138,14 @@
         "qldhighlighter": "cpp",
         "qcmakehighlighter": "cpp",
         "qluahighlighter": "cpp",
-        "qtextedit": "cpp"
+        "qtextedit": "cpp",
+        "cfenv": "cpp",
+        "complex": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "scoped_allocator": "cpp",
+        "strstream": "cpp",
+        "typeindex": "cpp",
+        "valarray": "cpp"
     }
 }

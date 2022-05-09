@@ -1,28 +1,26 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
 #include "ELF_Reader.hpp"
-
-#include <llvm/Demangle/Demangle.h>
-
-#include <fstream>
-
 #include "ELF32.hpp"
+#include <llvm/Demangle/Demangle.h>
+#include <fstream>
+#include <QFile>
 
 namespace L0::ELF {
 
@@ -89,6 +87,8 @@ namespace L0::ELF {
             LOG_CORE_TRACE(" - Little endian");
         } else {
             LOG_CORE_TRACE(" - Big endian");
+            LOG_CORE_ERROR(" - Big endian ELF files are not supported yet");
+            return false;
         }
 
         // check if this is a 32bit or a 64bit file
@@ -147,34 +147,109 @@ namespace L0::ELF {
         // 1 - load all section data offsets to vector
         m_SectionData.reserve(header->sectionTableEntryCount);
 
-        for (int section_index = 0; section_index < header->sectionTableEntryCount; section_index++) {
-            auto sectionHeader = GetSection<ELF32::SectionHeader>(section_index);
+        for (int sectionIndex = 0; sectionIndex < header->sectionTableEntryCount; sectionIndex++) {
+            auto sectionHeader = GetSection<ELF32::SectionHeader>(sectionIndex);
             m_SectionData.push_back(m_RawData + sectionHeader->offsetInFile);
         }
 
         // 2 - process sections
         if (header->sectionHeaderOffset) {
-            for (int section_index = 0; section_index < header->sectionTableEntryCount; section_index++) {
-                auto sectionHeader = GetSection<ELF32::SectionHeader>(section_index);
+            bool symbolsLoaded = false;
+            ForEachSection([&](int sectionIndex, const ELF32::SectionHeader* section, const char* sectionName) {
+                m_SectionNameIndexMap[sectionName] = sectionIndex;
+                LOG_CORE_TRACE("Section {} \"{}\" ({}/{})", sectionIndex, sectionName, ToString(section->type), ToString(section->flags));
 
-                LOG_CORE_TRACE("Section {0} \"{1}\" at offset {2:X}",
-                               section_index,
-                               GetSectionName(sectionHeader->nameOffset),
-                               sectionHeader->offsetInFile);
+                if (section->type == ELF32::SectionType::SYMBOL_TABLE) {
+                    symbolsLoaded = LoadSymbols32(section);
+                }
+            });
 
-                if (sectionHeader->type == ELF32::SectionType::SYMBOL_TABLE) {
-                    if (!LoadSymbols32(sectionHeader)) {
-                        LOG_CORE_ERROR(" - Failed to load symbols");
+            if (!symbolsLoaded) {
+                LOG_CORE_ERROR(" - Failed to load symbols");
+                return false;
+            }
+        }
+
+        // 3 - print target physical memory sections and prepare loadable file
+        m_LoadableBinary.clear();
+        m_LoadableBinary.shrink_to_fit();
+
+        auto targetMemSections = GetTargetMemorySections();
+        if (targetMemSections.empty()) {
+            LOG_CORE_TRACE("Target physical memory sections not found");
+        } else {
+            LOG_CORE_TRACE("Target physical memory sections:");
+            for (auto section : targetMemSections) {
+                auto name          = GetSectionName(section);
+                QString memTypeStr = [&]() {
+                    switch (section->flags) {
+                        case ELF32::SectionFlags::RX: return "[FLASH]";
+                        case ELF32::SectionFlags::RW:
+                        case ELF32::SectionFlags::RWX: return "[RAM]  ";
+                        case ELF32::SectionFlags::R: return "[ROM]  ";
+                        default: return ToString(section->flags);
+                    }
+                }();
+
+                LOG_CORE_TRACE(" - {:8} {} 0x{:08X}-0x{:08X} ({} bytes)",
+                               name,
+                               memTypeStr,
+                               section->address,
+                               section->address + section->size,
+                               section->size);
+
+                // if section is a part of loadable firmware
+                if ((section->type == ELF32::SectionType::PROGBITS) && section->size) {
+                    try {
+                        auto sectMaxSize = section->address + section->size;
+                        if (sectMaxSize) {
+                            if (sectMaxSize > m_LoadableBinary.size())
+                                m_LoadableBinary.resize(sectMaxSize);
+
+                            auto blockData = GetSectionData<uint8_t>(section);
+                            if (!blockData) {
+                                LOG_CORE_ERROR("Failed to get loadable binary section data ({})", name);
+                                return false;
+                            }
+
+                            memcpy(m_LoadableBinary.data() + section->address, blockData, section->size);
+                        } else {
+                            LOG_CORE_WARN("Skip section {} - size is 0", name);
+                        }
+                    } catch (const std::exception& e) {
+                        LOG_CORE_CRITICAL("Failed to resize ELF loadable binary buffer ({})", e.what());
                         return false;
                     }
                 }
             }
+
+            LOG_CORE_TRACE("Loadable binary size: {} bytes", m_LoadableBinary.size());
+            LOG_CORE_TRACE("Saving temp .bin as {}.l0.bin", m_Path);
+
+            QFile tempBin(QString(m_Path.c_str()) + ".l0.bin");
+            tempBin.open(QIODevice::ReadWrite);
+            tempBin.write((const char*)m_LoadableBinary.data(), m_LoadableBinary.size());
+            tempBin.close();
         }
 
         if (header->programHeaderOffset) {
         }
 
         return true;
+    }
+
+    /// Iterate over each section [ELF32]
+    void ELF_Reader::ForEachSection(const ForEachSectionSig32& fn) const {
+        if (!m_ELF_Header.elf32) {
+            LOG_CORE_ERROR("Can not iterate ELF32 sections - header is nullptr");
+            return;
+        }
+
+        for (int sectionIndex = 0; sectionIndex < m_ELF_Header.elf32->sectionTableEntryCount; sectionIndex++) {
+            auto sectionHeader = GetSection<ELF32::SectionHeader>(sectionIndex);
+            auto sectionName   = GetSectionName(sectionHeader->nameOffset);
+            fn(sectionIndex, sectionHeader, sectionName);
+        }
     }
 
     bool ELF_Reader::LoadSymbols32(const ELF32::SectionHeader* section) {
@@ -190,9 +265,9 @@ namespace L0::ELF {
             // section->link is section index for string table
             auto symbolNameMangled = GetSymbolName(section->link, symbolEntry->nameOffset);
 
-            char symName[4096];
-            char mangleWorkBuf[4096];
-            size_t mangleBufSize = 4096;
+            static char symName[4096];
+            static char mangleWorkBuf[4096];
+            size_t mangleBufSize = sizeof(mangleWorkBuf);
 
             // only demangle object and function names
             if ((symbolEntry->IsFunction() || symbolEntry->IsObject())) {
@@ -237,12 +312,12 @@ namespace L0::ELF {
                     }
                 }*/
 
-                if (strcmp(
-                        firstSpace,
-                        "std::__detail::_Map_base<unsigned long, std::pair<unsigned long const, CFXS::TaskArrayEntry>, std::allocator<std::pair<unsigned long const, CFXS::TaskArrayEntry> >, std::__detail::_Select1st, std::equal_to<unsigned long>, std::hash<unsigned long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[](unsigned long const&)") ==
-                    0) {
-                    firstSpace = "std::map<unsigned long, CFXS::TaskArrayEntry>::operator[](unsigned long const&)";
-                }
+                //if (strcmp(
+                //        firstSpace,
+                //        "std::__detail::_Map_base<unsigned long, std::pair<unsigned long const, CFXS::TaskArrayEntry>, std::allocator<std::pair<unsigned long const, CFXS::TaskArrayEntry> >, std::__detail::_Select1st, std::equal_to<unsigned long>, std::hash<unsigned long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[](unsigned long const&)") ==
+                //    0) {
+                //    firstSpace = "std::map<unsigned long, CFXS::TaskArrayEntry>::operator[](unsigned long const&)";
+                //}
 
                 symInfo.name         = firstSpace;
                 symInfo.address      = symbolEntry->value;
@@ -277,8 +352,13 @@ namespace L0::ELF {
         return m_SectionNameTable + sectionNameTableOffset;
     }
 
-    const char* ELF_Reader::GetSymbolName(size_t sectionIndex, size_t nameOffset) const {
-        return GetSectionData<char>(sectionIndex) + nameOffset;
+    const char* ELF_Reader::GetSymbolName(int sectionIndex, size_t nameOffset) const {
+        auto rawData = GetSectionData<char>(sectionIndex);
+        if (!rawData) {
+            return "[invalid section]";
+        } else {
+            return rawData + nameOffset;
+        }
     }
 
     const ELF_Reader::SymbolInfo* ELF_Reader::AddressToSymbol(uint64_t addr) {
@@ -290,6 +370,23 @@ namespace L0::ELF {
         }
 
         return nullptr;
+    }
+
+    /// Get list of sections (indexes) located in target memory
+    std::vector<const ELF32::SectionHeader*> ELF_Reader::GetTargetMemorySections() const {
+        std::vector<const ELF32::SectionHeader*> sections;
+
+        if (m_FileClass == ELF::FileClass::_32) {
+            ForEachSection([&](int idx, const ELF32::SectionHeader* section, const char* name) {
+                // if section is PROGBITS(data) or NOBITS(space) and has access permission flags
+                if ((section->type == ELF32::SectionType::PROGBITS || section->type == ELF32::SectionType::NOBITS) &&
+                    (section->flags & ELF32::SectionFlags::ACCESS_PERMISSIONS_MASK)) {
+                    sections.push_back(section);
+                }
+            });
+        }
+
+        return sections;
     }
 
 } // namespace L0::ELF

@@ -16,6 +16,3 @@
 [submodule "Docs"]
 	path = Docs
 	url = https://github.com/CFXS/HWD-Private-Docs
-[submodule "CFXS_L0_Debugger/vendor/LLVM"]
-	path = CFXS_L0_Debugger/vendor/LLVM
-	url = https://github.com/CFXS/llvm-strip-l0

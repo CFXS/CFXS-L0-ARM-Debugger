@@ -38,7 +38,7 @@ namespace L0::UI {
 
         struct ActionEntryDefinition {
             bool isSeperator;
-            QString name                               = QStringLiteral("");
+            QString name                               = QSL("");
             std::function<void(MainWindow *)> callback = nullptr;
             QIcon icon                                 = QIcon{};
         };
@@ -82,6 +82,9 @@ namespace L0::UI {
 
         /// Open/show file panel with file
         TextEditPanel *OpenFilePanel(const QString &path);
+
+        /// Open a type of file
+        void OpenFileHandler(const QString &path, const QString &type);
 
     signals:
         void Closed();

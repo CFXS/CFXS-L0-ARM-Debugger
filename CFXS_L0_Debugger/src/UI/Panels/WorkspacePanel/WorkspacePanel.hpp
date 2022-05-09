@@ -40,7 +40,7 @@ namespace L0::UI {
 
         /// Get panel base name (for type matching from string)
         static const QString& GetPanelBaseName() {
-            static const QString name = QStringLiteral("WorkspacePanel");
+            static const QString name = QSL("WorkspacePanel");
             return name;
         }
 
@@ -50,7 +50,7 @@ namespace L0::UI {
         void SetRootPath(const QString& path);
 
     signals:
-        void RequestOpenFile(const QString& path);
+        void RequestOpenFile(const QString& path, const QString& type);
 
     private:
         /// Called on file/folder rightclick

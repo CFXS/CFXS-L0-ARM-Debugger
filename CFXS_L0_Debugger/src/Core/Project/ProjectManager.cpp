@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -27,8 +27,8 @@
 namespace L0 {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    static const QString CFXS_L0_CONFIG_DIRECTORY = QStringLiteral("/.cfxs/L0");
-    static const QString KEY_RECENT_PATHS         = QStringLiteral("recentPaths");
+    static const QString CFXS_L0_CONFIG_DIRECTORY = QSL("/.cfxs/L0");
+    static const QString KEY_RECENT_PATHS         = QSL("recentPaths");
     static constexpr int MAX_RECENT_PROJECTS      = 16;
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     static QStringList s_RecentProjectPaths;  // List of recently opened projects
@@ -163,7 +163,7 @@ namespace L0 {
 
     QString ProjectManager::GetProjectFilePath(Path path) {
         switch (path) {
-            case Path::WINDOW_STATE: return GetWorkspacePath() + CFXS_L0_CONFIG_DIRECTORY + QStringLiteral("/WindowState.L0");
+            case Path::WINDOW_STATE: return GetWorkspacePath() + CFXS_L0_CONFIG_DIRECTORY + QSL("/WindowState.L0");
         }
 
         LOG_PROJECT_CRITICAL("Unknown path {}", (int)path);
@@ -172,7 +172,7 @@ namespace L0 {
 
     /// Get full path to file that might or might not be a relative path
     QString ProjectManager::GetFullFilePath(const QString& path) {
-        QFileInfo info(GetWorkspacePath() + QStringLiteral("/") + path);
+        QFileInfo info(GetWorkspacePath() + QSL("/") + path);
 
         if (info.exists()) {
             return info.filePath();

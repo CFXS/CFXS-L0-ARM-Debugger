@@ -32,17 +32,12 @@
 namespace L0::UI {
 
     ////////////////////////////////////////////////////////////
-    const QStringList s_KnownExtensionList = {QStringLiteral("c"),         QStringLiteral("cc"),           QStringLiteral("cpp"),
-                                              QStringLiteral("cxx"),       QStringLiteral("c++"),          QStringLiteral("h"),
-                                              QStringLiteral("hh"),        QStringLiteral("hpp"),          QStringLiteral("hxx"),
-                                              QStringLiteral("h++"),       QStringLiteral("asm"),          QStringLiteral("s"),
-                                              QStringLiteral("inc"),       QStringLiteral("txt"),          QStringLiteral("json"),
-                                              QStringLiteral("xml"),       QStringLiteral("yml"),          QStringLiteral("yaml"),
-                                              QStringLiteral("l0"),        QStringLiteral("ld"),           QStringLiteral("py"),
-                                              QStringLiteral("icf"),       QStringLiteral("cmake"),        QStringLiteral("map"),
-                                              QStringLiteral("lhg"),       QStringLiteral("clang-format"), QStringLiteral("clang-tidy"),
-                                              QStringLiteral("lua"),       QStringLiteral("md"),           QStringLiteral("gitignore"),
-                                              QStringLiteral("gitmodules")};
+    const QStringList s_KnownExtensionList = {
+        QSL("c"),   QSL("cc"),           QSL("cpp"),        QSL("cxx"), QSL("c++"), QSL("h"),         QSL("hh"),         QSL("hpp"),
+        QSL("hxx"), QSL("h++"),          QSL("asm"),        QSL("s"),   QSL("inc"), QSL("txt"),       QSL("json"),       QSL("xml"),
+        QSL("yml"), QSL("yaml"),         QSL("l0"),         QSL("ld"),  QSL("py"),  QSL("icf"),       QSL("cmake"),      QSL("map"),
+        QSL("lhg"), QSL("clang-format"), QSL("clang-tidy"), QSL("lua"), QSL("md"),  QSL("gitignore"), QSL("gitmodules"), QSL("elf"),
+        QSL("out")};
     ////////////////////////////////////////////////////////////
 
     WorkspacePanel::WorkspacePanel() : ads::CDockWidget(GetPanelBaseName()), ui(std::make_unique<Ui::WorkspacePanel>()) {
@@ -72,7 +67,7 @@ namespace L0::UI {
                 // If extension matches external app list then open with external app
                 if (s_KnownExtensionList.contains(info.suffix().toLower())) {
                     LOG_CORE_TRACE("Open file internally \"{}\"", info.absoluteFilePath());
-                    emit RequestOpenFile(info.absoluteFilePath());
+                    emit RequestOpenFile(info.absoluteFilePath(), info.suffix().toLower());
                 } else {
                     LOG_CORE_TRACE("Open file externally \"{}\"", info.absoluteFilePath());
                     QDesktopServices::openUrl(info.absoluteFilePath());
@@ -105,7 +100,7 @@ namespace L0::UI {
     void WorkspacePanel::OpenItemContextMenu(const QPoint& point, const QModelIndex& index, const QFileInfo& info) {
         auto menu = new QMenu(this);
 
-        auto showInExplorerAction = new QAction(QPixmap(QStringLiteral(":/Icon/folder-open")), "Show in File Explorer", this);
+        auto showInExplorerAction = new QAction(QPixmap(QSL(":/Icon/folder-open")), "Show in File Explorer", this);
         menu->addAction(showInExplorerAction);
         connect(showInExplorerAction, &QAction::triggered, this, [=]() {
             if (info.isFile()) {
@@ -121,26 +116,38 @@ namespace L0::UI {
             menu->addSeparator();
 
             // Open as text file
-            auto openAsTextAction = new QAction(QPixmap(QStringLiteral(":/Icon/doc")), "Open as Text", this);
+            auto openAsTextAction = new QAction(QPixmap(QSL(":/Icon/doc")), "Open as Text", this);
             menu->addAction(openAsTextAction);
             connect(openAsTextAction, &QAction::triggered, this, [=]() {
                 LOG_CORE_TRACE("Open as Text \"{}\"", info.absoluteFilePath());
-                emit RequestOpenFile(info.absoluteFilePath());
+                emit RequestOpenFile(info.absoluteFilePath(), "txt");
             });
 
             // Open With...
-            auto openWithAction = new QAction(QPixmap(QStringLiteral(":/Icon/file")), "Open With...", this);
+            auto openWithAction = new QAction(QPixmap(QSL(":/Icon/file")), "Open With...", this);
             menu->addAction(openWithAction);
             connect(openWithAction, &QAction::triggered, this, [=]() {
 #if defined(Q_OS_WIN)
                 LOG_CORE_TRACE("Open With... \"{}\"", info.absoluteFilePath());
                 QProcess proc;
-                proc.startDetached("rundll32.exe",
-                                   {QStringLiteral("Shell32.dll,OpenAs_RunDLL"), info.absoluteFilePath().replace("/", "\\")});
+                proc.startDetached("rundll32.exe", {QSL("Shell32.dll,OpenAs_RunDLL"), info.absoluteFilePath().replace("/", "\\")});
 #else
 #error Open With... not implemented for this platform
 #endif
             });
+
+            menu->addSeparator();
+
+            { // Show file size
+                auto tempSizeLevel = menu->addMenu("File Size");
+                char tmp[3][32];
+                snprintf(tmp[0], sizeof(tmp), "%llu bytes", info.size());
+                snprintf(tmp[1], sizeof(tmp), "%.2f kB", info.size() / 1024.0f);
+                snprintf(tmp[2], sizeof(tmp), "%.3f MB", info.size() / (1024.0f * 1024.0f));
+                tempSizeLevel->addAction(new QAction(tmp[0], this));
+                tempSizeLevel->addAction(new QAction(tmp[1], this));
+                tempSizeLevel->addAction(new QAction(tmp[2], this));
+            }
         } else if (info.isDir()) {
         }
 
