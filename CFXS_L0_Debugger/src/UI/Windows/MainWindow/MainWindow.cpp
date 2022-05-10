@@ -474,7 +474,7 @@ namespace L0::UI {
     // Check what type of file this is and open it in either the text editor or a special editor
     void MainWindow::OpenFileHandler(const QString& path, const QString& type) {
         if (type == QSL("elf") || type == QSL("out")) {
-            auto obj = new ELF::ELF_Reader(path.toStdString());
+            auto obj = new ELF::ELF_Reader(path);
             obj->LoadFile();
             obj->LoadBasicSymbols();
         } else {

@@ -26,14 +26,14 @@ namespace L0::ELF {
 
     ELF_Reader* g_Test_ELF_Reader = nullptr;
 
-    ELF_Reader::ELF_Reader(const std::string& path) : m_Path(path) {
+    ELF_Reader::ELF_Reader(const QString& path) : m_Path(path) {
         g_Test_ELF_Reader = this;
     }
 
     bool ELF_Reader::LoadFile() {
         LOG_CORE_TRACE("Load ELF file {0}", m_Path);
 
-        std::ifstream fileStream(m_Path, std::ios::in | std::ios::binary);
+        std::ifstream fileStream(m_Path.toStdString(), std::ios::in | std::ios::binary);
         m_DataVector = std::vector<uint8_t>(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
         m_RawData    = m_DataVector.data();
 
@@ -66,7 +66,7 @@ namespace L0::ELF {
         return m_Valid;
     }
 
-    void ELF_Reader::SetFilePath(const std::string& path) {
+    void ELF_Reader::SetFilePath(const QString& path) {
         m_Path = path;
     }
 
@@ -253,7 +253,7 @@ namespace L0::ELF {
             LOG_CORE_TRACE("Loadable binary size: {} bytes", m_LoadableBinary.size());
             LOG_CORE_TRACE("Saving temp .bin as {}.l0.bin", m_Path);
 
-            QFile tempBin(QString(m_Path.c_str()) + ".l0.bin");
+            QFile tempBin(m_Path + ".l0.bin");
             tempBin.open(QIODevice::ReadWrite | QIODevice::Truncate);
             tempBin.write((const char*)m_LoadableBinary.data(), m_LoadableBinary.size());
             tempBin.close();
@@ -347,9 +347,8 @@ namespace L0::ELF {
 
             if (m_BasicSymbolTable.find(symName) == m_BasicSymbolTable.end()) {
                 SymbolTableEntry symInfo;
-                symInfo.fullName            = symName;
-                const char* firstSpace      = symName;
-                symInfo.name                = firstSpace;
+                symInfo.fullName            = symbolNameMangled;
+                symInfo.name                = symName;
                 symInfo.address             = symbolEntry->value;
                 symInfo.size                = symbolEntry->size;
                 m_BasicSymbolTable[symName] = symInfo;

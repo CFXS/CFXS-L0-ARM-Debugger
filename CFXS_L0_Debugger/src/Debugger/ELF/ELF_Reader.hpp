@@ -20,23 +20,24 @@
 #include "ELF.hpp"
 #include "ELF32.hpp"
 #include <functional>
+#include <QMap>
 
 namespace L0::ELF {
 
     class ELF_Reader {
     public:
         struct SymbolTableEntry {
-            std::string fullName;
-            std::string name;
+            QString fullName;
+            QString name;
             uint64_t address; // symbol address in target memory - 64bit for future 64bit core support
             uint64_t size;    // symbol size in bytes - 64bit for future 64bit core support
         };
 
     public:
-        ELF_Reader(const std::string& path);
+        ELF_Reader(const QString& path);
         ~ELF_Reader() = default;
 
-        void SetFilePath(const std::string& path);
+        void SetFilePath(const QString& path);
         bool IsValid() const;
         bool IsLittleEndian();
         bool IsBigEndian();
@@ -51,7 +52,7 @@ namespace L0::ELF {
         bool LoadBasicSymbols();
 
         /// Get basic symbol table
-        const std::unordered_map<std::string, SymbolTableEntry>& GetBasicSymbolTable() const {
+        const QMap<QString, SymbolTableEntry>& GetBasicSymbolTable() const {
             return m_BasicSymbolTable;
         }
 
@@ -77,10 +78,10 @@ namespace L0::ELF {
         /// Get section index by name
         /// \param sectionName name of section to find (case sensitive)
         /// \returns section index if found, -1 if not found
-        inline int GetSectionIndex(const std::string& sectionName) const {
+        inline int GetSectionIndex(const QString& sectionName) const {
             auto it = m_SectionNameIndexMap.find(sectionName);
             if (it != std::end(m_SectionNameIndexMap)) {
-                return it->second;
+                return it.value();
             } else {
                 return -1;
             }
@@ -103,7 +104,7 @@ namespace L0::ELF {
 
         /// Get section from section name
         template<typename T>
-        inline const T* GetSection(const std::string& sectionName) const {
+        inline const T* GetSection(const QString& sectionName) const {
             if (m_FileClass == ELF::FileClass::_32) {
                 auto index = GetSectionIndex(sectionName);
                 if (index != -1) {
@@ -145,7 +146,7 @@ namespace L0::ELF {
 
         /// Get section data from section name
         template<typename T>
-        inline const T* GetSectionData(const std::string& sectionName) const {
+        inline const T* GetSectionData(const QString& sectionName) const {
             auto index = GetSectionIndex(sectionName);
             if (index != -1) {
                 return GetSectionData<T>(index);
@@ -163,7 +164,7 @@ namespace L0::ELF {
         void ForEachSection(const ForEachSectionSig32& fn) const;
 
     private:
-        std::string m_Path;                // path to source elf
+        QString m_Path;                    // path to source elf
         std::vector<uint8_t> m_DataVector; // source elf data
         const uint8_t* m_RawData;          // raw data pointer
         bool m_Valid = false;              // is file valid
@@ -179,8 +180,8 @@ namespace L0::ELF {
         const char* m_SectionNameTable;            // Pointer to section name table
 
         // Content
-        std::unordered_map<std::string, int> m_SectionNameIndexMap;           // Section names to section indexes
-        std::unordered_map<std::string, SymbolTableEntry> m_BasicSymbolTable; // All symbols from .symtab
+        QMap<QString, int> m_SectionNameIndexMap;           // Section names to section indexes
+        QMap<QString, SymbolTableEntry> m_BasicSymbolTable; // All symbols from .symtab
 
         std::vector<uint8_t> m_LoadableBinary; // Target firmware file
     };

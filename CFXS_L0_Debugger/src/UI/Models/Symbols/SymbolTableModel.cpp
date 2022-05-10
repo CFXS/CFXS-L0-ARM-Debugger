@@ -79,10 +79,10 @@ namespace L0::UI {
         if (role == Qt::DisplayRole) {
             auto symIt = g_Test_ELF_Reader->GetBasicSymbolTable().begin();
             std::advance(symIt, index.row());
-            auto &sym = symIt->second;
+            auto &sym = symIt.value();
             char tmp[32];
             switch (index.column()) {
-                case 0: return sym.name.c_str();
+                case 0: return sym.name;
                 case 1: snprintf(tmp, 32, "0x%08llX", sym.address); return tmp;
                 case 2: snprintf(tmp, 32, "%llu", sym.size); return tmp;
             }
