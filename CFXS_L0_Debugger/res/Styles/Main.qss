@@ -5,7 +5,7 @@
 }
 
 #monospaceTextObject {
-    font-size: 12pt;
+    /*font-size: 12pt;*/
     font-family: "Consolas", "Courier New", monospace;
     font-weight: 450;
 }
@@ -68,22 +68,22 @@ QMenu::separator {
 }
 
 QMenu::right-arrow {
-  image: url(:/Image/SmallRightArrow.svg);
+    image: url(:/Image/SmallRightArrow.svg);
 }
 
 /* QTreeView */
 
-QTreeView::item  {
+QTreeView::item {
     margin: 1px 2px;
 }
 
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings  {
+QTreeView::branch:open:has-children: !has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
     border-image: none;
     image: url(:/Image/MidDownArrow.svg);
 }
 
-QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:has-children: !has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
     border-image: none;
     image: url(:/Image/MidRightArrow.svg);
@@ -148,19 +148,24 @@ QScrollBar::sub-line:vertical {
     background: none;
 }
 
-QScrollBar:left-arrow:horizontal, QScrollBar::right-arrow:horizontal {
+QScrollBar:left-arrow:horizontal,
+QScrollBar::right-arrow:horizontal {
     border: none;
     background: none;
 }
 
-QScrollBar:up-arrow:vertical, QScrollBar::down-arrow:vertical {
+QScrollBar:up-arrow:vertical,
+QScrollBar::down-arrow:vertical {
     border: none;
     background: none;
 }
 
-QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal,
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: none; /* rgba(255, 255, 255, 16); */
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+    /* rgba(255, 255, 255, 16); */
     border: none;
 }
 

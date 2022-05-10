@@ -34,6 +34,7 @@
 #include <UI/Panels/WorkspacePanel/WorkspacePanel.hpp>
 #include <UI/Panels/TextEditPanel/TextEditPanel.hpp>
 #include <UI/Panels/AppLogPanel/AppLogPanel.hpp>
+#include <UI/Panels/Debugger/Data/SymbolsPanel/SymbolListPanel.hpp>
 
 #include <Debugger/ELF/ELF_Reader.hpp>
 
@@ -82,6 +83,15 @@ namespace L0::UI {
          "Workspace",
          [](MainWindow* dis) {
              dis->OpenPanel_Workspace();
+         }},
+
+        // Seperator
+        {true},
+
+        {false,
+         "Symbols",
+         [](MainWindow* dis) {
+             dis->OpenPanel_Symbols();
          }},
 
         // Seperator
@@ -282,6 +292,10 @@ namespace L0::UI {
                                 if (auto appLogPanel = OpenPanel_AppLog()) {
                                     appLogPanel->LoadPanelState(&stateData);
                                 }
+                            } else if (panelName == SymbolListPanel::GetPanelBaseName()) {
+                                if (auto symbolPanel = OpenPanel_Symbols()) {
+                                    symbolPanel->LoadPanelState(&stateData);
+                                }
                             } else if (panelName == TextEditPanel::GetPanelBaseName()) {
                                 // panelData for TextEditPanel is relative file path
                                 if (auto filePanel = OpenFilePanel(panelData)) {
@@ -409,6 +423,18 @@ namespace L0::UI {
         return m_Panel_AppLog;
     }
 
+    SymbolListPanel* MainWindow::OpenPanel_Symbols() {
+        if (!m_Panel_SymbolList) {
+            m_Panel_SymbolList = new SymbolListPanel;
+            GetDockManager()->addDockWidgetFloating(m_Panel_SymbolList);
+        } else {
+            m_Panel_SymbolList->toggleView();
+            m_Panel_SymbolList->raise();
+        }
+
+        return m_Panel_SymbolList;
+    }
+
     TextEditPanel* MainWindow::OpenFilePanel(const QString& path) {
         QString newPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(path);
         auto fullPath   = ProjectManager::GetFullFilePath(newPath);
@@ -448,8 +474,9 @@ namespace L0::UI {
     // Check what type of file this is and open it in either the text editor or a special editor
     void MainWindow::OpenFileHandler(const QString& path, const QString& type) {
         if (type == QSL("elf") || type == QSL("out")) {
-            auto obj = ELF::ELF_Reader(path.toStdString());
-            obj.LoadFile();
+            auto obj = new ELF::ELF_Reader(path.toStdString());
+            obj->LoadFile();
+            obj->LoadBasicSymbols();
         } else {
             OpenFilePanel(path);
         }

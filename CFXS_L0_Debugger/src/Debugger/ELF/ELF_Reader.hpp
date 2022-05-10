@@ -25,7 +25,7 @@ namespace L0::ELF {
 
     class ELF_Reader {
     public:
-        struct SymbolInfo {
+        struct SymbolTableEntry {
             std::string fullName;
             std::string name;
             uint64_t address; // symbol address in target memory - 64bit for future 64bit core support
@@ -36,51 +36,40 @@ namespace L0::ELF {
         ELF_Reader(const std::string& path);
         ~ELF_Reader() = default;
 
-        inline void SetFilePath(const std::string& path) {
-            m_Path = path;
-        }
+        void SetFilePath(const std::string& path);
+        bool IsValid() const;
+        bool IsLittleEndian();
+        bool IsBigEndian();
+        bool Is32bit() const;
+        bool Is64bit() const;
 
-        inline bool IsValid() const {
-            return m_Valid;
-        }
-
-        inline bool IsLittleEndian() {
-            return m_DataEncoding == ELF::DataEncoding::LSB;
-        }
-
-        inline bool IsBigEndian() {
-            return m_DataEncoding == ELF::DataEncoding::MSB;
-        }
-
+        /// Load file from path and do initial parsing
+        /// \returns true on success
         bool LoadFile();
 
-        const std::unordered_map<std::string, SymbolInfo>& GetSymbolMap() const {
-            return m_SymbolMap;
-        }
+        /// Load basic symbols from .symtab
+        bool LoadBasicSymbols();
 
-        const SymbolInfo* AddressToSymbol(uint64_t addr);
-
-        const SymbolInfo* NameToSymbol(const char* symbolName) {
-            for (auto& [name, info] : m_SymbolMap) {
-                if (strcmp(info.name.c_str(), symbolName) == 0) {
-                    return &info;
-                }
-            }
-
-            return nullptr;
+        /// Get basic symbol table
+        const std::unordered_map<std::string, SymbolTableEntry>& GetBasicSymbolTable() const {
+            return m_BasicSymbolTable;
         }
 
     private:
         bool ParseFile();
 
         bool ParseFile32();
-        bool LoadSymbols32(const ELF32::SectionHeader* section);
-
         bool ParseFile64();
 
+        bool LoadBasicSymbols32();
+
+        /// Get symbol name from string section at offset
         const char* GetSymbolName(int sectionIndex, size_t nameOffset) const;
 
+        /// Get section name from section name table offset
         const char* GetSectionName(size_t sectionNameTableOffset) const;
+
+        /// Get section name from section name from section header
         const char* GetSectionName(const ELF32::SectionHeader* sectionHeader) const {
             return GetSectionName(sectionHeader->nameOffset);
         }
@@ -179,19 +168,19 @@ namespace L0::ELF {
         const uint8_t* m_RawData;          // raw data pointer
         bool m_Valid = false;              // is file valid
 
-        // ELF stuff
+        // ELF Stuff
         union {
             const ELF32::Header* elf32;
             const void* ptr;
         } m_ELF_Header;
-        ELF::DataEncoding m_DataEncoding; // Little/big endian
-        ELF::FileClass m_FileClass;       // 32bit/64bit
-        std::vector<const uint8_t*> m_SectionData;
-        const char* m_SectionNameTable;
+        ELF::DataEncoding m_DataEncoding;          // Little/big endian
+        ELF::FileClass m_FileClass;                // 32bit/64bit
+        std::vector<const uint8_t*> m_SectionData; // Pointers to section data blocks
+        const char* m_SectionNameTable;            // Pointer to section name table
 
-        //
-        std::unordered_map<std::string, SymbolInfo> m_SymbolMap;
-        std::unordered_map<std::string, int> m_SectionNameIndexMap;
+        // Content
+        std::unordered_map<std::string, int> m_SectionNameIndexMap;           // Section names to section indexes
+        std::unordered_map<std::string, SymbolTableEntry> m_BasicSymbolTable; // All symbols from .symtab
 
         std::vector<uint8_t> m_LoadableBinary; // Target firmware file
     };

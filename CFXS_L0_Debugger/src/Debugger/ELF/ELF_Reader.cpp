@@ -24,7 +24,10 @@
 
 namespace L0::ELF {
 
+    ELF_Reader* g_Test_ELF_Reader = nullptr;
+
     ELF_Reader::ELF_Reader(const std::string& path) : m_Path(path) {
+        g_Test_ELF_Reader = this;
     }
 
     bool ELF_Reader::LoadFile() {
@@ -63,8 +66,31 @@ namespace L0::ELF {
         return m_Valid;
     }
 
+    void ELF_Reader::SetFilePath(const std::string& path) {
+        m_Path = path;
+    }
+
+    bool ELF_Reader::IsValid() const {
+        return m_Valid;
+    }
+
+    bool ELF_Reader::IsLittleEndian() {
+        return m_DataEncoding == ELF::DataEncoding::LSB;
+    }
+
+    bool ELF_Reader::IsBigEndian() {
+        return m_DataEncoding == ELF::DataEncoding::MSB;
+    }
+
+    bool ELF_Reader::Is32bit() const {
+        return m_FileClass == ELF::FileClass::_32;
+    }
+
+    bool ELF_Reader::Is64bit() const {
+        return m_FileClass == ELF::FileClass::_64;
+    }
+
     bool ELF_Reader::ParseFile() {
-        m_SymbolMap.clear();
         m_SectionData.clear();
 
         auto header = m_ELF_Header.elf32;
@@ -154,22 +180,10 @@ namespace L0::ELF {
 
         // 2 - process sections
         if (header->sectionHeaderOffset) {
-            bool symbolsLoaded = false;
             ForEachSection([&](int sectionIndex, const ELF32::SectionHeader* section, const char* sectionName) {
                 m_SectionNameIndexMap[sectionName] = sectionIndex;
                 LOG_CORE_TRACE("Section {} \"{}\" ({}/{})", sectionIndex, sectionName, ToString(section->type), ToString(section->flags));
-
-                if (section->type == ELF32::SectionType::SYMBOL_TABLE) {
-                    symbolsLoaded = true;
-                    LOG_CORE_WARN("Symbol loading disabled");
-                    //symbolsLoaded = LoadSymbols32(section);
-                }
             });
-
-            if (!symbolsLoaded) {
-                LOG_CORE_ERROR(" - Failed to load symbols");
-                return false;
-            }
         }
 
         // 3 - print target physical memory sections and prepare loadable file
@@ -265,18 +279,37 @@ namespace L0::ELF {
         }
     }
 
-    bool ELF_Reader::LoadSymbols32(const ELF32::SectionHeader* section) {
-        LOG_CORE_TRACE(" - Load symbol table");
-        size_t entryCount = section->size / section->entrySize;
+    bool ELF_Reader::LoadBasicSymbols() {
+        if (Is32bit()) {
+            return LoadBasicSymbols32();
+        } else {
+            LOG_CORE_ERROR("64bit ELF not supported yet");
+            return false;
+        }
+    }
+
+    bool ELF_Reader::LoadBasicSymbols32() {
+        LOG_CORE_TRACE(" - Load symbol table [ELF32]");
+
+        auto symtab = GetSection<ELF32::SectionHeader>(".symtab");
+        if (!symtab) {
+            LOG_CORE_WARN("Symbol table not found (.symtab section not found)");
+            return false;
+        } else if (symtab->type != ELF32::SectionType::SYMBOL_TABLE) {
+            LOG_CORE_ERROR("Symbol table not found (.symtab is not of type SYMBOL_TABLE)");
+            return false;
+        }
+
+        size_t entryCount = symtab->size / symtab->entrySize;
 
         LOG_CORE_TRACE("   > Symbol table contains {0} symbols", entryCount);
 
         for (int symbol_index = 0; symbol_index < entryCount; symbol_index++) {
             auto symbolEntry =
-                reinterpret_cast<const ELF32::SymbolEntry*>(m_RawData + section->offsetInFile + symbol_index * section->entrySize);
+                reinterpret_cast<const ELF32::SymbolEntry*>(m_RawData + symtab->offsetInFile + symbol_index * symtab->entrySize);
 
             // section->link is section index for string table
-            auto symbolNameMangled = GetSymbolName(section->link, symbolEntry->nameOffset);
+            auto symbolNameMangled = GetSymbolName(symtab->link, symbolEntry->nameOffset);
 
             static char symName[4096];
             static char mangleWorkBuf[4096];
@@ -312,34 +345,18 @@ namespace L0::ELF {
                                  symbolEntry->value,
                                  type);*/
 
-            if (m_SymbolMap.find(symName) == m_SymbolMap.end()) {
-                SymbolInfo symInfo;
-                symInfo.fullName = symName;
-
-                const char* firstSpace = symName;
-                /*size_t symLen    = strlen(symName);
-                for (size_t i = 0; i < symLen; i++) {
-                    if (symName[i] == '(') {
-                        symName[i] = 0;
-                        break;
-                    }
-                }*/
-
-                //if (strcmp(
-                //        firstSpace,
-                //        "std::__detail::_Map_base<unsigned long, std::pair<unsigned long const, CFXS::TaskArrayEntry>, std::allocator<std::pair<unsigned long const, CFXS::TaskArrayEntry> >, std::__detail::_Select1st, std::equal_to<unsigned long>, std::hash<unsigned long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true>, true>::operator[](unsigned long const&)") ==
-                //    0) {
-                //    firstSpace = "std::map<unsigned long, CFXS::TaskArrayEntry>::operator[](unsigned long const&)";
-                //}
-
-                symInfo.name         = firstSpace;
-                symInfo.address      = symbolEntry->value;
-                symInfo.size         = symbolEntry->size;
-                m_SymbolMap[symName] = symInfo;
+            if (m_BasicSymbolTable.find(symName) == m_BasicSymbolTable.end()) {
+                SymbolTableEntry symInfo;
+                symInfo.fullName            = symName;
+                const char* firstSpace      = symName;
+                symInfo.name                = firstSpace;
+                symInfo.address             = symbolEntry->value;
+                symInfo.size                = symbolEntry->size;
+                m_BasicSymbolTable[symName] = symInfo;
             }
         }
 
-        LOG_CORE_TRACE("   > {0} symbols loaded", m_SymbolMap.size());
+        LOG_CORE_TRACE("   > {0} symbols loaded", m_BasicSymbolTable.size());
 
         return true;
     }
@@ -372,17 +389,6 @@ namespace L0::ELF {
         } else {
             return rawData + nameOffset;
         }
-    }
-
-    const ELF_Reader::SymbolInfo* ELF_Reader::AddressToSymbol(uint64_t addr) {
-        for (auto& [name, sym] : GetSymbolMap()) {
-            if (addr == sym.address)
-                return &sym;
-            if (addr >= sym.address && addr < (sym.address + sym.size))
-                return &sym;
-        }
-
-        return nullptr;
     }
 
     /// Get list of sections (indexes) located in target memory

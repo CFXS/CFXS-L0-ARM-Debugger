@@ -32,15 +32,17 @@ namespace L0::UI {
     class WorkspacePanel;
     class TextEditPanel;
     class AppLogPanel;
+    class SymbolListPanel;
 
     class MainWindow : public QMainWindow {
         Q_OBJECT
 
         struct ActionEntryDefinition {
             bool isSeperator;
-            QString name                               = QSL("");
-            std::function<void(MainWindow *)> callback = nullptr;
-            QIcon icon                                 = QIcon{};
+            QString name                                = QSL("");
+            std::function<void(MainWindow *)> callback  = nullptr;
+            QIcon icon                                  = QIcon{};
+            std::vector<ActionEntryDefinition> children = {};
         };
 
     public:
@@ -80,6 +82,9 @@ namespace L0::UI {
         // Dev panels
         AppLogPanel *OpenPanel_AppLog();
 
+        // Debug panels
+        SymbolListPanel *OpenPanel_Symbols();
+
         /// Open/show file panel with file
         TextEditPanel *OpenFilePanel(const QString &path);
 
@@ -102,8 +107,9 @@ namespace L0::UI {
         static std::vector<ActionEntryDefinition> s_ActionDefinitions_View;
 
         // Panels
-        WorkspacePanel *m_Panel_Workspace = nullptr;
-        AppLogPanel *m_Panel_AppLog       = nullptr;
+        WorkspacePanel *m_Panel_Workspace   = nullptr;
+        AppLogPanel *m_Panel_AppLog         = nullptr;
+        SymbolListPanel *m_Panel_SymbolList = nullptr;
     };
 
 } // namespace L0::UI

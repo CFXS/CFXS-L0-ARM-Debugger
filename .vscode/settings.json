@@ -146,6 +146,7 @@
         "scoped_allocator": "cpp",
         "strstream": "cpp",
         "typeindex": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "qabstracttablemodel": "cpp"
     }
 }
