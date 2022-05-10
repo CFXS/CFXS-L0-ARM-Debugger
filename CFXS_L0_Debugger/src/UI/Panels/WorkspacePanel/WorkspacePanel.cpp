@@ -175,7 +175,7 @@ namespace L0::UI {
 
         QStringList expandedEntries;
         auto rootPathLen = m_FB_Model->rootPath().size();
-        for (auto& index : m_FB_Model->GetPersistendIndexList()) {
+        for (auto& index : m_FB_Model->GetPersistentIndexList()) {
             if (ui->tw_FileBrowser->isExpanded(index)) {
                 auto path = index.data(QFileSystemModel::Roles::FilePathRole).toString().mid(rootPathLen);
                 expandedEntries.append(path);
