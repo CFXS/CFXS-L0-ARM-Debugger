@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-//
+// 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -33,6 +33,7 @@ namespace L0::UI {
     class TextEditPanel;
     class AppLogPanel;
     class SymbolListPanel;
+    class TargetBinaryPanel;
 
     class MainWindow : public QMainWindow {
         Q_OBJECT
@@ -83,7 +84,8 @@ namespace L0::UI {
         AppLogPanel *OpenPanel_AppLog();
 
         // Debug panels
-        SymbolListPanel *OpenPanel_Symbols();
+        SymbolListPanel *OpenPanel_Symbols();        // Open target app symbol list viewer
+        TargetBinaryPanel *OpenPanel_TargetBinary(); // Open target binary in hex viewer
 
         /// Open/show file panel with file
         TextEditPanel *OpenFilePanel(const QString &path);
@@ -107,9 +109,10 @@ namespace L0::UI {
         static std::vector<ActionEntryDefinition> s_ActionDefinitions_View;
 
         // Panels
-        WorkspacePanel *m_Panel_Workspace   = nullptr;
-        AppLogPanel *m_Panel_AppLog         = nullptr;
-        SymbolListPanel *m_Panel_SymbolList = nullptr;
+        WorkspacePanel *m_Panel_Workspace       = nullptr;
+        AppLogPanel *m_Panel_AppLog             = nullptr;
+        SymbolListPanel *m_Panel_SymbolList     = nullptr;
+        TargetBinaryPanel *m_Panel_TargetBinary = nullptr;
     };
 
 } // namespace L0::UI

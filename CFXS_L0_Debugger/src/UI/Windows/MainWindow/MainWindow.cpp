@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-//
+// 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -31,10 +31,11 @@
 
 #include <Core/Project/ProjectManager.hpp>
 #include <UI/Windows/AboutWindow/AboutWindow.hpp>
-#include <UI/Panels/WorkspacePanel/WorkspacePanel.hpp>
-#include <UI/Panels/TextEditPanel/TextEditPanel.hpp>
-#include <UI/Panels/AppLogPanel/AppLogPanel.hpp>
-#include <UI/Panels/Debugger/Data/SymbolsPanel/SymbolListPanel.hpp>
+#include <UI/Panels/WorkspacePanel.hpp>
+#include <UI/Panels/TextEditPanel.hpp>
+#include <UI/Panels/AppLogPanel.hpp>
+#include <UI/Panels/Debugger/SymbolListPanel.hpp>
+#include <UI/Panels/Debugger/TargetBinaryPanel.hpp>
 
 #include <Debugger/ELF/ELF_Reader.hpp>
 
@@ -285,21 +286,25 @@ namespace L0::UI {
                             }
 
                             if (panelName == WorkspacePanel::GetPanelBaseName()) {
-                                if (auto workspacePanel = OpenPanel_Workspace()) {
-                                    workspacePanel->LoadPanelState(&stateData);
+                                if (auto panel = OpenPanel_Workspace()) {
+                                    panel->LoadPanelState(&stateData);
                                 }
                             } else if (panelName == AppLogPanel::GetPanelBaseName()) {
-                                if (auto appLogPanel = OpenPanel_AppLog()) {
-                                    appLogPanel->LoadPanelState(&stateData);
+                                if (auto panel = OpenPanel_AppLog()) {
+                                    panel->LoadPanelState(&stateData);
                                 }
                             } else if (panelName == SymbolListPanel::GetPanelBaseName()) {
-                                if (auto symbolPanel = OpenPanel_Symbols()) {
-                                    symbolPanel->LoadPanelState(&stateData);
+                                if (auto panel = OpenPanel_Symbols()) {
+                                    panel->LoadPanelState(&stateData);
+                                }
+                            } else if (panelName == TargetBinaryPanel::GetPanelBaseName()) {
+                                if (auto panel = OpenPanel_TargetBinary()) {
+                                    panel->LoadPanelState(&stateData);
                                 }
                             } else if (panelName == TextEditPanel::GetPanelBaseName()) {
                                 // panelData for TextEditPanel is relative file path
-                                if (auto filePanel = OpenFilePanel(panelData)) {
-                                    filePanel->LoadPanelState(&stateData);
+                                if (auto panel = OpenFilePanel(panelData)) {
+                                    panel->LoadPanelState(&stateData);
                                 }
                             } else {
                                 known = false;
@@ -433,6 +438,18 @@ namespace L0::UI {
         }
 
         return m_Panel_SymbolList;
+    }
+
+    TargetBinaryPanel* MainWindow::OpenPanel_TargetBinary() {
+        if (!m_Panel_TargetBinary) {
+            m_Panel_TargetBinary = new TargetBinaryPanel;
+            GetDockManager()->addDockWidgetFloating(m_Panel_TargetBinary);
+        } else {
+            m_Panel_TargetBinary->toggleView();
+            m_Panel_TargetBinary->raise();
+        }
+
+        return m_Panel_TargetBinary;
     }
 
     TextEditPanel* MainWindow::OpenFilePanel(const QString& path) {

@@ -31,7 +31,7 @@ namespace L0 {
     Application* Application::s_Instance = nullptr;
 
     static void SetQtAttributes() {
-        //QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+        QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     }
 
     Application::Application(int argc, char** argv, const std::string& name) {
@@ -61,10 +61,10 @@ namespace L0 {
         darkPalette.setColor(QPalette::WindowText, Qt::white);
         darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
         darkPalette.setColor(QPalette::Base, QColor(33, 33, 33));
+        darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
         darkPalette.setColor(QPalette::Mid, QColor(66, 66, 66));
         darkPalette.setColor(QPalette::Midlight, QColor(105, 105, 105));
         darkPalette.setColor(QPalette::Light, QColor(164, 164, 164));
-        darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
         darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
         darkPalette.setColor(QPalette::ToolTipText, Qt::white);
         darkPalette.setColor(QPalette::Text, Qt::white);

@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-//
+// 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -315,6 +315,17 @@ namespace L0::ELF {
             static char mangleWorkBuf[4096];
             size_t mangleBufSize = sizeof(mangleWorkBuf);
 
+            QString specialInfoString = QSL("");
+            ////////////////////////////////////////////////////////
+            if (memcmp(symbolNameMangled, "_GLOBAL_sub_I_", strlen("_GLOBAL_sub_I_") - 1) == 0) { // static initializer
+                symbolNameMangled += strlen("__GLOBAL_sub_I_");
+                specialInfoString = "Static Initializer";
+            } else if (memcmp(symbolNameMangled, "_GLOBAL__sub_D_", strlen("_GLOBAL__sub_D_") - 1) == 0) { // static destructor
+                symbolNameMangled += strlen("_GLOBAL__sub_D_");
+                specialInfoString = "Static Destructor";
+            }
+            ////////////////////////////////////////////////////////
+
             // only demangle object and function names
             if ((symbolEntry->IsFunction() || symbolEntry->IsObject())) {
                 if (char* itanium = llvm::itaniumDemangle(symbolNameMangled, mangleWorkBuf, &mangleBufSize, NULL)) {
@@ -351,6 +362,7 @@ namespace L0::ELF {
                 symInfo.name                = symName;
                 symInfo.address             = symbolEntry->value;
                 symInfo.size                = symbolEntry->size;
+                symInfo.specialInfoString   = specialInfoString;
                 m_BasicSymbolTable[symName] = symInfo;
             }
         }
