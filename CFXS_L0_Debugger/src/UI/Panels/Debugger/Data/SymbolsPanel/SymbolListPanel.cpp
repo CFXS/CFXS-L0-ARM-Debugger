@@ -55,12 +55,11 @@ namespace L0::UI {
         ui->symbolTable->setObjectName("monospaceTextObject");
         ui->symbolTable->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
         ui->symbolTable->setFocusPolicy(Qt::NoFocus);
-        ui->symbolTable->verticalHeader()->setVisible(false);
-        ui->symbolTable->horizontalHeader()->setStretchLastSection(true);
-        ui->symbolTable->setStyleSheet("QTableView{font-size: 14px;}");
-        ui->symbolTable->verticalHeader()->setDefaultSectionSize(16);
+        ui->symbolTable->setStyleSheet(
+            "QTreeView{font-size: 14px;} QTreeView::item {margin: 0px; border: 1px; border-style: thin; border-color: rgba(255,255,255,32);}");
         ui->symbolTable->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
         ui->symbolTable->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+        ui->symbolTable->setUniformRowHeights(true);
         ui->symbolTable->setModel(m_SymbolTableModel);
 
         setWidget(ui->root);
