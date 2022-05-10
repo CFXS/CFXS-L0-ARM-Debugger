@@ -160,7 +160,9 @@ namespace L0::ELF {
                 LOG_CORE_TRACE("Section {} \"{}\" ({}/{})", sectionIndex, sectionName, ToString(section->type), ToString(section->flags));
 
                 if (section->type == ELF32::SectionType::SYMBOL_TABLE) {
-                    symbolsLoaded = LoadSymbols32(section);
+                    symbolsLoaded = true;
+                    LOG_CORE_WARN("Symbol loading disabled");
+                    //symbolsLoaded = LoadSymbols32(section);
                 }
             });
 
@@ -178,6 +180,10 @@ namespace L0::ELF {
         if (targetMemSections.empty()) {
             LOG_CORE_TRACE("Target physical memory sections not found");
         } else {
+            // bin file start address comp
+            size_t startAddressOffset = 0;
+            bool startAddressSet      = false;
+
             LOG_CORE_TRACE("Target physical memory sections:");
             for (auto section : targetMemSections) {
                 auto name          = GetSectionName(section);
@@ -191,7 +197,7 @@ namespace L0::ELF {
                     }
                 }();
 
-                LOG_CORE_TRACE(" - {:8} {} 0x{:08X}-0x{:08X} ({} bytes)",
+                LOG_CORE_TRACE(" - {:16} {} 0x{:08X}-0x{:08X} ({} bytes)",
                                name,
                                memTypeStr,
                                section->address,
@@ -201,10 +207,17 @@ namespace L0::ELF {
                 // if section is a part of loadable firmware
                 if ((section->type == ELF32::SectionType::PROGBITS) && section->size) {
                     try {
-                        auto sectMaxSize = section->address + section->size;
-                        if (sectMaxSize) {
-                            if (sectMaxSize > m_LoadableBinary.size())
-                                m_LoadableBinary.resize(sectMaxSize);
+                        if (!startAddressSet) {
+                            startAddressSet    = true;
+                            startAddressOffset = section->address;
+                        }
+                        auto sectionSize    = section->size;
+                        auto loadAddress    = section->address - startAddressOffset;
+                        auto fileExpandSize = loadAddress + sectionSize;
+
+                        if (fileExpandSize) {
+                            if (fileExpandSize > m_LoadableBinary.size())
+                                m_LoadableBinary.resize(fileExpandSize);
 
                             auto blockData = GetSectionData<uint8_t>(section);
                             if (!blockData) {
@@ -212,7 +225,7 @@ namespace L0::ELF {
                                 return false;
                             }
 
-                            memcpy(m_LoadableBinary.data() + section->address, blockData, section->size);
+                            memcpy(m_LoadableBinary.data() + loadAddress, blockData, sectionSize);
                         } else {
                             LOG_CORE_WARN("Skip section {} - size is 0", name);
                         }
@@ -227,7 +240,7 @@ namespace L0::ELF {
             LOG_CORE_TRACE("Saving temp .bin as {}.l0.bin", m_Path);
 
             QFile tempBin(QString(m_Path.c_str()) + ".l0.bin");
-            tempBin.open(QIODevice::ReadWrite);
+            tempBin.open(QIODevice::ReadWrite | QIODevice::Truncate);
             tempBin.write((const char*)m_LoadableBinary.data(), m_LoadableBinary.size());
             tempBin.close();
         }
