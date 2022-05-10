@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -33,9 +33,14 @@ namespace L0::ELF {
     bool ELF_Reader::LoadFile() {
         LOG_CORE_TRACE("Load ELF file {0}", m_Path);
 
-        std::ifstream fileStream(m_Path.toStdString(), std::ios::in | std::ios::binary);
-        m_DataVector = std::vector<uint8_t>(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
-        m_RawData    = m_DataVector.data();
+        QFile elfFile(m_Path);
+        if (!elfFile.open(QIODevice::ReadOnly)) {
+            LOG_CORE_ERROR("Failed to open ELF file {}", m_Path);
+            return false;
+        }
+        m_DataVector = elfFile.readAll();
+        elfFile.close();
+        m_RawData = (const uint8_t*)m_DataVector.data();
 
         m_ELF_Header.ptr = reinterpret_cast<const void*>(m_RawData);
 
@@ -182,13 +187,18 @@ namespace L0::ELF {
         if (header->sectionHeaderOffset) {
             ForEachSection([&](int sectionIndex, const ELF32::SectionHeader* section, const char* sectionName) {
                 m_SectionNameIndexMap[sectionName] = sectionIndex;
-                LOG_CORE_TRACE("Section {} \"{}\" ({}/{})", sectionIndex, sectionName, ToString(section->type), ToString(section->flags));
+                LOG_CORE_TRACE("Section {} \"{}\" ({}/{}) [data @ 0x{:X}]",
+                               sectionIndex,
+                               sectionName,
+                               ToString(section->type),
+                               ToString(section->flags),
+                               section->offsetInFile);
             });
         }
 
-        // 3 - print target physical memory sections and prepare loadable file
-        m_LoadableBinary.clear();
-        m_LoadableBinary.shrink_to_fit();
+        // 3 - print target physical memory sections and prepare target binary file
+        m_TargetBinary.clear();
+        m_TargetBinary.shrink_to_fit();
 
         auto targetMemSections = GetTargetMemorySections();
         if (targetMemSections.empty()) {
@@ -218,7 +228,7 @@ namespace L0::ELF {
                                section->address + section->size,
                                section->size);
 
-                // if section is a part of loadable firmware
+                // if section is a part of target firmware
                 if ((section->type == ELF32::SectionType::PROGBITS) && section->size) {
                     try {
                         if (!startAddressSet) {
@@ -230,32 +240,32 @@ namespace L0::ELF {
                         auto fileExpandSize = loadAddress + sectionSize;
 
                         if (fileExpandSize) {
-                            if (fileExpandSize > m_LoadableBinary.size())
-                                m_LoadableBinary.resize(fileExpandSize);
+                            if (fileExpandSize > m_TargetBinary.size())
+                                m_TargetBinary.resize(fileExpandSize);
 
                             auto blockData = GetSectionData<uint8_t>(section);
                             if (!blockData) {
-                                LOG_CORE_ERROR("Failed to get loadable binary section data ({})", name);
+                                LOG_CORE_ERROR("Failed to get target binary section data ({})", name);
                                 return false;
                             }
 
-                            memcpy(m_LoadableBinary.data() + loadAddress, blockData, sectionSize);
+                            memcpy(m_TargetBinary.data() + loadAddress, blockData, sectionSize);
                         } else {
                             LOG_CORE_WARN("Skip section {} - size is 0", name);
                         }
                     } catch (const std::exception& e) {
-                        LOG_CORE_CRITICAL("Failed to resize ELF loadable binary buffer ({})", e.what());
+                        LOG_CORE_CRITICAL("Failed to resize ELF target binary buffer ({})", e.what());
                         return false;
                     }
                 }
             }
 
-            LOG_CORE_TRACE("Loadable binary size: {} bytes", m_LoadableBinary.size());
+            LOG_CORE_TRACE("Target binary size: {} bytes", m_TargetBinary.size());
             LOG_CORE_TRACE("Saving temp .bin as {}.l0.bin", m_Path);
 
             QFile tempBin(m_Path + ".l0.bin");
             tempBin.open(QIODevice::ReadWrite | QIODevice::Truncate);
-            tempBin.write((const char*)m_LoadableBinary.data(), m_LoadableBinary.size());
+            tempBin.write((const char*)m_TargetBinary.data(), m_TargetBinary.size());
             tempBin.close();
         }
 

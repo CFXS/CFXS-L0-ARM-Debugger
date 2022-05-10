@@ -134,9 +134,6 @@
                                     </layout>
                                 </widget>
                             </item>
-                            <item>
-                                <widget class="QTreeView" name="symbolTable" />
-                            </item>
                         </layout>
                     </widget>
                 </item>

@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -55,6 +55,16 @@ namespace L0::ELF {
         /// Get basic symbol table
         const QMap<QString, SymbolTableEntry>& GetBasicSymbolTable() const {
             return m_BasicSymbolTable;
+        }
+
+        /// Get target binary
+        const QByteArray& GetTargetBinary() const {
+            return m_TargetBinary;
+        }
+
+        /// Get raw elf file
+        const QByteArray& GetRawFileData() const {
+            return m_DataVector;
         }
 
     private:
@@ -165,10 +175,10 @@ namespace L0::ELF {
         void ForEachSection(const ForEachSectionSig32& fn) const;
 
     private:
-        QString m_Path;                    // path to source elf
-        std::vector<uint8_t> m_DataVector; // source elf data
-        const uint8_t* m_RawData;          // raw data pointer
-        bool m_Valid = false;              // is file valid
+        QString m_Path;           // path to source elf
+        QByteArray m_DataVector;  // source elf data
+        const uint8_t* m_RawData; // raw data pointer
+        bool m_Valid = false;     // is file valid
 
         // ELF Stuff
         union {
@@ -184,7 +194,7 @@ namespace L0::ELF {
         QMap<QString, int> m_SectionNameIndexMap;           // Section names to section indexes
         QMap<QString, SymbolTableEntry> m_BasicSymbolTable; // All symbols from .symtab
 
-        std::vector<uint8_t> m_LoadableBinary; // Target firmware file
+        QByteArray m_TargetBinary; // Target firmware file
     };
 
 } // namespace L0::ELF

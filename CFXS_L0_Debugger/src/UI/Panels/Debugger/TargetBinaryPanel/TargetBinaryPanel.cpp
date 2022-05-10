@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -20,8 +20,8 @@
 
 #include <DockWidgetTab.h>
 
-#include <UI/Models/Symbols/SymbolTableModel.hpp>
 #include <Core/Project/ProjectManager.hpp>
+#include <QHexEdit2/QHexEdit.hpp>
 #include <QBoxLayout>
 #include <QDir>
 #include <QFileInfo>
@@ -32,6 +32,13 @@
 
 #include "ui_TargetBinaryPanel.h"
 
+#include <Core/ELF/ELF_Reader.hpp>
+
+namespace L0::ELF {
+    extern ELF_Reader* g_Test_ELF_Reader;
+}
+using L0::ELF::g_Test_ELF_Reader;
+
 namespace L0::UI {
 
     TargetBinaryPanel::TargetBinaryPanel() : ads::CDockWidget(GetPanelBaseName()), ui(std::make_unique<Ui::TargetBinaryPanel>()) {
@@ -39,28 +46,38 @@ namespace L0::UI {
         ui->setupUi(this);
         setWindowTitle("Target Binary");
 
-        m_SymbolTableModel = new SymbolTableModel(this);
+        m_HexEditor = new QHexEdit;
+        ui->content->layout()->addWidget(m_HexEditor);
 
-        ui->searchTextBar->setPlaceholderText("Search...");
+        ui->searchTextBar->setPlaceholderText("Jump To Address...");
         ui->searchTextBar->setStyleSheet("QLineEdit{color: gray;}");
         ui->searchTextBar->setObjectName("monospaceTextObject");
-        connect(ui->searchTextBar, &QLineEdit::textChanged, [=] {
-            if (ui->searchTextBar->text().isEmpty()) {
+        connect(ui->searchTextBar, qOverload<const QString&>(&QLineEdit::textChanged), [=](const QString& text) {
+            if (text.isEmpty()) {
                 ui->searchTextBar->setStyleSheet("QLineEdit{color: gray;}");
             } else {
                 ui->searchTextBar->setStyleSheet("QLineEdit{color: white;}");
+
+                if (text == QSL("e")) {
+                    m_HexEditor->setData(g_Test_ELF_Reader->GetRawFileData());
+                } else if (text == QSL("b")) {
+                    m_HexEditor->setData(g_Test_ELF_Reader->GetTargetBinary());
+                } else {
+                    m_HexEditor->setData(QByteArray{});
+                }
             }
         });
 
-        ui->symbolTable->setObjectName("monospaceTextObject");
-        ui->symbolTable->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
-        ui->symbolTable->setFocusPolicy(Qt::NoFocus);
-        ui->symbolTable->setStyleSheet(
-            "QTreeView{font-size: 14px;} QTreeView::item {margin: 0px; border: 1px; border-style: thin; border-color: rgba(255,255,255,32);}");
-        ui->symbolTable->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-        ui->symbolTable->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-        ui->symbolTable->setUniformRowHeights(true);
-        ui->symbolTable->setModel(m_SymbolTableModel);
+        m_HexEditor->setObjectName("monospaceTextObject");
+        m_HexEditor->setHexFontColor(QColor{255, 255, 255});
+        m_HexEditor->setAddressFontColor(QColor{160, 160, 160});
+        m_HexEditor->setAsciiFontColor(QColor{240, 240, 240});
+        m_HexEditor->setAsciiAreaColor(QColor{22, 22, 22});
+        m_HexEditor->setAddressAreaColor(QColor{77, 77, 77});
+        m_HexEditor->setStyleSheet("QFrame{background-color: rgb(22, 22, 22);}");
+        m_HexEditor->setBytesPerLine(16);
+        m_HexEditor->setHexCaps(true);
+        m_HexEditor->setReadOnly(true);
 
         setWidget(ui->root);
     }
