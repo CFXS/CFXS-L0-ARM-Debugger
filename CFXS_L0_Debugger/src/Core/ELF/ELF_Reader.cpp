@@ -240,7 +240,7 @@ namespace L0::ELF {
                         auto fileExpandSize = loadAddress + sectionSize;
 
                         if (fileExpandSize) {
-                            if (fileExpandSize > m_TargetBinary.size())
+                            if (fileExpandSize > (size_t)m_TargetBinary.size())
                                 m_TargetBinary.resize(fileExpandSize);
 
                             auto blockData = GetSectionData<uint8_t>(section);
@@ -289,16 +289,16 @@ namespace L0::ELF {
         }
     }
 
-    bool ELF_Reader::LoadBasicSymbols() {
+    bool ELF_Reader::LoadSTABS() {
         if (Is32bit()) {
-            return LoadBasicSymbols32();
+            return LoadSTABS_32();
         } else {
             LOG_CORE_ERROR("64bit ELF not supported yet");
             return false;
         }
     }
 
-    bool ELF_Reader::LoadBasicSymbols32() {
+    bool ELF_Reader::LoadSTABS_32() {
         LOG_CORE_TRACE(" - Load symbol table [ELF32]");
 
         auto symtab = GetSection<ELF32::SectionHeader>(".symtab");

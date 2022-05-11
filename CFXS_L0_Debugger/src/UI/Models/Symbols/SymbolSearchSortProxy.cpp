@@ -26,8 +26,8 @@ namespace L0::UI {
 
     void SymbolSearchSortProxy::SetNameFilter(const QString &filterString) {
         beginResetModel();
-        m_NameFilterRaw = filterString;
-        if (m_NameFilterRaw.length())
+        m_FilterString = filterString;
+        if (m_FilterString.length())
             m_NameFilterExpression = Utils::FuzzyMatcher::CreateRegularExpression(filterString, Qt::CaseSensitivity::CaseInsensitive);
         endResetModel();
     }
@@ -57,9 +57,41 @@ namespace L0::UI {
     }
 
     bool SymbolSearchSortProxy::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const {
-        if (m_NameFilterRaw.length()) {
-            QModelIndex nameIndex = sourceModel()->index(sourceRow, 0, sourceParent);
-            return m_NameFilterExpression.match(nameIndex.data(Qt::DisplayRole).toString()).hasMatch();
+        if (m_FilterString.length()) {
+            bool isAddressQuery = m_FilterString.at(0) == '&';
+
+            if (isAddressQuery && m_FilterString.size() >= 2) {
+                QModelIndex nameIndex = sourceModel()->index(sourceRow, 0, sourceParent);
+                QModelIndex addrIndex = sourceModel()->index(sourceRow, 1, sourceParent);
+                QModelIndex sizeIndex = sourceModel()->index(sourceRow, 2, sourceParent);
+                uint64_t address      = addrIndex.data(Qt::DisplayRole).toString().toULongLong(nullptr, 16);
+                uint64_t size         = sizeIndex.data(Qt::DisplayRole).toString().toULongLong(nullptr, 10);
+                bool validQuery;
+
+                bool skip2 = (m_FilterString.at(1) == '>') || (m_FilterString.at(1) == '<') || (m_FilterString.at(1) == '=');
+
+                uint64_t queryAddr = m_FilterString.mid(skip2 ? 2 : 1).toULongLong(&validQuery, 16);
+                if (!validQuery) {
+                    return false;
+                }
+
+                if (m_FilterString.at(1) == '>') {
+                    return address >= queryAddr;
+                } else if (m_FilterString.at(1) == '<') {
+                    return address <= queryAddr;
+                } else if (m_FilterString.at(1) == '=') {
+                    return address == queryAddr;
+                } else {
+                    if (size == 0) {
+                        size = 128;
+                    }
+                    return (queryAddr >= address) && (queryAddr <= (address + size));
+                }
+            } else {
+                QModelIndex nameIndex = sourceModel()->index(sourceRow, 0, sourceParent);
+                return m_NameFilterExpression.match(nameIndex.data(Qt::DisplayRole).toString()).hasMatch();
+            }
+
         } else {
             return true;
         }

@@ -46,12 +46,17 @@ namespace L0::UI {
         ui->searchTextBar->setPlaceholderText("Search...");
         ui->searchTextBar->setStyleSheet("QLineEdit{color: gray;}");
         ui->searchTextBar->setObjectName("monospaceTextObject");
+
         connect(ui->searchTextBar, &QLineEdit::textChanged, [=] {
             if (ui->searchTextBar->text().isEmpty()) {
                 ui->searchTextBar->setStyleSheet("QLineEdit{color: gray;}");
             } else {
                 ui->searchTextBar->setStyleSheet("QLineEdit{color: white;}");
             }
+        });
+
+        connect(ui->searchTextBar, &QLineEdit::returnPressed, [=]() {
+            m_SymbolSearchSortProxy->SetNameFilter(ui->searchTextBar->text());
         });
 
         ui->symbolTable->setObjectName("monospaceTextObject");
@@ -71,11 +76,6 @@ namespace L0::UI {
 
         m_SymbolSearchSortProxy->setSourceModel(m_SymbolTableModel);
         ui->symbolTable->setModel(m_SymbolSearchSortProxy);
-
-        connect(ui->searchTextBar,
-                qOverload<const QString&>(&QLineEdit::textChanged),
-                m_SymbolSearchSortProxy,
-                &SymbolSearchSortProxy::SetNameFilter);
 
         setWidget(ui->root);
     }

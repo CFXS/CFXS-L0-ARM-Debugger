@@ -33,7 +33,7 @@ namespace L0::UI {
         bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 
     private:
-        QString m_NameFilterRaw;
+        QString m_FilterString;
         QRegularExpression m_NameFilterExpression;
     };
 

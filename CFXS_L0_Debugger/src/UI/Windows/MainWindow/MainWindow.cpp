@@ -499,7 +499,7 @@ namespace L0::UI {
         if (type == QSL("elf") || type == QSL("out")) {
             auto obj = new ELF::ELF_Reader(path);
             obj->LoadFile();
-            obj->LoadBasicSymbols();
+            obj->LoadSTABS();
         } else {
             OpenFilePanel(path);
         }

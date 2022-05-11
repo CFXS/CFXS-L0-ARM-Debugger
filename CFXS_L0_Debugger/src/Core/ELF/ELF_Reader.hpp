@@ -50,7 +50,7 @@ namespace L0::ELF {
         bool LoadFile();
 
         /// Load basic symbols from .symtab
-        bool LoadBasicSymbols();
+        bool LoadSTABS();
 
         /// Get basic symbol table
         const QMap<QString, SymbolTableEntry>& GetBasicSymbolTable() const {
@@ -73,7 +73,7 @@ namespace L0::ELF {
         bool ParseFile32();
         bool ParseFile64();
 
-        bool LoadBasicSymbols32();
+        bool LoadSTABS_32();
 
         /// Get symbol name from string section at offset
         const char* GetSymbolName(int sectionIndex, size_t nameOffset) const;
