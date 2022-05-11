@@ -58,9 +58,9 @@ namespace L0::UI {
             } else {
                 ui->searchTextBar->setStyleSheet("QLineEdit{color: white;}");
 
-                if (text == QSL("e")) {
+                if (g_Test_ELF_Reader && text == QSL("e")) {
                     m_HexEditor->setData(g_Test_ELF_Reader->GetRawFileData());
-                } else if (text == QSL("b")) {
+                } else if (g_Test_ELF_Reader && text == QSL("b")) {
                     m_HexEditor->setData(g_Test_ELF_Reader->GetTargetBinary());
                 } else {
                     m_HexEditor->setData(QByteArray{});
