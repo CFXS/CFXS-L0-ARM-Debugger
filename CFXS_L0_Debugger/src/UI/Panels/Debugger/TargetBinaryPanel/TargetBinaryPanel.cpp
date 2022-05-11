@@ -69,7 +69,7 @@ namespace L0::UI {
         });
 
         m_HexEditor->setObjectName("monospaceTextObject");
-        m_HexEditor->setHexFontColor(QColor{255, 255, 255});
+        m_HexEditor->setHexFontColor(QColor{220, 220, 220});
         m_HexEditor->setAddressFontColor(QColor{160, 160, 160});
         m_HexEditor->setAsciiFontColor(QColor{240, 240, 240});
         m_HexEditor->setAsciiAreaColor(QColor{22, 22, 22});
@@ -78,6 +78,7 @@ namespace L0::UI {
         m_HexEditor->setBytesPerLine(16);
         m_HexEditor->setHexCaps(true);
         m_HexEditor->setReadOnly(true);
+        m_HexEditor->SetFontSize(14);
 
         setWidget(ui->root);
     }

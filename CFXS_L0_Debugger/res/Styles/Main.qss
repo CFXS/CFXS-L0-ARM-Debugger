@@ -77,14 +77,12 @@ QTreeView::item {
     margin: 1px 2px;
 }
 
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings {
+QTreeView::branch:open:has-children:!has-siblings,QTreeView::branch:open:has-children:has-siblings {
     border-image: none;
     image: url(:/Image/MidDownArrow.svg);
 }
 
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
+QTreeView::branch:has-children:!has-siblings:closed,QTreeView::branch:closed:has-children:has-siblings {
     border-image: none;
     image: url(:/Image/MidRightArrow.svg);
 }
@@ -164,8 +162,8 @@ QScrollBar::add-page:horizontal,
 QScrollBar::sub-page:horizontal,
 QScrollBar::add-page:vertical,
 QScrollBar::sub-page:vertical {
+    /*background: rgba(0, 0, 0, 36);*/
     background: none;
-    /* rgba(255, 255, 255, 16); */
     border: none;
 }
 
