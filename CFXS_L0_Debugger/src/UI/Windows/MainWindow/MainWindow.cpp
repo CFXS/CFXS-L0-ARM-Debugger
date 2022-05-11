@@ -35,7 +35,7 @@
 #include <UI/Panels/TextEditPanel.hpp>
 #include <UI/Panels/AppLogPanel.hpp>
 #include <UI/Panels/Debugger/SymbolListPanel.hpp>
-#include <UI/Panels/Debugger/TargetBinaryPanel.hpp>
+#include <UI/Panels/Debugger/HexEditorPanel.hpp>
 
 #include <Core/ELF/ELF_Reader.hpp>
 
@@ -86,7 +86,7 @@ namespace L0::UI {
              dis->OpenPanel_Workspace();
          }},
 
-        // Seperator
+        // Separator
         {true},
 
         {false,
@@ -95,13 +95,7 @@ namespace L0::UI {
              dis->OpenPanel_Symbols();
          }},
 
-        {false,
-         "Target Binary Viewer",
-         [](MainWindow* dis) {
-             dis->OpenPanel_TargetBinary();
-         }},
-
-        // Seperator
+        // Separator
         {true},
 
         // Open app log
@@ -243,7 +237,8 @@ namespace L0::UI {
     void MainWindow::HideAllPanels() {
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
             if (panel->objectName() != CENTRAL_WIDGET_NAME) {
-                if (panel->objectName().contains("TextEditPanel")) {
+                if (panel->objectName().startsWith(TextEditPanel::GetPanelBaseName()) ||
+                    panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName())) {
                     GetDockManager()->removeDockWidget(panel);
                     panel->deleteLater();
                 } else {
@@ -282,35 +277,41 @@ namespace L0::UI {
                             // PanelName|PanelData...
                             QString panelName;
                             QString panelData;
-                            auto seperatorOffset = panelDescription.indexOf("|");
+                            auto separatorOffset = panelDescription.indexOf(QSL("|"));
 
-                            if (seperatorOffset > 0) {
-                                panelName = panelDescription.mid(0, seperatorOffset);  // start to '|'
-                                panelData = panelDescription.mid(seperatorOffset + 1); // '|' to end
+                            if (separatorOffset > 0) {
+                                panelName = panelDescription.mid(0, separatorOffset);  // start to '|'
+                                panelData = panelDescription.mid(separatorOffset + 1); // '|' to end
                             } else {
                                 panelName = panelDescription;
                             }
 
                             if (panelName == WorkspacePanel::GetPanelBaseName()) {
                                 if (auto panel = OpenPanel_Workspace()) {
-                                    panel->LoadPanelState(&stateData);
+                                    if (panel)
+                                        panel->LoadPanelState(&stateData);
                                 }
                             } else if (panelName == AppLogPanel::GetPanelBaseName()) {
                                 if (auto panel = OpenPanel_AppLog()) {
-                                    panel->LoadPanelState(&stateData);
+                                    if (panel)
+                                        panel->LoadPanelState(&stateData);
                                 }
                             } else if (panelName == SymbolListPanel::GetPanelBaseName()) {
                                 if (auto panel = OpenPanel_Symbols()) {
-                                    panel->LoadPanelState(&stateData);
+                                    if (panel)
+                                        panel->LoadPanelState(&stateData);
                                 }
-                            } else if (panelName == TargetBinaryPanel::GetPanelBaseName()) {
-                                if (auto panel = OpenPanel_TargetBinary()) {
-                                    panel->LoadPanelState(&stateData);
+                            } else if (panelName == HexEditorPanel::GetPanelBaseName()) {
+                                // panelData for TextEditPanel is relative file path
+                                if (auto panel = OpenHexEditor(panelData)) {
+                                    if (panel)
+                                        panel->LoadPanelState(&stateData);
                                 }
                             } else if (panelName == TextEditPanel::GetPanelBaseName()) {
                                 // panelData for TextEditPanel is relative file path
                                 if (auto panel = OpenFilePanel(panelData)) {
-                                    panel->LoadPanelState(&stateData);
+                                    if (panel)
+                                        panel->LoadPanelState(&stateData);
                                 }
                             } else {
                                 known = false;
@@ -375,7 +376,7 @@ namespace L0::UI {
 
     void MainWindow::InitializeActions_View() {
         for (auto& vae : s_ActionDefinitions_View) {
-            if (vae.isSeperator) {
+            if (vae.isSeparator) {
                 ui->menuView->addSeparator();
             } else {
                 auto action = new QAction(vae.icon, vae.name, this);
@@ -446,16 +447,17 @@ namespace L0::UI {
         return m_Panel_SymbolList;
     }
 
-    TargetBinaryPanel* MainWindow::OpenPanel_TargetBinary() {
-        if (!m_Panel_TargetBinary) {
-            m_Panel_TargetBinary = new TargetBinaryPanel;
-            GetDockManager()->addDockWidgetFloating(m_Panel_TargetBinary);
-        } else {
-            m_Panel_TargetBinary->toggleView();
-            m_Panel_TargetBinary->raise();
+    HexEditorPanel* MainWindow::OpenPanel_HexEditor(const QString& filePath) {
+        auto hexEditPanel = new HexEditorPanel;
+        bool fileLoaded   = hexEditPanel->LoadFile(filePath);
+        if (!fileLoaded) {
+            delete hexEditPanel;
+            return nullptr;
         }
+        GetDockManager()->addDockWidgetFloating(hexEditPanel);
+        hexEditPanel->setFeature(CDockWidget::DockWidgetAlwaysCloseAndDelete, true); // delete on close
 
-        return m_Panel_TargetBinary;
+        return hexEditPanel;
     }
 
     TextEditPanel* MainWindow::OpenFilePanel(const QString& path) {
@@ -464,13 +466,14 @@ namespace L0::UI {
         QFileInfo fileInfo(fullPath);
 
         if (!fileInfo.exists()) {
-            LOG_UI_TRACE("OpenFile file does not exist - {}", path);
+            LOG_UI_WARN("OpenFilePanel file does not exist - {}", path);
             return nullptr;
         }
 
         TextEditPanel* existingEditor = nullptr;
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
-            if (panel->objectName().contains(QSL("TextEditPanel")) && panel->property("absoluteFilePath").toString() == fullPath) {
+            if (panel->objectName().startsWith(TextEditPanel::GetPanelBaseName()) &&
+                panel->property("absoluteFilePath").toString() == fullPath) {
                 existingEditor = static_cast<TextEditPanel*>(panel);
                 break;
             }
@@ -482,6 +485,34 @@ namespace L0::UI {
             return existingEditor;
         } else {
             return OpenPanel_TextEdit(fullPath);
+        }
+    }
+
+    HexEditorPanel* MainWindow::OpenHexEditor(const QString& path) {
+        QString newPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(path);
+        auto fullPath   = ProjectManager::GetFullFilePath(newPath);
+        QFileInfo fileInfo(fullPath);
+
+        if (!fileInfo.exists()) {
+            LOG_UI_WARN("OpenHexEditor file does not exist - {}", path);
+            return nullptr;
+        }
+
+        HexEditorPanel* existingEditor = nullptr;
+        for (auto panel : GetDockManager()->dockWidgetsMap()) {
+            if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName()) &&
+                panel->property("absoluteFilePath").toString() == fullPath) {
+                existingEditor = static_cast<HexEditorPanel*>(panel);
+                break;
+            }
+        }
+
+        // if exists, set as current tab
+        if (existingEditor) {
+            existingEditor->setAsCurrentTab();
+            return existingEditor;
+        } else {
+            return OpenPanel_HexEditor(fullPath);
         }
     }
 
@@ -500,6 +531,8 @@ namespace L0::UI {
             auto obj = new ELF::ELF_Reader(path);
             obj->LoadFile();
             obj->LoadSTABS();
+        } else if (type == QSL("$HexEditor")) {
+            OpenHexEditor(path);
         } else {
             OpenFilePanel(path);
         }

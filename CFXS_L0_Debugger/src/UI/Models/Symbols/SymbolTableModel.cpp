@@ -50,7 +50,7 @@ namespace L0::UI {
     }
 
     int SymbolTableModel::columnCount(const QModelIndex &parent) const {
-        return 3;
+        return Row::_COUNT;
     }
 
     int SymbolTableModel::rowCount(const QModelIndex &parent) const {
@@ -60,9 +60,9 @@ namespace L0::UI {
         if (role == Qt::DisplayRole) {
             if (orientation == Qt::Horizontal) {
                 switch (column) {
-                    case 0: return QSL("Name");
-                    case 1: return QSL("Address");
-                    case 2: return QSL("Size");
+                    case Row::NAME: return QSL("Name");
+                    case Row::ADDRESS: return QSL("Address");
+                    case Row::SIZE: return QSL("Size");
                     default: return QSL("");
                 }
             }

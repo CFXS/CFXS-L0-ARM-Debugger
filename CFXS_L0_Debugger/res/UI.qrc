@@ -30,7 +30,8 @@
         <file alias="Icon/file">Images/UI/FileBrowser/file.svg</file>
         <file alias="Icon/doc">Images/UI/FileBrowser/document.svg</file>
         <file alias="Icon/asm">Images/UI/FileBrowser/assembly.svg</file>
-        <file alias="Icon/bin">Images/UI/FileBrowser/hex.svg</file>
+        <file alias="Icon/bin">Images/UI/FileBrowser/assembly.svg</file>
+        <file alias="Icon/hex">Images/UI/FileBrowser/hex.svg</file>
         <file alias="Icon/c">Images/UI/FileBrowser/c.svg</file>
         <file alias="Icon/cert">Images/UI/FileBrowser/certificate.svg</file>
         <file alias="Icon/cmake">Images/UI/FileBrowser/cmake.svg</file>

@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -53,6 +53,7 @@ namespace L0::UI {
         SEGGER,
         LINK,
         L0,
+        HEX,
 
         // Closed Folders
         FOLDER,
@@ -114,6 +115,7 @@ namespace L0::UI {
                 QPixmap(QSL(":/Icon/segger")),
                 QPixmap(QSL(":/Icon/link")),
                 QPixmap(QSL(":/Icon/l0")),
+                QPixmap(QSL(":/Icon/hex")),
 
                 // Closed folders
                 QPixmap(QSL(":/Icon/folder")),
@@ -204,10 +206,11 @@ namespace L0::UI {
                 return s_IconTable[Icon::HPP];
             } else if (suffix == QSL("cmake")) {
                 return s_IconTable[Icon::CMAKE];
-            } else if (suffix == QSL("s") || suffix == QSL("asm") || suffix == QSL("a") || suffix == QSL("o") || suffix == QSL("bin") ||
-                       suffix == QSL("raw")) {
+            } else if (suffix == QSL("s") || suffix == QSL("asm") || suffix == QSL("a") || suffix == QSL("o") || suffix == QSL("raw")) {
                 return s_IconTable[Icon::ASM];
             } else if (suffix == QSL("hex")) {
+                return s_IconTable[Icon::HEX];
+            } else if (suffix == QSL("bin")) {
                 return s_IconTable[Icon::BIN];
             } else if (suffix == QSL("lhg")) {
                 return s_IconTable[Icon::CERT];

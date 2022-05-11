@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>TargetBinaryPanel</class>
-    <widget class="ads::CDockWidget" name="TargetBinaryPanel">
+    <class>HexEditorPanel</class>
+    <widget class="ads::CDockWidget" name="HexEditorPanel">
         <property name="geometry">
             <rect>
                 <x>0</x>
@@ -11,7 +11,7 @@
             </rect>
         </property>
         <property name="windowTitle">
-            <string>TargetBinaryPanel</string>
+            <string>HexEditorPanel</string>
         </property>
         <widget class="QFrame" name="root">
             <property name="geometry">

@@ -60,7 +60,7 @@ namespace L0 {
     }
 
     void L0_Application::Unload_Probe() {
-        LOG_CORE_INFO("Unload probes");
+        LOG_CORE_INFO("Unload Probes");
         Probe::JLink::L0_Unload();
     }
 

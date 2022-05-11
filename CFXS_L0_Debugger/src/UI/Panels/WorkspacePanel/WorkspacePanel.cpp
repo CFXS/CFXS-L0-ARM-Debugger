@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
 #include <Core/PlatformUtils.hpp>
 #include <Core/Project/ProjectManager.hpp>
+#include <UI/Helpers/CreateQMenuTextSeparator.hpp>
 #include <QAction>
 #include <QDir>
 #include <QMenu>
@@ -116,21 +117,29 @@ namespace L0::UI {
             menu->addSeparator();
 
             // Open as text file
-            auto openAsTextAction = new QAction(QPixmap(QSL(":/Icon/doc")), "Open as Text", this);
+            auto openAsTextAction = new QAction(QPixmap(QSL(":/Icon/doc")), QSL("Open as Text"), this);
             menu->addAction(openAsTextAction);
             connect(openAsTextAction, &QAction::triggered, this, [=]() {
                 LOG_CORE_TRACE("Open as Text \"{}\"", info.absoluteFilePath());
-                emit RequestOpenFile(info.absoluteFilePath(), "txt");
+                emit RequestOpenFile(info.absoluteFilePath(), QSL("txt"));
+            });
+
+            // Open as text file
+            auto openInHexEdit = new QAction(QPixmap(QSL(":/Icon/hex")), QSL("Open in Hex Editor"), this);
+            menu->addAction(openInHexEdit);
+            connect(openInHexEdit, &QAction::triggered, this, [=]() {
+                LOG_CORE_TRACE("Open in Hex Editor \"{}\"", info.absoluteFilePath());
+                emit RequestOpenFile(info.absoluteFilePath(), QSL("$HexEditor"));
             });
 
             // Open With...
-            auto openWithAction = new QAction(QPixmap(QSL(":/Icon/file")), "Open With...", this);
+            auto openWithAction = new QAction(QPixmap(QSL(":/Icon/file")), QSL("Open With..."), this);
             menu->addAction(openWithAction);
             connect(openWithAction, &QAction::triggered, this, [=]() {
 #if defined(Q_OS_WIN)
                 LOG_CORE_TRACE("Open With... \"{}\"", info.absoluteFilePath());
                 QProcess proc;
-                proc.startDetached("rundll32.exe", {QSL("Shell32.dll,OpenAs_RunDLL"), info.absoluteFilePath().replace("/", "\\")});
+                proc.startDetached(QSL("rundll32.exe"), {QSL("Shell32.dll,OpenAs_RunDLL"), info.absoluteFilePath().replace("/", "\\")});
 #else
 #error Open With... not implemented for this platform
 #endif
@@ -139,14 +148,22 @@ namespace L0::UI {
             menu->addSeparator();
 
             { // Show file size
-                auto tempSizeLevel = menu->addMenu("File Size");
                 char tmp[3][32];
                 snprintf(tmp[0], sizeof(tmp), "%llu bytes", info.size());
                 snprintf(tmp[1], sizeof(tmp), "%.2f kB", info.size() / 1024.0f);
                 snprintf(tmp[2], sizeof(tmp), "%.3f MB", info.size() / (1024.0f * 1024.0f));
-                tempSizeLevel->addAction(new QAction(tmp[0], this));
-                tempSizeLevel->addAction(new QAction(tmp[1], this));
-                tempSizeLevel->addAction(new QAction(tmp[2], this));
+                QWidgetAction* sizes[] = {
+                    Utils::CreateQMenuTextSeparator(
+                        tmp[0], QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")),
+                    Utils::CreateQMenuTextSeparator(
+                        tmp[1], QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")),
+                    Utils::CreateQMenuTextSeparator(
+                        tmp[2], QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")),
+                };
+
+                menu->addAction(sizes[0]);
+                menu->addAction(sizes[1]);
+                menu->addAction(sizes[2]);
             }
         } else if (info.isDir()) {
         }
@@ -170,8 +187,8 @@ namespace L0::UI {
         LOG_UI_TRACE("WorkspacePanel save state - {}", cfgKey);
 
         cfg->beginGroup(cfgKey);
-        cfg->setValue("version", 1);
-        cfg->setValue("scroll_y", ui->tw_FileBrowser->verticalScrollBar()->value());
+        cfg->setValue(QSL("version"), 1);
+        cfg->setValue(QSL("scroll_y"), ui->tw_FileBrowser->verticalScrollBar()->value());
 
         QStringList expandedEntries;
         auto rootPathLen = m_FB_Model->rootPath().size();
@@ -182,7 +199,7 @@ namespace L0::UI {
             }
         }
 
-        cfg->setValue("expandedEntries", expandedEntries);
+        cfg->setValue(QSL("expandedEntries"), expandedEntries);
 
         cfg->endGroup();
     }
@@ -198,9 +215,9 @@ namespace L0::UI {
         }
 
         cfg->beginGroup(cfgKey);
-        auto version = cfg->value("version").toInt();
+        auto version = cfg->value(QSL("version")).toInt();
         if (version == 1) {
-            auto entries     = cfg->value("expandedEntries").toStringList();
+            auto entries     = cfg->value(QSL("expandedEntries")).toStringList();
             QString rootPath = m_FB_Model->rootPath();
 
             ui->tw_FileBrowser->setUpdatesEnabled(false);
@@ -210,7 +227,7 @@ namespace L0::UI {
             }
             ui->tw_FileBrowser->setUpdatesEnabled(true);
 
-            auto scroll_y = cfg->value("scroll_y").toInt();
+            auto scroll_y = cfg->value(QSL("scroll_y")).toInt();
             if (scroll_y) {
                 QTimer::singleShot(
                     1,

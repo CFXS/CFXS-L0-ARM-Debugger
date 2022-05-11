@@ -170,7 +170,7 @@ QScrollBar::sub-page:vertical {
 /* QToolTip */
 
 QToolTip {
-    background: palette(dark);
+    background-color: palette(base);
     border: 1px solid palette(mid);
     color: rgb(255, 255, 255);
 }

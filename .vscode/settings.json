@@ -147,6 +147,7 @@
         "strstream": "cpp",
         "typeindex": "cpp",
         "valarray": "cpp",
-        "qabstracttablemodel": "cpp"
+        "qabstracttablemodel": "cpp",
+        "qwidgetaction": "cpp"
     }
 }

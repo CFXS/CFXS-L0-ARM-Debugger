@@ -16,7 +16,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-
 #pragma once
 
 #include <DockWidget.h>
@@ -50,11 +49,13 @@ namespace L0::UI {
         void LoadPanelState(QSettings* cfg) override;
 
     private:
-        SymbolTableModel* m_SymbolTableModel           = nullptr;
-        SymbolSearchSortProxy* m_SymbolSearchSortProxy = nullptr;
+        void OpenSymbolContextMenu(const QPoint& point);
 
     private:
         std::unique_ptr<Ui::SymbolListPanel> ui;
+
+        SymbolTableModel* m_SymbolTableModel           = nullptr;
+        SymbolSearchSortProxy* m_SymbolSearchSortProxy = nullptr;
     };
 
 } // namespace L0::UI

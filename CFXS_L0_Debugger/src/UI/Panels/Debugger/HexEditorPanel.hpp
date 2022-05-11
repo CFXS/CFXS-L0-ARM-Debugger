@@ -16,7 +16,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-
 #pragma once
 
 #include <DockWidget.h>
@@ -26,29 +25,32 @@
 #include <UI/Panels/I_Panel.hpp>
 
 namespace Ui {
-    class TargetBinaryPanel;
+    class HexEditorPanel;
 }
 
 class QHexEdit;
 namespace L0::UI {
 
-    class TargetBinaryPanel : public ads::CDockWidget, public I_Panel {
+    class HexEditorPanel : public ads::CDockWidget, public I_Panel {
         Q_OBJECT
     public:
-        TargetBinaryPanel();
-        virtual ~TargetBinaryPanel() = default;
+        HexEditorPanel();
+        virtual ~HexEditorPanel() = default;
 
         /// Get panel base name (for type matching from string)
         static const QString& GetPanelBaseName() {
-            static const QString name = QSL("TargetBinaryPanel");
+            static const QString name = QSL("HexEditorPanel");
             return name;
         }
 
         void SavePanelState(QSettings* cfg) override;
         void LoadPanelState(QSettings* cfg) override;
 
+        /// Load file from path
+        bool LoadFile(const QString& filePath);
+
     private:
-        std::unique_ptr<Ui::TargetBinaryPanel> ui;
+        std::unique_ptr<Ui::HexEditorPanel> ui;
 
         QHexEdit* m_HexEditor;
     };

@@ -22,14 +22,14 @@
 
 #include <UI/Models/Symbols/SymbolTableModel.hpp>
 #include <UI/Models/Symbols/SymbolSearchSortProxy.hpp>
+#include <UI/Helpers/CreateQMenuTextSeparator.hpp>
 #include <Core/Project/ProjectManager.hpp>
-#include <QBoxLayout>
+#include <QClipboard>
 #include <QDir>
 #include <QFileInfo>
-#include <QPixmap>
 #include <QPoint>
 #include <QScrollBar>
-#include <QTimer>
+#include <QMenu>
 
 #include "ui_SymbolListPanel.h"
 
@@ -62,14 +62,18 @@ namespace L0::UI {
         ui->symbolTable->setObjectName("monospaceTextObject");
         ui->symbolTable->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
         ui->symbolTable->setFocusPolicy(Qt::NoFocus);
-        ui->symbolTable->setStyleSheet("QTreeView{font-size: 14px;}"
-                                       "QTreeView::item {margin: 0px; border: 1px; border-style: thin; border-color: rgba(255,255,255,32);}"
-                                       "QTreeView::item:alternate{background-color:rgb(28,28,28);}");
+        ui->symbolTable->setStyleSheet(
+            "QTreeView{font-size: 14px;}"
+            "QTreeView::item {margin: 1px 0px; padding: 1px 1px; border: 1px; border-style: thin; border-color: rgba(255,255,255,32);}"
+            "QTreeView::item:alternate{background-color:rgb(30,30,30);}");
         ui->symbolTable->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
         ui->symbolTable->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
         ui->symbolTable->setRootIsDecorated(false);
         ui->symbolTable->setUniformRowHeights(true);
         ui->symbolTable->setAlternatingRowColors(true);
+
+        ui->symbolTable->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(ui->symbolTable, &QTreeView::customContextMenuRequested, this, &SymbolListPanel::OpenSymbolContextMenu);
 
         ui->symbolTable->setSortingEnabled(true);
         ui->symbolTable->sortByColumn(1, Qt::AscendingOrder);
@@ -121,6 +125,26 @@ namespace L0::UI {
             LOG_UI_ERROR(" - Unsupported SymbolListPanel state data version {}", version);
         }
         cfg->endGroup();
+    }
+
+    void SymbolListPanel::OpenSymbolContextMenu(const QPoint& point) {
+        QModelIndex index = ui->symbolTable->indexAt(point);
+        if (index.isValid()) {
+            auto menu = new QMenu(this);
+
+            // TODO: add text separator showing symbol name
+            //menu->addAction(Utils::CreateQMenuTextSeparator(
+            //    ui->symbolTable->model()->index(index.row(), SymbolTableModel::Row::NAME).data(Qt::DisplayRole).toString()));
+
+            auto copyAddressAction = new QAction("Copy Address to Clipboard", this);
+            menu->addAction(copyAddressAction);
+            connect(copyAddressAction, &QAction::triggered, this, [=]() {
+                auto addr = ui->symbolTable->model()->index(index.row(), SymbolTableModel::Row::ADDRESS).data(Qt::DisplayRole).toString();
+                QApplication::clipboard()->setText(addr);
+            });
+
+            menu->popup(ui->symbolTable->viewport()->mapToGlobal(point));
+        }
     }
 
 } // namespace L0::UI
