@@ -34,8 +34,8 @@
 #include <UI/Panels/WorkspacePanel.hpp>
 #include <UI/Panels/TextEditPanel.hpp>
 #include <UI/Panels/AppLogPanel.hpp>
+#include <UI/Panels/HexEditorPanel.hpp>
 #include <UI/Panels/Debugger/SymbolListPanel.hpp>
-#include <UI/Panels/Debugger/HexEditorPanel.hpp>
 
 #include <Core/ELF/ELF_Reader.hpp>
 
