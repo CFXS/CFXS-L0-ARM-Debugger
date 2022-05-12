@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -208,6 +208,49 @@ namespace L0::ELF {
             size_t startAddressOffset = 0;
             bool startAddressSet      = false;
 
+            for (auto section : targetMemSections) {
+                auto name          = GetSectionName(section);
+                QString memTypeStr = [&]() {
+                    switch (section->flags) {
+                        case ELF32::SectionFlags::RX: return "[FLASH]";
+                        case ELF32::SectionFlags::RW:
+                        case ELF32::SectionFlags::RWX: return "[RAM]  ";
+                        case ELF32::SectionFlags::R: return "[ROM]  ";
+                        default: return ToString(section->flags);
+                    }
+                }();
+
+                LOG_CORE_TRACE(" - {:16} {} 0x{:08X}-0x{:08X} ({} bytes)",
+                               name,
+                               memTypeStr,
+                               section->address,
+                               section->address + section->size,
+                               section->size);
+
+                // prepare target bin buffer
+                if ((section->type == ELF32::SectionType::PROGBITS) && section->size) {
+                    try {
+                        if (!startAddressSet) {
+                            startAddressSet    = true;
+                            startAddressOffset = section->address;
+                        }
+                        auto sectionSize    = section->size;
+                        auto loadAddress    = section->address - startAddressOffset;
+                        auto fileExpandSize = loadAddress + sectionSize;
+
+                        if (fileExpandSize) {
+                            if (fileExpandSize > (size_t)m_TargetBinary.size())
+                                m_TargetBinary.resize(fileExpandSize);
+                        }
+                    } catch (const std::exception& e) {
+                        LOG_CORE_CRITICAL("Failed to resize ELF target binary buffer ({})", e.what());
+                        return false;
+                    }
+                }
+
+                memset(m_TargetBinary.data(), 0, m_TargetBinary.size());
+            }
+
             LOG_CORE_TRACE("Target physical memory sections:");
             for (auto section : targetMemSections) {
                 auto name          = GetSectionName(section);
@@ -230,33 +273,16 @@ namespace L0::ELF {
 
                 // if section is a part of target firmware
                 if ((section->type == ELF32::SectionType::PROGBITS) && section->size) {
-                    try {
-                        if (!startAddressSet) {
-                            startAddressSet    = true;
-                            startAddressOffset = section->address;
-                        }
-                        auto sectionSize    = section->size;
-                        auto loadAddress    = section->address - startAddressOffset;
-                        auto fileExpandSize = loadAddress + sectionSize;
+                    auto sectionSize = section->size;
+                    auto loadAddress = section->address - startAddressOffset;
 
-                        if (fileExpandSize) {
-                            if (fileExpandSize > (size_t)m_TargetBinary.size())
-                                m_TargetBinary.resize(fileExpandSize);
-
-                            auto blockData = GetSectionData<uint8_t>(section);
-                            if (!blockData) {
-                                LOG_CORE_ERROR("Failed to get target binary section data ({})", name);
-                                return false;
-                            }
-
-                            memcpy(m_TargetBinary.data() + loadAddress, blockData, sectionSize);
-                        } else {
-                            LOG_CORE_WARN("Skip section {} - size is 0", name);
-                        }
-                    } catch (const std::exception& e) {
-                        LOG_CORE_CRITICAL("Failed to resize ELF target binary buffer ({})", e.what());
+                    auto blockData = GetSectionData<uint8_t>(section);
+                    if (!blockData) {
+                        LOG_CORE_ERROR("Failed to get target binary section data ({})", name);
                         return false;
                     }
+
+                    memcpy(m_TargetBinary.data() + loadAddress, blockData, sectionSize);
                 }
             }
 

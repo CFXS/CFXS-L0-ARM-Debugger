@@ -29,6 +29,9 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QFile>
+#include <QMenu>
+#include <QClipboard>
+#include <QAction>
 
 #include "ui_HexEditorPanel.h"
 
@@ -45,7 +48,7 @@ namespace L0::UI {
         m_BottomLabel = new QLabel;
         ui->content->layout()->addWidget(m_BottomLabel);
         m_BottomLabel->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-        m_BottomLabel->setFixedHeight(18);
+        m_BottomLabel->setFixedHeight(18 * 2);
         m_BottomLabel->setAlignment(Qt::AlignVCenter);
         m_BottomLabel->setObjectName("monospaceTextObject");
 
@@ -146,6 +149,11 @@ namespace L0::UI {
         m_HexEditor->setReadOnly(true);
         m_HexEditor->SetFontSize(14);
 
+        m_HexEditor->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(m_HexEditor, &QHexEdit::customContextMenuRequested, [=](const QPoint& point) {
+            OpenEditorContextMenu(point);
+        });
+
         connect(m_HexEditor, &QHexEdit::currentAddressChanged, [=](qint64 cursorPos) {
             static char infoStr[256];
             static char valueStr[64];
@@ -163,25 +171,28 @@ namespace L0::UI {
                     case 2:
                         snprintf(valueStr,
                                  sizeof(valueStr),
-                                 "| LE: 0x%X | BE: 0x%X",
+                                 "\nLE: 0x%X | BE: 0x%X",
                                  qToLittleEndian(*(uint16_t*)data.data()),
                                  qToBigEndian(*(uint16_t*)data.data()));
                         break;
                     case 4:
                         snprintf(valueStr,
                                  sizeof(valueStr),
-                                 "| LE: 0x%X | BE: 0x%X",
+                                 "\nLE: 0x%X | BE: 0x%X",
                                  qToLittleEndian(*(uint32_t*)data.data()),
                                  qToBigEndian(*(uint32_t*)data.data()));
                         break;
                     case 8:
                         snprintf(valueStr,
                                  sizeof(valueStr),
-                                 "| LE: 0x%llX | BE: 0x%llX",
+                                 "\nLE: 0x%llX | BE: 0x%llX",
                                  qToLittleEndian(*(uint64_t*)data.data()),
                                  qToBigEndian(*(uint64_t*)data.data()));
                         break;
-                    default: valueStr[0] = 0; break;
+                    default:
+                        valueStr[0] = '\n';
+                        valueStr[1] = '\0';
+                        break;
                 }
 
                 snprintf(infoStr,
@@ -195,7 +206,7 @@ namespace L0::UI {
                          m_HexEditor->GetSelectionEnd() - 1,
                          valueStr);
             } else {
-                snprintf(infoStr, sizeof(infoStr), "Cursor: %llu(0x%llX)", cursorPos, cursorPos);
+                snprintf(infoStr, sizeof(infoStr), "Cursor: %llu(0x%llX)\n ", cursorPos, cursorPos);
             }
             m_BottomLabel->setText(infoStr);
         });
@@ -241,6 +252,65 @@ namespace L0::UI {
         setProperty("absoluteFilePath", filePath);
 
         return true;
+    }
+
+    void HexEditorPanel::OpenEditorContextMenu(const QPoint& point) {
+        auto menu    = new QMenu(this);
+        auto selSize = m_HexEditor->GetSelectionSize();
+
+        if (selSize == 2 || selSize == 4 || selSize == 8) {
+            auto bdata = m_HexEditor->GetChunkData(m_HexEditor->GetSelectionStart(), m_HexEditor->GetSelectionSize());
+            static char valueStr_LE[32];
+            static char valueStr_BE[32];
+
+            switch (selSize) {
+                case 2:
+                    snprintf(valueStr_LE, sizeof(valueStr_LE), "0x%X", qToLittleEndian(*(uint16_t*)bdata.data()));
+                    snprintf(valueStr_BE, sizeof(valueStr_BE), "0x%X", qToBigEndian(*(uint16_t*)bdata.data()));
+                    break;
+                case 4:
+                    snprintf(valueStr_LE, sizeof(valueStr_LE), "0x%X", qToLittleEndian(*(uint32_t*)bdata.data()));
+                    snprintf(valueStr_BE, sizeof(valueStr_BE), "0x%X", qToBigEndian(*(uint32_t*)bdata.data()));
+                    break;
+                case 8:
+                    snprintf(valueStr_LE, sizeof(valueStr_LE), "0x%llX", qToLittleEndian(*(uint64_t*)bdata.data()));
+                    snprintf(valueStr_BE, sizeof(valueStr_BE), "0x%llX", qToBigEndian(*(uint64_t*)bdata.data()));
+                    break;
+                default: return;
+            }
+
+            auto copyValueLE = new QAction(QSL("Copy Value (%1)").arg(valueStr_LE), this);
+            menu->addAction(copyValueLE);
+            connect(copyValueLE, &QAction::triggered, this, [=]() {
+                QApplication::clipboard()->setText(valueStr_LE);
+            });
+
+            auto copyValueBE = new QAction(QSL("Copy Value (%1)").arg(valueStr_BE), this);
+            menu->addAction(copyValueBE);
+            connect(copyValueBE, &QAction::triggered, this, [=]() {
+                QApplication::clipboard()->setText(valueStr_BE);
+            });
+        }
+
+        if (selSize) {
+            auto copyInitializer = new QAction(QSL("Copy as C Array"), this);
+            menu->addAction(copyInitializer);
+            connect(copyInitializer, &QAction::triggered, this, [=]() {
+                static char valueStr[8];
+                auto bdata           = m_HexEditor->GetChunkData(m_HexEditor->GetSelectionStart(), m_HexEditor->GetSelectionSize());
+                QString dataInitList = "";
+                qsizetype byteIndex  = 0;
+                for (auto b : bdata) {
+                    snprintf(valueStr, sizeof(valueStr), (byteIndex < bdata.size() - 1) ? "0x%02X, " : "0x%02X", (uint8_t)b);
+                    dataInitList += valueStr;
+                    byteIndex++;
+                }
+                QApplication::clipboard()->setText(dataInitList);
+            });
+        }
+
+        if (!menu->actions().isEmpty())
+            menu->popup(m_HexEditor->viewport()->mapToGlobal(point));
     }
 
 } // namespace L0::UI
