@@ -39,6 +39,8 @@
 
 #include <Core/ELF/ELF_Reader.hpp>
 
+#include <Core/Probe/JLink/JLink.hpp>
+
 using ads::CDockManager;
 using ads::CDockWidget;
 using ads::DockWidgetArea;
@@ -525,6 +527,53 @@ namespace L0::UI {
         return textEditPanel;
     }
 
+    static Probe::JLink* probe = nullptr;
+
+    static void Temp_LoadToTarget(const QString& path) {
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            LOG_CORE_ERROR("Failed to open file {}", path);
+            return;
+        }
+
+        auto prog = file.readAll();
+        file.close();
+
+        if (!probe) {
+            Target::SupportedDevices::LoadSupportedDevices();
+            auto& testDevice = Target::SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
+            probe            = new Probe::JLink;
+            probe->L0_SelectDevice(269301262);
+            probe->Probe_Disconnect();
+            probe->Probe_Connect();
+            probe->Target_SelectDebugInterface(Probe::I_Probe::DebugInterface::SWD);
+            probe->Target_SelectDevice(testDevice);
+            probe->Target_Connect();
+        }
+
+        probe->Target_Halt();
+        probe->Target_WriteProgram((uint8_t*)prog.data(), prog.size());
+        probe->Target_Reset();
+        probe->Target_Run();
+    }
+
+    static void Temp_EraseTarget() {
+        if (!probe) {
+            Target::SupportedDevices::LoadSupportedDevices();
+            auto& testDevice = Target::SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
+            probe            = new Probe::JLink;
+            probe->L0_SelectDevice(269301262);
+            probe->Probe_Disconnect();
+            probe->Probe_Connect();
+            probe->Target_SelectDebugInterface(Probe::I_Probe::DebugInterface::SWD);
+            probe->Target_SelectDevice(testDevice);
+            probe->Target_Connect();
+        }
+
+        probe->Target_Halt();
+        probe->Target_Erase();
+    }
+
     // Check what type of file this is and open it in either the text editor or a special editor
     void MainWindow::OpenFileHandler(const QString& path, const QString& type) {
         if (type == QSL("elf") || type == QSL("out")) {
@@ -533,9 +582,13 @@ namespace L0::UI {
             obj->LoadSTABS();
         } else if (type == QSL("$HexEditor")) {
             OpenHexEditor(path);
+        } else if (type == QSL("$LoadToTarget")) {
+            Temp_LoadToTarget(path);
+        } else if (type == QSL("$EraseTarget")) {
+            Temp_EraseTarget();
         } else {
             OpenFilePanel(path);
         }
-    }
+    } // namespace L0::UI
 
 } // namespace L0::UI

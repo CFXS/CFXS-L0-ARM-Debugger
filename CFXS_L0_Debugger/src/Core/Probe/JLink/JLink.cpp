@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -26,7 +26,7 @@
 namespace L0::Probe {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    static constexpr bool LOG_ENABLED       = false;
+    static constexpr bool LOG_ENABLED       = true;
     static constexpr bool WARN_LOG_ENABLED  = true;
     static constexpr bool ERROR_LOG_ENABLED = true;
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +70,10 @@ namespace L0::Probe {
 
         ErrorCode ec = GetDriver()->probe_SelectBySerialNumber_USB(serialNumber);
 
+        GetDriver()->probe_SetWarningCallback(Probe_WarningCallback);
+        GetDriver()->probe_SetErrorCallback(Probe_ErrorCallback);
+        GetDriver()->probe_SetLogCallback(Probe_LogCallback);
+
         if (ec != ErrorCode::OK) {
             LOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number {1} - {2}", fmt::ptr(this), serialNumber, ec);
             m_DeviceAssigned = false;
@@ -91,24 +95,24 @@ namespace L0::Probe {
 
     void JLink::Probe_LogCallback(const char* message) {
         if constexpr (LOG_ENABLED) {
-            LOG_PROBE_TRACE("[JLink@{0}][LOG] {1}", fmt::ptr(this), message ? message : "-");
+            LOG_PROBE_TRACE("[LOG] {}", message ? message : "-");
         }
     }
 
     void JLink::Probe_WarningCallback(const char* message) {
         if constexpr (WARN_LOG_ENABLED) {
-            LOG_PROBE_WARN("[JLink@{0}][WARN] >> {1}", fmt::ptr(this), message ? message : "-");
+            LOG_PROBE_WARN("[WARN] >> {}", message ? message : "-");
         }
     }
 
     void JLink::Probe_ErrorCallback(const char* message) {
         if constexpr (ERROR_LOG_ENABLED) {
-            LOG_PROBE_ERROR("[JLink@{0}][ERROR] >> {1}", fmt::ptr(this), message ? message : "-");
+            LOG_PROBE_ERROR("[ERROR] >> {}", message ? message : "-");
         }
     }
 
     void JLink::Probe_FlashProgressCallback(const char* action, const char* prog, int percentage) {
-        //LOG_PROBE_INFO("[JLink@{0}][PROG] >> {1} {2} {3}%", fmt::ptr(this), action ? action : "", prog ? prog : "", percentage);
+        LOG_PROBE_TRACE("[PROG] >> {} {} {}%", action ? action : "", prog ? prog : "", percentage);
         //m_FlashProgress = percentage / 100.0f;
     }
 
@@ -151,10 +155,9 @@ namespace L0::Probe {
             return false;
         }
 
-        //GetDriver()->probe_SetWarningCallback(s_ProbeCallbackEntries[m_ProbeIndex].warning);
-
         Probe_DisableFlashProgressPopup();
-        //GetDriver()->probe_SetFlashProgProgressCallback(s_ProbeCallbackEntries[m_ProbeIndex].flashProgress);
+        GetDriver()->probe_SetFlashProgProgressCallback(Probe_FlashProgressCallback);
+        //GetDriver()->probe_SetWarningCallback(s_ProbeCallbackEntries[m_ProbeIndex].warning);
 
         UpdateProbeInfo();
 
@@ -390,9 +393,6 @@ namespace L0::Probe {
     }
     bool JLink::Target_Run() {
         Target_Halt();
-
-        GetDriver()->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R15, 0x000354C5);
-        GetDriver()->target_WriteRegister((Driver::JLink_Types::CPU_Registers::ARM)Driver::JLink_Types::Cortex_M4::R13, 0x20012400);
         GetDriver()->target_Run();
         return true;
     }

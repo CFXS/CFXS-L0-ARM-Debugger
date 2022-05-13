@@ -220,13 +220,6 @@ namespace L0::ELF {
                     }
                 }();
 
-                LOG_CORE_TRACE(" - {:16} {} 0x{:08X}-0x{:08X} ({} bytes)",
-                               name,
-                               memTypeStr,
-                               section->address,
-                               section->address + section->size,
-                               section->size);
-
                 // prepare target bin buffer
                 if ((section->type == ELF32::SectionType::PROGBITS) && section->size) {
                     try {

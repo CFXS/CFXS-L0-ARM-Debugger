@@ -27,6 +27,7 @@
         <file alias="Icon/folder-l0">Images/UI/FileBrowser/folder-L0.png</file>
         <file alias="Icon/folder-l0-open">Images/UI/FileBrowser/folder-L0-open.png</file>
 
+        <file alias="Icon/console">Images/UI/FileBrowser/console.svg</file>
         <file alias="Icon/file">Images/UI/FileBrowser/file.svg</file>
         <file alias="Icon/doc">Images/UI/FileBrowser/document.svg</file>
         <file alias="Icon/asm">Images/UI/FileBrowser/assembly.svg</file>

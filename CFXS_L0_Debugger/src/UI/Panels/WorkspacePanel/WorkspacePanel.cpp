@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -114,6 +114,26 @@ namespace L0::UI {
         });
 
         if (info.isFile()) {
+            if (info.suffix() == "bin") {
+                menu->addSeparator();
+
+                // Load to connected device
+                auto loadToDevice = new QAction(QPixmap(QSL(":/Icon/console")), QSL("Flash Target"), this);
+                menu->addAction(loadToDevice);
+                connect(loadToDevice, &QAction::triggered, this, [=]() {
+                    LOG_CORE_TRACE("Load to target \"{}\"", info.absoluteFilePath());
+                    emit RequestOpenFile(info.absoluteFilePath(), QSL("$LoadToTarget"));
+                });
+
+                // Load to connected device
+                auto eraseDev = new QAction(QPixmap(QSL(":/Icon/l0")), QSL("Erase Target"), this);
+                menu->addAction(eraseDev);
+                connect(eraseDev, &QAction::triggered, this, [=]() {
+                    LOG_CORE_TRACE("Erase target \"{}\"", info.absoluteFilePath());
+                    emit RequestOpenFile(info.absoluteFilePath(), QSL("$EraseTarget"));
+                });
+            }
+
             menu->addSeparator();
 
             // Open as text file
