@@ -48,7 +48,7 @@ namespace L0::UI {
         m_BottomLabel = new QLabel;
         ui->content->layout()->addWidget(m_BottomLabel);
         m_BottomLabel->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
-        m_BottomLabel->setFixedHeight(18 * 2);
+        m_BottomLabel->setFixedHeight(18);
         m_BottomLabel->setAlignment(Qt::AlignVCenter);
         m_BottomLabel->setObjectName("monospaceTextObject");
 
@@ -156,7 +156,6 @@ namespace L0::UI {
 
         connect(m_HexEditor, &QHexEdit::currentAddressChanged, [=](qint64 cursorPos) {
             static char infoStr[256];
-            static char valueStr[64];
 
             if (m_HexEditor->data().isEmpty()) {
                 m_BottomLabel->setText("");
@@ -167,44 +166,15 @@ namespace L0::UI {
             if (selSize) {
                 auto data = m_HexEditor->GetChunkData(m_HexEditor->GetSelectionStart(), m_HexEditor->GetSelectionSize());
 
-                switch (selSize) {
-                    case 2:
-                        snprintf(valueStr,
-                                 sizeof(valueStr),
-                                 "\nLE: 0x%X | BE: 0x%X",
-                                 qToLittleEndian(*(uint16_t*)data.data()),
-                                 qToBigEndian(*(uint16_t*)data.data()));
-                        break;
-                    case 4:
-                        snprintf(valueStr,
-                                 sizeof(valueStr),
-                                 "\nLE: 0x%X | BE: 0x%X",
-                                 qToLittleEndian(*(uint32_t*)data.data()),
-                                 qToBigEndian(*(uint32_t*)data.data()));
-                        break;
-                    case 8:
-                        snprintf(valueStr,
-                                 sizeof(valueStr),
-                                 "\nLE: 0x%llX | BE: 0x%llX",
-                                 qToLittleEndian(*(uint64_t*)data.data()),
-                                 qToBigEndian(*(uint64_t*)data.data()));
-                        break;
-                    default:
-                        valueStr[0] = '\n';
-                        valueStr[1] = '\0';
-                        break;
-                }
-
                 snprintf(infoStr,
                          sizeof(infoStr),
-                         "Cursor: %llu(0x%llX) | Selection: %llu byte%s [0x%llX - 0x%llX] %s",
+                         "Cursor: %llu(0x%llX) | Selection: %llu byte%s [0x%llX - 0x%llX]",
                          cursorPos,
                          cursorPos,
                          selSize,
                          selSize == 1 ? "" : "s",
                          m_HexEditor->GetSelectionStart(),
-                         m_HexEditor->GetSelectionEnd() - 1,
-                         valueStr);
+                         m_HexEditor->GetSelectionEnd() - 1);
             } else {
                 snprintf(infoStr, sizeof(infoStr), "Cursor: %llu(0x%llX)\n ", cursorPos, cursorPos);
             }
