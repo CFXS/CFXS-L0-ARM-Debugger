@@ -80,7 +80,7 @@ namespace L0::Probe {
         } else {
             LOG_PROBE_TRACE("[JLink@{0}] Probe {1} selected", fmt::ptr(this), serialNumber);
 
-            m_SerialNumberString = std::to_string(serialNumber);
+            m_SerialNumberString = QString::number(serialNumber);
 
             m_DeviceAssigned = true;
         }
@@ -119,11 +119,11 @@ namespace L0::Probe {
     /////////////////////////////////////////////////////////////
     // Probe
 
-    const std::string& JLink::GetModelName() const {
+    const QString& JLink::GetModelName() const {
         return m_ModelName;
     }
 
-    const std::string& JLink::GetSerialNumberString() const {
+    const QString& JLink::GetSerialNumberString() const {
         return m_SerialNumberString;
     }
 
@@ -225,6 +225,7 @@ namespace L0::Probe {
 
     // TODO: Implement error reason callback for higher level callers
     bool JLink::Target_SelectDebugInterface(DebugInterface interface) {
+        m_DebugInterface = interface;
         switch (interface) {
             case DebugInterface::SWD: {
                 TargetInterfaceMask supportedInterfaces;
@@ -236,6 +237,19 @@ namespace L0::Probe {
                     return true;
                 } else {
                     LOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"SWD\" - not supported", fmt::ptr(this));
+                    return false;
+                }
+            }
+            case DebugInterface::JTAG: {
+                TargetInterfaceMask supportedInterfaces;
+                GetDriver()->target_GetAvailableInterfaces(&supportedInterfaces);
+
+                if (supportedInterfaces & TargetInterfaceMask::JTAG) {
+                    GetDriver()->target_SelectInterface(TargetInterface::JTAG);
+                    LOG_PROBE_TRACE("[JLink@{0}] Selected JTAG target interface", fmt::ptr(this));
+                    return true;
+                } else {
+                    LOG_PROBE_ERROR("[JLink@{0}] Failed to select target interface \"JTAG\" - not supported", fmt::ptr(this));
                     return false;
                 }
             }
@@ -314,6 +328,8 @@ namespace L0::Probe {
     bool JLink::Target_Reset(bool haltAfterReset) {
         ErrorCode ec;
 
+        GetDriver()->target_SetResetType(L0::Probe::Driver::JLink_Types::ResetType::HALT_DBGRQ); // XXX: TEMPORARY
+
         if (haltAfterReset) {
             if (m_ProbeCapabilities & ProbeCapabilities::RESET_STOP_TIMED) { // can halt immediately after reset
                 ec = GetDriver()->target_Reset();
@@ -390,6 +406,9 @@ namespace L0::Probe {
 
     bool JLink::Target_Halt() {
         return GetDriver()->target_Halt();
+    }
+    void JLink::Target_WaitForHalt(int to) {
+        GetDriver()->target_WaitForHalt(to);
     }
     bool JLink::Target_Run() {
         Target_Halt();

@@ -117,7 +117,6 @@ namespace L0::UI {
             if (info.suffix() == "bin") {
                 menu->addSeparator();
 
-                // Load to connected device
                 auto loadToDevice = new QAction(QPixmap(QSL(":/Icon/console")), QSL("Flash Target"), this);
                 menu->addAction(loadToDevice);
                 connect(loadToDevice, &QAction::triggered, this, [=]() {
@@ -125,12 +124,30 @@ namespace L0::UI {
                     emit RequestOpenFile(info.absoluteFilePath(), QSL("$LoadToTarget"));
                 });
 
-                // Load to connected device
                 auto eraseDev = new QAction(QPixmap(QSL(":/Icon/l0")), QSL("Erase Target"), this);
                 menu->addAction(eraseDev);
                 connect(eraseDev, &QAction::triggered, this, [=]() {
                     LOG_CORE_TRACE("Erase target \"{}\"", info.absoluteFilePath());
                     emit RequestOpenFile(info.absoluteFilePath(), QSL("$EraseTarget"));
+                });
+
+                menu->addSeparator();
+                auto op1 = new QAction(QPixmap(QSL(":/Icon/hex")), QSL("Set Part A [Pad 64kB]"), this);
+                menu->addAction(op1);
+                connect(op1, &QAction::triggered, this, [=]() {
+                    emit RequestOpenFile(info.absoluteFilePath(), QSL("$GluePartA64"));
+                });
+
+                auto op2 = new QAction(QPixmap(QSL(":/Icon/hex")), QSL("Set Part A [Pad 128kB]"), this);
+                menu->addAction(op2);
+                connect(op2, &QAction::triggered, this, [=]() {
+                    emit RequestOpenFile(info.absoluteFilePath(), QSL("$GluePartA128"));
+                });
+
+                auto op3 = new QAction(QPixmap(QSL(":/Icon/bin")), QSL("Merge With Part A"), this);
+                menu->addAction(op3);
+                connect(op3, &QAction::triggered, this, [=]() {
+                    emit RequestOpenFile(info.absoluteFilePath(), QSL("$MergeA"));
                 });
             }
 

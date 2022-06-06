@@ -55,8 +55,8 @@ namespace L0::Probe {
         bool Probe_Disconnect() override;
         bool Probe_IsConnected() const override;
 
-        const std::string& GetModelName() const;
-        const std::string& GetSerialNumberString() const;
+        const QString& GetModelName() const;
+        const QString& GetSerialNumberString() const;
 
         /////////////////////////////////////////
         // Probe target overrides
@@ -68,6 +68,8 @@ namespace L0::Probe {
         bool Target_Erase() override;
         bool Target_WriteProgram(const uint8_t* data, uint32_t size) override;
         bool Target_Reset(bool haltAfterReset = true) override;
+
+        void Target_WaitForHalt(int to);
 
         uint8_t Target_ReadMemory_8(uint32_t address, bool* success = nullptr) override;
         uint16_t Target_ReadMemory_16(uint32_t address, bool* success = nullptr) override;
@@ -85,7 +87,7 @@ namespace L0::Probe {
 
     public:
         JLink();
-        static std::vector<JLink*> GetConnectedProbes();
+        static std::vector<Driver::JLink_Types::ProbeInfo> GetConnectedProbes();
 
     private:
         static Driver::JLink_Driver* GetDriver() {
@@ -123,10 +125,12 @@ namespace L0::Probe {
         /// True if physical device is assigned to drive
         bool m_DeviceAssigned = false;
 
+        DebugInterface m_DebugInterface;
+
         Driver::JLink_Types::ProbeCapabilities m_ProbeCapabilities = {}; // initialize to 0
 
-        std::string m_ModelName          = "JLink";
-        std::string m_SerialNumberString = "?";
+        QString m_ModelName          = "JLink";
+        QString m_SerialNumberString = "?";
     };
 
 } // namespace L0::Probe

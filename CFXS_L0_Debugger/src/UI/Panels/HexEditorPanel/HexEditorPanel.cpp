@@ -33,6 +33,19 @@
 #include <QClipboard>
 #include <QAction>
 
+///////////////////////////////////////////
+// Test
+#include <Core/Probe/JLink/JLink.hpp>
+extern "C" {
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+}
+extern const char* g_TargetDeviceModel;
+extern uint32_t g_ProbeID;
+extern L0::Probe::JLink* g_JLink;
+///////////////////////////////////////////
+
 #include "ui_HexEditorPanel.h"
 
 namespace L0::UI {
@@ -52,7 +65,6 @@ namespace L0::UI {
         m_BottomLabel->setAlignment(Qt::AlignVCenter);
         m_BottomLabel->setObjectName("monospaceTextObject");
 
-        ui->searchTextBar->setPlaceholderText("Jump to Address...");
         ui->searchTextBar->setStyleSheet("QLineEdit{color: gray;}");
         ui->searchTextBar->setObjectName("monospaceTextObject");
         connect(ui->searchTextBar, qOverload<const QString&>(&QLineEdit::textChanged), [=](const QString& text) {
@@ -64,76 +76,7 @@ namespace L0::UI {
         });
 
         connect(ui->searchTextBar, &QLineEdit::returnPressed, [=]() {
-            auto val = ui->searchTextBar->text();
-            if (val.length() == 0) {
-                return;
-            }
-
-            uint64_t addr;
-            bool convOk;
-
-            enum _local_OP { NONE, ADD, SUB, MUL, DIV } op = _local_OP::NONE;
-
-            switch (val.at(0).toLatin1()) {
-                case '+': op = _local_OP::ADD; break;
-                case '-': op = _local_OP::SUB; break;
-                case '*': op = _local_OP::MUL; break;
-                case '/': op = _local_OP::DIV; break;
-                default:
-                    if (!val.at(0).isDigit()) {
-                        ui->searchTextBar->setText(QSL("Invalid operator '") + val.at(0) + QSL("'"));
-                        ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
-                        return;
-                    }
-            }
-
-            if (op != _local_OP::NONE) {
-                if (val.length() == 1) {
-                    ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
-                    return;
-                }
-                val = val.mid(1);
-            }
-
-            if (val.startsWith("0x")) {
-                addr = val.toULongLong(&convOk, 16);
-            } else if (val.startsWith("0b")) {
-                if (val.length() == 2) {
-                    convOk = false;
-                    addr   = 0; // unused variable warning
-                } else {
-                    addr = val.mid(2).toULongLong(&convOk, 2);
-                }
-            } else if (val.startsWith("0")) {
-                addr = val.toULongLong(&convOk, 8);
-            } else {
-                addr = val.toULongLong(&convOk, 10);
-            }
-
-            if (!convOk) {
-                ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
-                return;
-            }
-
-            switch (op) {
-                case _local_OP::NONE: break;
-                case _local_OP::ADD: addr = (m_HexEditor->cursorPosition() / 2) + addr; break;
-                case _local_OP::SUB: addr = (m_HexEditor->cursorPosition() / 2) - addr; break;
-                case _local_OP::MUL: addr = (m_HexEditor->cursorPosition() / 2) * addr; break;
-                case _local_OP::DIV:
-                    if (addr == 0) {
-                        ui->searchTextBar->setText(QSL("Division by Zero :("));
-                        ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
-                        return;
-                    }
-                    addr = (m_HexEditor->cursorPosition() / 2) / addr;
-                    break;
-            }
-
-            if (convOk) {
-                m_HexEditor->setCursorPosition(addr * 2); // x2 because of byte size (2 units/byte)
-                m_HexEditor->ensureVisible();
-            }
+            ProcessSearchExpression();
         });
 
         m_HexEditor->setObjectName("monospaceTextObject");
@@ -218,40 +161,68 @@ namespace L0::UI {
         QString cfgKey = objectName();
         cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
         LOG_UI_TRACE("HexEditorPanel save state - {}", cfgKey);
+
+        cfg->beginGroup(cfgKey);
+        cfg->setValue("searchBarContent", ui->searchTextBar->text());
+        cfg->endGroup();
     }
 
     void HexEditorPanel::LoadPanelState(QSettings* cfg) {
         QString cfgKey = objectName();
         cfgKey.replace('/', '\\'); // QSettings does not like '/' in keys
         LOG_UI_TRACE("HexEditorPanel load state - {}", cfgKey);
+
+        cfg->beginGroup(cfgKey);
+        if (cfg->value("searchBarContent").isValid()) {
+            ui->searchTextBar->setText(cfg->value("searchBarContent").toString());
+        }
+        cfg->endGroup();
     }
 
     bool HexEditorPanel::LoadFile(const QString& filePath) {
-        QFile file(filePath);
-        if (!file.open(QIODevice::ReadOnly)) {
-            LOG_UI_WARN("HexEditorPanel failed to open file {} ({})", filePath, file.errorString());
-            setWindowTitle(QSL("Hex Editor - No file loaded"));
-            return false;
-        }
+        if (filePath.startsWith("$FastMemoryView")) {
+            ui->searchTextBar->setPlaceholderText("Load Range... \"op = {addr, size}\"");
+            m_FastMemoryView = true;
 
-        m_HexEditor->setData(file.readAll());
-        file.close();
+            m_HexEditor->setData({});
 
-        QString relPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(filePath);
-
-        if (relPath != filePath) {
-            setObjectName(QSL("HexEditorPanel|./") + relPath);
-            tabWidget()->setToolTip(QSL("./") + relPath);
-        } else {
             setObjectName(QSL("HexEditorPanel|") + filePath);
             tabWidget()->setToolTip(filePath);
+
+            setWindowTitle(QSL("Fast Memory View (") + filePath + QSL(")"));
+
+            setProperty("virtualView", true);
+
+            return true;
+        } else {
+            ui->searchTextBar->setPlaceholderText("Jump to Address...");
+            m_FastMemoryView = false;
+            QFile file(filePath);
+            if (!file.open(QIODevice::ReadOnly)) {
+                LOG_UI_WARN("HexEditorPanel failed to open file {} ({})", filePath, file.errorString());
+                setWindowTitle(QSL("Hex Editor - No file loaded"));
+                return false;
+            }
+
+            m_HexEditor->setData(file.readAll());
+            file.close();
+
+            QString relPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(filePath);
+
+            if (relPath != filePath) {
+                setObjectName(QSL("HexEditorPanel|./") + relPath);
+                tabWidget()->setToolTip(QSL("./") + relPath);
+            } else {
+                setObjectName(QSL("HexEditorPanel|") + filePath);
+                tabWidget()->setToolTip(filePath);
+            }
+
+            setWindowTitle(QSL("Hex Editor - ") + QFileInfo(filePath).fileName());
+
+            setProperty("absoluteFilePath", filePath);
+
+            return true;
         }
-
-        setWindowTitle(QSL("Hex Editor - ") + QFileInfo(filePath).fileName());
-
-        setProperty("absoluteFilePath", filePath);
-
-        return true;
     }
 
     void HexEditorPanel::OpenEditorContextMenu(const QPoint& point) {
@@ -311,6 +282,142 @@ namespace L0::UI {
 
         if (!menu->actions().isEmpty())
             menu->popup(m_HexEditor->viewport()->mapToGlobal(point));
+    }
+
+    void HexEditorPanel::ProcessSearchExpression() {
+        if (m_FastMemoryView) {
+            if (!g_JLink) {
+                LOG_CORE_CRITICAL("FastMemoryView Error: Probe/Device not selected");
+                return;
+            }
+
+            if (!g_JLink->Probe_IsConnected() || !g_JLink->Target_IsConnected()) {
+                LOG_CORE_CRITICAL("FastMemoryView Error: Probe/Device not connected");
+                return;
+            }
+
+            lua_State* L = luaL_newstate();
+            luaL_openlibs(L);
+            auto stat = luaL_dostring(L, (ui->searchTextBar->text()).toStdString().c_str());
+            if (stat) {
+                LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
+                lua_close(L);
+                return;
+            }
+
+            lua_getglobal(L, "op");
+            if (!lua_istable(L, 1)) {
+                LOG_CORE_ERROR("FastMemoryView Lua Error: Invalid _G.op");
+                lua_close(L);
+                return;
+            }
+
+            lua_rawgeti(L, 1, 1);
+            lua_rawgeti(L, 1, 2);
+
+            if (!lua_isnumber(L, 2)) {
+                LOG_CORE_ERROR("FastMemoryView Lua Error: Address not a number");
+                lua_close(L);
+                return;
+            }
+            if (!lua_isnumber(L, 3)) {
+                LOG_CORE_ERROR("FastMemoryView Lua Error: Size not a number");
+                lua_close(L);
+                return;
+            }
+
+            auto addr = lua_tointeger(L, 2);
+            auto size = lua_tointeger(L, 3);
+
+            lua_close(L);
+            LOG_CORE_TRACE("FastMemoryView Memory Read [0x{:X} - 0x{:X} ({} bytes)]", addr, addr + size, size, size);
+
+            std::vector<char> readTemp;
+            readTemp.resize(size);
+            memset(readTemp.data(), 0, readTemp.size());
+            g_JLink->Target_Halt();
+            g_JLink->Target_WaitForHalt(1000);
+            g_JLink->Target_ReadMemoryTo(addr, readTemp.data(), size, L0::Probe::I_Probe::AccessWidth::_1);
+            g_JLink->Target_Run();
+            QByteArray readArray(readTemp.data(), readTemp.size());
+
+            auto sel0 = m_HexEditor->GetSelectionStart();
+            auto sel1 = m_HexEditor->GetSelectionEnd();
+            m_HexEditor->setData(readArray);
+            m_HexEditor->SetSelection(sel0, sel1);
+
+        } else {
+            auto val = ui->searchTextBar->text();
+            if (val.length() == 0) {
+                return;
+            }
+
+            uint64_t addr;
+            bool convOk;
+
+            enum _local_OP { NONE, ADD, SUB, MUL, DIV } op = _local_OP::NONE;
+
+            switch (val.at(0).toLatin1()) {
+                case '+': op = _local_OP::ADD; break;
+                case '-': op = _local_OP::SUB; break;
+                case '*': op = _local_OP::MUL; break;
+                case '/': op = _local_OP::DIV; break;
+                default:
+                    if (!val.at(0).isDigit()) {
+                        ui->searchTextBar->setText(QSL("Invalid operator '") + val.at(0) + QSL("'"));
+                        ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
+                        return;
+                    }
+            }
+
+            if (op != _local_OP::NONE) {
+                if (val.length() == 1) {
+                    ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
+                    return;
+                }
+                val = val.mid(1);
+            }
+
+            if (val.startsWith("0x")) {
+                addr = val.toULongLong(&convOk, 16);
+            } else if (val.startsWith("0b")) {
+                if (val.length() == 2) {
+                    convOk = false;
+                    addr   = 0; // unused variable warning
+                } else {
+                    addr = val.mid(2).toULongLong(&convOk, 2);
+                }
+            } else if (val.startsWith("0")) {
+                addr = val.toULongLong(&convOk, 8);
+            } else {
+                addr = val.toULongLong(&convOk, 10);
+            }
+
+            if (!convOk) {
+                ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
+                return;
+            }
+
+            switch (op) {
+                case _local_OP::NONE: break;
+                case _local_OP::ADD: addr = (m_HexEditor->cursorPosition() / 2) + addr; break;
+                case _local_OP::SUB: addr = (m_HexEditor->cursorPosition() / 2) - addr; break;
+                case _local_OP::MUL: addr = (m_HexEditor->cursorPosition() / 2) * addr; break;
+                case _local_OP::DIV:
+                    if (addr == 0) {
+                        ui->searchTextBar->setText(QSL("Division by Zero :("));
+                        ui->searchTextBar->setStyleSheet("QLineEdit{color: red;}");
+                        return;
+                    }
+                    addr = (m_HexEditor->cursorPosition() / 2) / addr;
+                    break;
+            }
+
+            if (convOk) {
+                m_HexEditor->setCursorPosition(addr * 2); // x2 because of byte size (2 units/byte)
+                m_HexEditor->ensureVisible();
+            }
+        }
     }
 
 } // namespace L0::UI
