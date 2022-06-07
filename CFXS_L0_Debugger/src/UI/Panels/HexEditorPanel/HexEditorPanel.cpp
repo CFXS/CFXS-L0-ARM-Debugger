@@ -49,6 +49,7 @@ namespace L0::ELF {
 extern const char* g_TargetDeviceModel;
 extern uint32_t g_ProbeID;
 extern L0::Probe::JLink* g_JLink;
+extern void StartConnection();
 ///////////////////////////////////////////
 
 #include "ui_HexEditorPanel.h"
@@ -341,13 +342,14 @@ namespace L0::UI {
                 }
 
                 bool s;
-                LOG_CORE_TRACE("FastMemoryView: ReadMem8 @ 0x%{:X}", addr);
                 auto val = g_JLink->Target_ReadMemory_8(addr, &s);
+                //LOG_CORE_TRACE("FastMemoryView: ReadMem8 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
                 } else {
                     lua_pushnil(L);
-                    LOG_CORE_ERROR("ReadMem8 read error");
+                    LOG_CORE_ERROR("ReadMem8 read error (0x{:X} - 0x{:X})", addr, addr + 1);
+                    ;
                 }
 
                 return 1;
@@ -363,13 +365,13 @@ namespace L0::UI {
                 }
 
                 bool s;
-                LOG_CORE_TRACE("FastMemoryView: ReadMem16 @ 0x%{:X}", addr);
                 auto val = g_JLink->Target_ReadMemory_16(addr, &s);
+                //LOG_CORE_TRACE("FastMemoryView: ReadMem16 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
                 } else {
                     lua_pushnil(L);
-                    LOG_CORE_ERROR("ReadMem16 read error");
+                    LOG_CORE_ERROR("ReadMem16 read error (0x{:X} - 0x{:X})", addr, addr + 1);
                 }
 
                 return 1;
@@ -385,13 +387,13 @@ namespace L0::UI {
                 }
 
                 bool s;
-                LOG_CORE_TRACE("FastMemoryView: ReadMem32 @ 0x%{:X}", addr);
                 auto val = g_JLink->Target_ReadMemory_32(addr, &s);
+                //LOG_CORE_TRACE("FastMemoryView: ReadMem32 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
                 } else {
                     lua_pushnil(L);
-                    LOG_CORE_ERROR("ReadMem32 read error");
+                    LOG_CORE_ERROR("ReadMem32 read error (0x{:X} - 0x{:X})", addr, addr + 3);
                 }
 
                 return 1;
@@ -407,13 +409,13 @@ namespace L0::UI {
                 }
 
                 bool s;
-                LOG_CORE_TRACE("FastMemoryView: ReadMem64 @ 0x%{:X}", addr);
                 auto val = g_JLink->Target_ReadMemory_64(addr, &s);
+                //LOG_CORE_TRACE("FastMemoryView: ReadMem64 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
                 } else {
                     lua_pushnil(L);
-                    LOG_CORE_ERROR("ReadMem64 read error");
+                    LOG_CORE_ERROR("ReadMem64 read error (0x{:X} - 0x{:X})", addr, addr + 7);
                 }
 
                 return 1;
@@ -421,21 +423,15 @@ namespace L0::UI {
             lua_setglobal(L, "ReadMem64");
 
             lua_pushcfunction(L, [](lua_State* L) -> int {
-                LOG_CORE_TRACE("Lua: {}", luaL_checkstring(L, 1));
+                LOG_CORE_TRACE("> {}", luaL_checkstring(L, 1));
                 return 0;
             });
             lua_setglobal(L, "__Print");
 
-            auto libStat = luaL_dostring(L,
-                                         "_G.Array = function(addr, elemSize, pos) return {addr + elemSize*pos, elemSize} end\n"
-                                         "_G.addrof = _G.__SymbolNameToAddress\n"
-                                         "_G.sizeof = _G.__SymbolNameToSize\n"
-                                         "_G.printf = function(...) _G.__Print(string.format(...)) end\n");
-
-            // Vector:
-            // _Myfirst
-            // _Mylast
-            // _Myend
+            QFile libFile(":/Lua/CFXS_Lib.lua");
+            libFile.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text);
+            auto libStat = luaL_dostring(L, libFile.readAll().data());
+            libFile.close();
 
             if (libStat) {
                 LOG_CORE_ERROR("FastMemoryView Lua Lib Error: {}", lua_tostring(L, -1));
@@ -471,48 +467,50 @@ namespace L0::UI {
                 }
             }
 
-            lua_getglobal(L, "op");
-            if (!lua_istable(L, 1)) {
+            lua_getglobal(L, "hex");
+            if (!(lua_istable(L, 1) || lua_isnil(L, 1))) {
                 LOG_CORE_ERROR("FastMemoryView Lua Error: Invalid _G.op");
                 lua_close(L);
                 g_JLink->Target_Run();
                 return;
             }
 
-            lua_rawgeti(L, 1, 1);
-            lua_rawgeti(L, 1, 2);
+            if (!lua_isnil(L, 1)) {
+                lua_rawgeti(L, 1, 1);
+                lua_rawgeti(L, 1, 2);
 
-            if (!lua_isnumber(L, 2)) {
-                LOG_CORE_ERROR("FastMemoryView Lua Error: Address not a number");
-                lua_close(L);
-                g_JLink->Target_Run();
-                return;
-            }
-            if (!lua_isnumber(L, 3)) {
-                LOG_CORE_ERROR("FastMemoryView Lua Error: Size not a number");
-                lua_close(L);
-                g_JLink->Target_Run();
-                return;
-            }
+                if (!lua_isnumber(L, 2)) {
+                    LOG_CORE_ERROR("FastMemoryView Lua Error: Address not a number");
+                    lua_close(L);
+                    g_JLink->Target_Run();
+                    return;
+                }
+                if (!lua_isnumber(L, 3)) {
+                    LOG_CORE_ERROR("FastMemoryView Lua Error: Size not a number");
+                    lua_close(L);
+                    g_JLink->Target_Run();
+                    return;
+                }
 
-            auto addr = lua_tointeger(L, 2);
-            auto size = lua_tointeger(L, 3);
+                auto addr = lua_tointeger(L, 2);
+                auto size = lua_tointeger(L, 3);
+
+                //LOG_CORE_TRACE("FastMemoryView Memory Read [0x{:X} - 0x{:X} ({} bytes)]", addr, addr + size, size, size);
+
+                std::vector<char> readTemp;
+                readTemp.resize(size);
+                memset(readTemp.data(), 0, readTemp.size());
+                g_JLink->Target_ReadMemoryTo(addr, readTemp.data(), size, L0::Probe::I_Probe::AccessWidth::_1);
+                QByteArray readArray(readTemp.data(), readTemp.size());
+
+                auto sel0 = m_HexEditor->GetSelectionStart();
+                auto sel1 = m_HexEditor->GetSelectionEnd();
+                m_HexEditor->setData(readArray);
+                m_HexEditor->SetSelection(sel0, sel1);
+            }
 
             lua_close(L);
-            LOG_CORE_TRACE("FastMemoryView Memory Read [0x{:X} - 0x{:X} ({} bytes)]", addr, addr + size, size, size);
-
-            std::vector<char> readTemp;
-            readTemp.resize(size);
-            memset(readTemp.data(), 0, readTemp.size());
-            g_JLink->Target_ReadMemoryTo(addr, readTemp.data(), size, L0::Probe::I_Probe::AccessWidth::_1);
             g_JLink->Target_Run();
-            QByteArray readArray(readTemp.data(), readTemp.size());
-
-            auto sel0 = m_HexEditor->GetSelectionStart();
-            auto sel1 = m_HexEditor->GetSelectionEnd();
-            m_HexEditor->setData(readArray);
-            m_HexEditor->SetSelection(sel0, sel1);
-
         } else {
             auto val = ui->searchTextBar->text();
             if (val.length() == 0) {

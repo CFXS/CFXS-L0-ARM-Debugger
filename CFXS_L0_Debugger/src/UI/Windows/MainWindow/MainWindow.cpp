@@ -69,8 +69,9 @@ using ads::DockWidgetArea;
 //    Panel #4 - TextEditPanel|./CFXS_RTOS_Test/src/main.cpp
 //    Panel #5 - TextEditPanel|./CFXS_RTOS_Test/src/_TM4C129X_Startup_RTOS.cpp
 
+QString s_ELFPath;
 L0::Probe::JLink* g_JLink = nullptr;
-static void StartConnection() {
+void StartConnection() {
     if (g_ProbeID && g_TargetDeviceModel) {
         if (!g_JLink) {
             g_JLink = new L0::Probe::JLink;
@@ -235,6 +236,10 @@ namespace L0::UI {
 
         cfg.setValue(KEY_WINDOW_DATA, state);
 
+        cfg.setValue("_temp_TargetDeviceModel", QString(g_TargetDeviceModel));
+        cfg.setValue("_temp_ProbeID", g_ProbeID);
+        cfg.setValue("_ELF", s_ELFPath);
+
         emit StateDataReady(&cfg);
     }
 
@@ -337,6 +342,21 @@ namespace L0::UI {
                         break;
                     }
                     default: LOG_UI_ERROR("MainWindow failed to load state - unsupported version"); return;
+                }
+
+                static char tmpx[64];
+                if (stateData.value("_temp_TargetDeviceModel").isValid()) {
+                    snprintf(tmpx, 64, "%s", stateData.value("_temp_TargetDeviceModel").toString().toStdString().c_str());
+                    if (strlen(tmpx))
+                        g_TargetDeviceModel = tmpx;
+                }
+                g_ProbeID = stateData.value("_temp_ProbeID").toUInt();
+                StartConnection();
+                if (stateData.value("_ELF").isValid()) {
+                    s_ELFPath = stateData.value("_ELF").toString();
+                    auto obj  = new ELF::ELF_Reader(s_ELFPath);
+                    obj->LoadFile();
+                    obj->LoadSTABS();
                 }
             } else {
                 LOG_UI_ERROR("MainWindow failed to load state - corrupted data");
@@ -759,7 +779,8 @@ namespace L0::UI {
     // Check what type of file this is and open it in either the text editor or a special editor
     void MainWindow::OpenFileHandler(const QString& path, const QString& type) {
         if (type == QSL("elf") || type == QSL("out")) {
-            auto obj = new ELF::ELF_Reader(path);
+            s_ELFPath = path;
+            auto obj  = new ELF::ELF_Reader(path);
             obj->LoadFile();
             obj->LoadSTABS();
         } else if (type == QSL("$HexEditor")) {
