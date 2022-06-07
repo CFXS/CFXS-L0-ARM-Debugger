@@ -64,7 +64,7 @@ namespace L0::UI {
         });
 
         connect(ui->searchTextBar, &QLineEdit::returnPressed, [=]() {
-            auto val = ui->searchTextBar->text();
+            auto val = ui->searchTextBar->text().trimmed();
             if (val.length() == 0) {
                 return;
             }
@@ -176,7 +176,7 @@ namespace L0::UI {
                          m_HexEditor->GetSelectionStart(),
                          m_HexEditor->GetSelectionEnd() - 1);
             } else {
-                snprintf(infoStr, sizeof(infoStr), "Cursor: %llu(0x%llX)\n ", cursorPos, cursorPos);
+                snprintf(infoStr, sizeof(infoStr), "Cursor: %llu(0x%llX)", cursorPos, cursorPos);
             }
             m_BottomLabel->setText(infoStr);
         });
