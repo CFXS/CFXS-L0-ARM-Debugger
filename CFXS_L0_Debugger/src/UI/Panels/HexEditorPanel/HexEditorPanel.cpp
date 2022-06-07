@@ -442,6 +442,8 @@ namespace L0::UI {
             g_JLink->Target_Halt();
             g_JLink->Target_WaitForHalt(2000);
 
+            LOG_CORE_TRACE("FastMemoryView Exec \"{}\"", ui->searchTextBar->text());
+
             if (ui->searchTextBar->text().at(0).toLatin1() == '$') {
                 // load from file
                 QFile f(ui->searchTextBar->text().mid(1));
