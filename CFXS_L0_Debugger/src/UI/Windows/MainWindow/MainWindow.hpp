@@ -111,7 +111,7 @@ namespace L0::UI {
         std::unique_ptr<Ui::MainWindow> ui;
         ads::CDockManager *m_DockManager;
 
-        static std::vector<ActionEntryDefinition> s_ActionDefinitions_View;
+        static std::vector<ActionEntryDefinition> *s_ActionDefinitions_View;
 
         // Panels
         WorkspacePanel *m_Panel_Workspace   = nullptr;

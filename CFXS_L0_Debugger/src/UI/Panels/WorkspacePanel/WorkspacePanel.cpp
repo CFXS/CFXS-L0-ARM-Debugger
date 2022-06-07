@@ -27,6 +27,7 @@
 #include <QProcess>
 #include <QScrollBar>
 #include <QTimer>
+#include <QClipboard>
 
 #include "ui_WorkspacePanel.h"
 
@@ -111,6 +112,12 @@ namespace L0::UI {
                 LOG_UI_TRACE("Show Folder in File Explorer \"{}\"", info.absolutePath());
                 PlatformUtils::ShowInFileExplorer(info.absolutePath());
             }
+        });
+
+        auto copyAbsPath = new QAction(QPixmap(QSL(":/Icon/folder-open")), "Copy Absolute Path", this);
+        menu->addAction(copyAbsPath);
+        connect(copyAbsPath, &QAction::triggered, this, [=]() {
+            QApplication::clipboard()->setText(info.absoluteFilePath());
         });
 
         if (info.isFile()) {

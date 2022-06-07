@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -141,6 +141,18 @@ namespace L0::UI {
             connect(copyAddressAction, &QAction::triggered, this, [=]() {
                 auto addr = ui->symbolTable->model()->index(index.row(), SymbolTableModel::Row::ADDRESS).data(Qt::DisplayRole).toString();
                 QApplication::clipboard()->setText(addr);
+            });
+
+            menu->addSeparator();
+
+            auto copyNameAction = new QAction("Copy Name to Clipboard", this);
+            menu->addAction(copyNameAction);
+            connect(copyNameAction, &QAction::triggered, this, [=]() {
+                auto name = ui->symbolTable->model()
+                                ->index(index.row(), SymbolTableModel::Row::NAME)
+                                .data(SymbolTableModel::Role::SymbolMapName)
+                                .toString();
+                QApplication::clipboard()->setText(name);
             });
 
             menu->popup(ui->symbolTable->viewport()->mapToGlobal(point));

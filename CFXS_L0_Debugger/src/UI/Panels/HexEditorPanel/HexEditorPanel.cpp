@@ -41,6 +41,11 @@ extern "C" {
 #include <lualib.h>
 #include <lauxlib.h>
 }
+#include <Core/ELF/ELF_Reader.hpp>
+
+namespace L0::ELF {
+    extern ELF_Reader* g_Test_ELF_Reader;
+}
 extern const char* g_TargetDeviceModel;
 extern uint32_t g_ProbeID;
 extern L0::Probe::JLink* g_JLink;
@@ -191,7 +196,7 @@ namespace L0::UI {
 
             setWindowTitle(QSL("Fast Memory View (") + filePath + QSL(")"));
 
-            setProperty("virtualView", true);
+            setProperty("MULTI_INSTANCE", true);
 
             return true;
         } else {
@@ -296,19 +301,181 @@ namespace L0::UI {
                 return;
             }
 
+            if (!L0::ELF::g_Test_ELF_Reader) {
+                LOG_CORE_CRITICAL("FastMemoryView Error: ELF file not loaded");
+                return;
+            }
+
             lua_State* L = luaL_newstate();
             luaL_openlibs(L);
-            auto stat = luaL_dostring(L, (ui->searchTextBar->text()).toStdString().c_str());
-            if (stat) {
-                LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto name = luaL_checkstring(L, 1);
+                auto it   = L0::ELF::g_Test_ELF_Reader->GetBasicSymbolTable().find(name);
+                if (it != L0::ELF::g_Test_ELF_Reader->GetBasicSymbolTable().end()) {
+                    lua_pushinteger(L, (*it).address);
+                } else {
+                    lua_pushnil(L);
+                }
+                return 1;
+            });
+            lua_setglobal(L, "__SymbolNameToAddress");
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto name = luaL_checkstring(L, 1);
+                auto it   = L0::ELF::g_Test_ELF_Reader->GetBasicSymbolTable().find(name);
+                if (it != L0::ELF::g_Test_ELF_Reader->GetBasicSymbolTable().end()) {
+                    lua_pushinteger(L, (*it).size);
+                } else {
+                    lua_pushnil(L);
+                }
+                return 1;
+            });
+            lua_setglobal(L, "__SymbolNameToSize");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr = luaL_checkinteger(L, 1);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem8 invalid addr");
+                    return 1;
+                }
+
+                bool s;
+                LOG_CORE_TRACE("FastMemoryView: ReadMem8 @ 0x%{:X}", addr);
+                auto val = g_JLink->Target_ReadMemory_8(addr, &s);
+                if (s) {
+                    lua_pushinteger(L, val);
+                } else {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem8 read error");
+                }
+
+                return 1;
+            });
+            lua_setglobal(L, "ReadMem8");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr = luaL_checkinteger(L, 1);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem16 invalid addr");
+                    return 1;
+                }
+
+                bool s;
+                LOG_CORE_TRACE("FastMemoryView: ReadMem16 @ 0x%{:X}", addr);
+                auto val = g_JLink->Target_ReadMemory_16(addr, &s);
+                if (s) {
+                    lua_pushinteger(L, val);
+                } else {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem16 read error");
+                }
+
+                return 1;
+            });
+            lua_setglobal(L, "ReadMem16");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr = luaL_checkinteger(L, 1);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem32 invalid addr");
+                    return 1;
+                }
+
+                bool s;
+                LOG_CORE_TRACE("FastMemoryView: ReadMem32 @ 0x%{:X}", addr);
+                auto val = g_JLink->Target_ReadMemory_32(addr, &s);
+                if (s) {
+                    lua_pushinteger(L, val);
+                } else {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem32 read error");
+                }
+
+                return 1;
+            });
+            lua_setglobal(L, "ReadMem32");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr = luaL_checkinteger(L, 1);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem64 invalid addr");
+                    return 1;
+                }
+
+                bool s;
+                LOG_CORE_TRACE("FastMemoryView: ReadMem64 @ 0x%{:X}", addr);
+                auto val = g_JLink->Target_ReadMemory_64(addr, &s);
+                if (s) {
+                    lua_pushinteger(L, val);
+                } else {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("ReadMem64 read error");
+                }
+
+                return 1;
+            });
+            lua_setglobal(L, "ReadMem64");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                LOG_CORE_TRACE("Lua: {}", luaL_checkstring(L, 1));
+                return 0;
+            });
+            lua_setglobal(L, "__Print");
+
+            auto libStat = luaL_dostring(L,
+                                         "_G.Array = function(addr, elemSize, pos) return {addr + elemSize*pos, elemSize} end\n"
+                                         "_G.addrof = _G.__SymbolNameToAddress\n"
+                                         "_G.sizeof = _G.__SymbolNameToSize\n"
+                                         "_G.printf = function(...) _G.__Print(string.format(...)) end\n");
+
+            // Vector:
+            // _Myfirst
+            // _Mylast
+            // _Myend
+
+            if (libStat) {
+                LOG_CORE_ERROR("FastMemoryView Lua Lib Error: {}", lua_tostring(L, -1));
                 lua_close(L);
                 return;
+            }
+
+            g_JLink->Target_Halt();
+            g_JLink->Target_WaitForHalt(2000);
+
+            if (ui->searchTextBar->text().at(0).toLatin1() == '$') {
+                // load from file
+                QFile f(ui->searchTextBar->text().mid(1));
+                f.open(QIODevice::OpenModeFlag::Text | QIODevice::OpenModeFlag::ReadOnly);
+                auto res = f.readAll();
+                f.close();
+                auto stat = luaL_dostring(L, res.data());
+                if (stat) {
+                    LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
+                    lua_close(L);
+                    g_JLink->Target_Run();
+                    return;
+                }
+
+            } else {
+                // exec string
+                auto stat = luaL_dostring(L, (ui->searchTextBar->text()).toStdString().c_str());
+                if (stat) {
+                    LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
+                    lua_close(L);
+                    g_JLink->Target_Run();
+                    return;
+                }
             }
 
             lua_getglobal(L, "op");
             if (!lua_istable(L, 1)) {
                 LOG_CORE_ERROR("FastMemoryView Lua Error: Invalid _G.op");
                 lua_close(L);
+                g_JLink->Target_Run();
                 return;
             }
 
@@ -318,11 +485,13 @@ namespace L0::UI {
             if (!lua_isnumber(L, 2)) {
                 LOG_CORE_ERROR("FastMemoryView Lua Error: Address not a number");
                 lua_close(L);
+                g_JLink->Target_Run();
                 return;
             }
             if (!lua_isnumber(L, 3)) {
                 LOG_CORE_ERROR("FastMemoryView Lua Error: Size not a number");
                 lua_close(L);
+                g_JLink->Target_Run();
                 return;
             }
 
@@ -335,8 +504,6 @@ namespace L0::UI {
             std::vector<char> readTemp;
             readTemp.resize(size);
             memset(readTemp.data(), 0, readTemp.size());
-            g_JLink->Target_Halt();
-            g_JLink->Target_WaitForHalt(1000);
             g_JLink->Target_ReadMemoryTo(addr, readTemp.data(), size, L0::Probe::I_Probe::AccessWidth::_1);
             g_JLink->Target_Run();
             QByteArray readArray(readTemp.data(), readTemp.size());

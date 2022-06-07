@@ -101,33 +101,7 @@ namespace L0::UI {
     static const QString KEY_WINDOW_DATA               = QSL("windowStateData");
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // Actions
-    std::vector<MainWindow::ActionEntryDefinition> MainWindow::s_ActionDefinitions_View = {
-        // Open workspace panel
-        {false,
-         "Workspace",
-         [](MainWindow* dis) {
-             dis->OpenPanel_Workspace();
-         }},
-
-        // Separator
-        {true},
-
-        {false,
-         "Symbols",
-         [](MainWindow* dis) {
-             dis->OpenPanel_Symbols();
-         }},
-
-        // Separator
-        {true},
-
-        // Open app log
-        {false,
-         "Appication Log",
-         [](MainWindow* dis) {
-             dis->OpenPanel_AppLog();
-         }},
-    };
+    std::vector<MainWindow::ActionEntryDefinition>* MainWindow::s_ActionDefinitions_View;
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
     MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
@@ -243,7 +217,7 @@ namespace L0::UI {
         for (auto w : dockWidgets) {
             // Don't store info about the central widget
             if (w->objectName() != CENTRAL_WIDGET_NAME) {
-                if (w->property("virtualView").isValid()) {
+                if (w->property("MULTI_INSTANCE").isValid()) {
                     if (w->isClosed()) {
                         continue;
                     }
@@ -374,6 +348,49 @@ namespace L0::UI {
     ///////////////////////////////////////////////////////////////
 
     void MainWindow::InitializeActions() {
+        // Actions
+        s_ActionDefinitions_View = new std::vector<MainWindow::ActionEntryDefinition>{
+            // Open workspace panel
+            {false,
+             "Workspace",
+             [](MainWindow* dis) {
+                 dis->OpenPanel_Workspace();
+             }},
+
+            // Separator
+            {true},
+
+            {false,
+             "Symbols",
+             [](MainWindow* dis) {
+                 dis->OpenPanel_Symbols();
+             }},
+
+            {false,
+             "Range Memory View",
+             [](MainWindow* dis) {
+                 int fmwCount = 0;
+                 for (auto panel : dis->GetDockManager()->dockWidgetsMap()) {
+                     if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName() + "|$FastMemoryView")) {
+                         fmwCount++;
+                     }
+                 }
+
+                 dis->OpenHexEditor("$FastMemoryView" + QString::number(fmwCount));
+             },
+             FileIconProvider{}.icon(FileIconProvider::Icon::BIN)},
+
+            // Separator
+            {true},
+
+            // Open app log
+            {false,
+             "Appication Log",
+             [](MainWindow* dis) {
+                 dis->OpenPanel_AppLog();
+             }},
+        };
+
         InitializeActions_File();
         InitializeActions_View();
         InitializeActions_Help();
@@ -406,7 +423,7 @@ namespace L0::UI {
     }
 
     void MainWindow::InitializeActions_View() {
-        for (auto& vae : s_ActionDefinitions_View) {
+        for (auto& vae : *s_ActionDefinitions_View) {
             if (vae.isSeparator) {
                 ui->menuView->addSeparator();
             } else {
@@ -491,18 +508,6 @@ namespace L0::UI {
                 }
             });
         }
-        m->addSeparator();
-        auto mem = m->addAction(FileIconProvider{}.icon(FileIconProvider::Icon::BIN), "Range Memory View");
-        connect(mem, &QAction::triggered, this, [=]() {
-            int fmwCount = 0;
-            for (auto panel : GetDockManager()->dockWidgetsMap()) {
-                if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName() + "|$FastMemoryView")) {
-                    fmwCount++;
-                }
-            }
-
-            OpenHexEditor("$FastMemoryView" + QString::number(fmwCount));
-        });
 
         m->addSeparator();
         auto rst = m->addAction(FileIconProvider{}.icon(FileIconProvider::Icon::GEAR), "Reset Target");
@@ -511,6 +516,7 @@ namespace L0::UI {
                 g_JLink->Target_Reset(false);
             }
         });
+
         auto rcon = m->addAction(FileIconProvider{}.icon(FileIconProvider::Icon::GEAR), "Reconnect Target");
         connect(rcon, &QAction::triggered, this, [=]() {
             StartConnection();
@@ -617,7 +623,7 @@ namespace L0::UI {
 
         HexEditorPanel* existingEditor = nullptr;
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
-            if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName()) && !panel->property("virtualView").isValid() &&
+            if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName()) && !panel->property("MULTI_INSTANCE").isValid() &&
                 panel->property("absoluteFilePath").toString() == fullPath) {
                 existingEditor = static_cast<HexEditorPanel*>(panel);
                 break;
