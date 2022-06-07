@@ -26,20 +26,22 @@ namespace L0::Probe {
     static constexpr auto MAX_DISCOVERABLE_PROBE_COUNT = 8;
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    std::vector<JLink*> JLink::GetConnectedProbes() {
+    std::vector<ProbeInfo> JLink::GetConnectedProbes() {
         ProbeInfo probeInfoBuffer[MAX_DISCOVERABLE_PROBE_COUNT]; // limit max discoverable probes to MAX_DISCOVERABLE_PROBE_COUNT
 
         auto connectedProbeCount = GetDriver()->probe_GetDeviceList(
             HostInterfaceType::USB | HostInterfaceType::ETHERNET, probeInfoBuffer, MAX_DISCOVERABLE_PROBE_COUNT);
 
+        std::vector<ProbeInfo> probes;
         for (int i = 0; i < connectedProbeCount; i++) {
             LOG_PROBE_INFO("JLink probe on {0} interface: \"{1}\" - S/N: {2}",
                            probeInfoBuffer[i].interface == HostInterfaceType::USB ? "USB" : "ETHERNET",
                            probeInfoBuffer[i].modelName,
                            probeInfoBuffer[i].serialNumber);
+            probes.push_back(probeInfoBuffer[i]);
         }
 
-        return {};
+        return probes;
     }
 
 } // namespace L0::Probe

@@ -38,6 +38,14 @@ namespace L0::Target {
                                                                          MemoryRegion{"SRAM", 0x20000000, 0x40000, Access::READ_WRITE},
                                                                      }};
 
+        s_SupportedTargets["ATSAMA5D36"] =
+            Target::DeviceDescription{"ATSAMA5D36",
+                                      {
+                                          MemoryRegion{"SRAM", 0x00300000, 0x20000, Access::READ_WRITE},
+                                          MemoryRegion{"RAM (Cache)", 0x20000000, 0x4000000, Access::READ_WRITE},
+                                          MemoryRegion{"RAM (No Cache)", 0x24000000, 0x1000000, Access::READ_WRITE},
+                                      }};
+
         LOG_CORE_TRACE("Supported devices:");
         for (const auto& [name, desc] : s_SupportedTargets) {
             LOG_CORE_TRACE(" - {0}", name);

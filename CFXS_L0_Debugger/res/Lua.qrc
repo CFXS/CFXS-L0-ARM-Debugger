@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file alias="Lua/CFXS_Lib.lua">Lua/CFXS_Lib.lua</file>
+    </qresource>
+</RCC>

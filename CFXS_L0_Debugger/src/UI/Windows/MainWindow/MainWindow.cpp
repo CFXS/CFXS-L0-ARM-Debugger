@@ -36,10 +36,13 @@
 #include <UI/Panels/AppLogPanel.hpp>
 #include <UI/Panels/HexEditorPanel.hpp>
 #include <UI/Panels/Debugger/SymbolListPanel.hpp>
+#include <UI/Helpers/CreateQMenuTextSeparator.hpp>
 
 #include <Core/ELF/ELF_Reader.hpp>
 
 #include <Core/Probe/JLink/JLink.hpp>
+const char* g_TargetDeviceModel = nullptr;
+uint32_t g_ProbeID              = 0;
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -66,6 +69,25 @@ using ads::DockWidgetArea;
 //    Panel #4 - TextEditPanel|./CFXS_RTOS_Test/src/main.cpp
 //    Panel #5 - TextEditPanel|./CFXS_RTOS_Test/src/_TM4C129X_Startup_RTOS.cpp
 
+QString s_ELFPath;
+L0::Probe::JLink* g_JLink = nullptr;
+void StartConnection() {
+    if (g_ProbeID && g_TargetDeviceModel) {
+        if (!g_JLink) {
+            g_JLink = new L0::Probe::JLink;
+            g_JLink->L0_SelectDevice(g_ProbeID);
+        }
+
+        L0::Target::SupportedDevices::LoadSupportedDevices();
+        auto& testDevice = L0::Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
+        g_JLink->Probe_Disconnect();
+        g_JLink->Probe_Connect();
+        g_JLink->Target_SelectDebugInterface(L0::Probe::I_Probe::DebugInterface::JTAG);
+        g_JLink->Target_SelectDevice(testDevice);
+        g_JLink->Target_Connect();
+    }
+}
+
 namespace L0::UI {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,33 +102,7 @@ namespace L0::UI {
     static const QString KEY_WINDOW_DATA               = QSL("windowStateData");
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // Actions
-    std::vector<MainWindow::ActionEntryDefinition> MainWindow::s_ActionDefinitions_View = {
-        // Open workspace panel
-        {false,
-         "Workspace",
-         [](MainWindow* dis) {
-             dis->OpenPanel_Workspace();
-         }},
-
-        // Separator
-        {true},
-
-        {false,
-         "Symbols",
-         [](MainWindow* dis) {
-             dis->OpenPanel_Symbols();
-         }},
-
-        // Separator
-        {true},
-
-        // Open app log
-        {false,
-         "Appication Log",
-         [](MainWindow* dis) {
-             dis->OpenPanel_AppLog();
-         }},
-    };
+    std::vector<MainWindow::ActionEntryDefinition>* MainWindow::s_ActionDefinitions_View;
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
     MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()) {
@@ -125,6 +121,7 @@ namespace L0::UI {
         }
 
         auto centralFrame = new CFXS_Center_Widget;
+        centralFrame->setStyleSheet("background: rgb(32, 32, 32);");
         centralFrame->setObjectName("MainWindowCentralFrame");
 
         CDockWidget* centralDockWidget = new CDockWidget(CENTRAL_WIDGET_NAME);
@@ -221,6 +218,12 @@ namespace L0::UI {
         for (auto w : dockWidgets) {
             // Don't store info about the central widget
             if (w->objectName() != CENTRAL_WIDGET_NAME) {
+                if (w->property("MULTI_INSTANCE").isValid()) {
+                    if (w->isClosed()) {
+                        continue;
+                    }
+                }
+
                 openPanelList.append(w->objectName());
                 auto panel = dynamic_cast<I_Panel*>(w);
                 if (panel) {
@@ -232,6 +235,10 @@ namespace L0::UI {
         state[KEY_OPEN_PANEL_DESCRIPTION] = openPanelList;
 
         cfg.setValue(KEY_WINDOW_DATA, state);
+
+        cfg.setValue("_temp_TargetDeviceModel", QString(g_TargetDeviceModel));
+        cfg.setValue("_temp_ProbeID", g_ProbeID);
+        cfg.setValue("_ELF", s_ELFPath);
 
         emit StateDataReady(&cfg);
     }
@@ -336,6 +343,21 @@ namespace L0::UI {
                     }
                     default: LOG_UI_ERROR("MainWindow failed to load state - unsupported version"); return;
                 }
+
+                static char tmpx[64];
+                if (stateData.value("_temp_TargetDeviceModel").isValid()) {
+                    snprintf(tmpx, 64, "%s", stateData.value("_temp_TargetDeviceModel").toString().toStdString().c_str());
+                    if (strlen(tmpx))
+                        g_TargetDeviceModel = tmpx;
+                }
+                g_ProbeID = stateData.value("_temp_ProbeID").toUInt();
+                StartConnection();
+                if (stateData.value("_ELF").isValid()) {
+                    s_ELFPath = stateData.value("_ELF").toString();
+                    auto obj  = new ELF::ELF_Reader(s_ELFPath);
+                    obj->LoadFile();
+                    obj->LoadSTABS();
+                }
             } else {
                 LOG_UI_ERROR("MainWindow failed to load state - corrupted data");
                 return;
@@ -346,9 +368,53 @@ namespace L0::UI {
     ///////////////////////////////////////////////////////////////
 
     void MainWindow::InitializeActions() {
+        // Actions
+        s_ActionDefinitions_View = new std::vector<MainWindow::ActionEntryDefinition>{
+            // Open workspace panel
+            {false,
+             "Workspace",
+             [](MainWindow* dis) {
+                 dis->OpenPanel_Workspace();
+             }},
+
+            // Separator
+            {true},
+
+            {false,
+             "Symbols",
+             [](MainWindow* dis) {
+                 dis->OpenPanel_Symbols();
+             }},
+
+            {false,
+             "Range Memory View",
+             [](MainWindow* dis) {
+                 int fmwCount = 0;
+                 for (auto panel : dis->GetDockManager()->dockWidgetsMap()) {
+                     if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName() + "|$FastMemoryView")) {
+                         fmwCount++;
+                     }
+                 }
+
+                 dis->OpenHexEditor("$FastMemoryView" + QString::number(fmwCount));
+             },
+             FileIconProvider{}.icon(FileIconProvider::Icon::BIN)},
+
+            // Separator
+            {true},
+
+            // Open app log
+            {false,
+             "Appication Log",
+             [](MainWindow* dis) {
+                 dis->OpenPanel_AppLog();
+             }},
+        };
+
         InitializeActions_File();
         InitializeActions_View();
         InitializeActions_Help();
+        InitializeActions_Debug();
     }
 
     void MainWindow::InitializeActions_File() {
@@ -377,7 +443,7 @@ namespace L0::UI {
     }
 
     void MainWindow::InitializeActions_View() {
-        for (auto& vae : s_ActionDefinitions_View) {
+        for (auto& vae : *s_ActionDefinitions_View) {
             if (vae.isSeparator) {
                 ui->menuView->addSeparator();
             } else {
@@ -406,6 +472,74 @@ namespace L0::UI {
         connect(ui->actionAbout, &QAction::triggered, this, [=]() {
             auto aboutWindow = new AboutWindow;
             aboutWindow->show();
+        });
+    }
+
+    void MainWindow::InitializeActions_Debug() {
+        auto m                       = ui->menubar->addMenu("Debug");
+        static const char* DEVICES[] = {"TM4C1294NC", "ATSAMA5D36"};
+
+        m->addAction(Utils::CreateQMenuTextSeparator(
+            "Target Device", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
+
+        static QAction* s_DeviceActions[sizeof(DEVICES) / sizeof(DEVICES[0])];
+
+        int idx = 0;
+        for (auto d : DEVICES) {
+            auto a                 = m->addAction(d);
+            s_DeviceActions[idx++] = a;
+            connect(a, &QAction::triggered, this, [=]() {
+                g_TargetDeviceModel = d;
+                StartConnection();
+                for (int i = 0; i < sizeof(s_DeviceActions) / sizeof(s_DeviceActions[0]); i++) {
+                    if (i == idx - 1) {
+                        s_DeviceActions[i]->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::L0));
+                    } else {
+                        s_DeviceActions[i]->setIcon(QIcon{});
+                    }
+                }
+            });
+        }
+
+        static std::vector<QAction*> s_ProbeActions;
+
+        m->addSeparator();
+        m->addAction(Utils::CreateQMenuTextSeparator(
+            "J-Link Probe", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
+
+        auto probes = Probe::JLink::GetConnectedProbes();
+        idx         = 0;
+        for (auto& p : probes) {
+            auto a      = m->addAction(QString(p.modelName) + " (" + QString::number(p.serialNumber) + ")");
+            auto serial = p.serialNumber;
+            s_ProbeActions.push_back(a);
+            idx++;
+            connect(a, &QAction::triggered, this, [=]() {
+                g_ProbeID = serial;
+                StartConnection();
+                int i = 0;
+                for (auto pa : s_ProbeActions) {
+                    if (i == idx - 1) {
+                        pa->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
+                    } else {
+                        pa->setIcon(QIcon{});
+                    }
+                    i++;
+                }
+            });
+        }
+
+        m->addSeparator();
+        auto rst = m->addAction(FileIconProvider{}.icon(FileIconProvider::Icon::GEAR), "Reset Target");
+        connect(rst, &QAction::triggered, this, [=]() {
+            if (g_JLink) {
+                g_JLink->Target_Reset(false);
+            }
+        });
+
+        auto rcon = m->addAction(FileIconProvider{}.icon(FileIconProvider::Icon::GEAR), "Reconnect Target");
+        connect(rcon, &QAction::triggered, this, [=]() {
+            StartConnection();
         });
     }
 
@@ -491,18 +625,25 @@ namespace L0::UI {
     }
 
     HexEditorPanel* MainWindow::OpenHexEditor(const QString& path) {
-        QString newPath = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(path);
-        auto fullPath   = ProjectManager::GetFullFilePath(newPath);
-        QFileInfo fileInfo(fullPath);
+        QString newPath;
+        QFileInfo fileInfo;
+        QString fullPath;
 
-        if (!fileInfo.exists()) {
-            LOG_UI_WARN("OpenHexEditor file does not exist - {}", path);
-            return nullptr;
+        if (path.at(0) == QChar('$')) {
+            fullPath = path;
+        } else {
+            newPath  = QDir(ProjectManager::GetWorkspacePath()).relativeFilePath(path);
+            fullPath = ProjectManager::GetFullFilePath(newPath);
+            fileInfo = QFileInfo(fullPath);
+            if (!fileInfo.exists()) {
+                LOG_UI_WARN("OpenHexEditor file does not exist - {}", path);
+                return nullptr;
+            }
         }
 
         HexEditorPanel* existingEditor = nullptr;
         for (auto panel : GetDockManager()->dockWidgetsMap()) {
-            if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName()) &&
+            if (panel->objectName().startsWith(HexEditorPanel::GetPanelBaseName()) && !panel->property("MULTI_INSTANCE").isValid() &&
                 panel->property("absoluteFilePath").toString() == fullPath) {
                 existingEditor = static_cast<HexEditorPanel*>(panel);
                 break;
@@ -530,20 +671,28 @@ namespace L0::UI {
     static Probe::JLink* probe = nullptr;
 
     static void Temp_LoadToTarget(const QString& path) {
+        if (!g_TargetDeviceModel) {
+            LOG_CORE_CRITICAL("No target device selected\n");
+            return;
+        }
+        if (!g_ProbeID) {
+            LOG_CORE_CRITICAL("No probe selected\n");
+            return;
+        }
+
         QFile file(path);
         if (!file.open(QIODevice::ReadOnly)) {
             LOG_CORE_ERROR("Failed to open file {}", path);
             return;
         }
-
         auto prog = file.readAll();
         file.close();
 
         if (!probe) {
             Target::SupportedDevices::LoadSupportedDevices();
-            auto& testDevice = Target::SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
+            auto& testDevice = Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
             probe            = new Probe::JLink;
-            probe->L0_SelectDevice(269301262);
+            probe->L0_SelectDevice(g_ProbeID);
             probe->Probe_Disconnect();
             probe->Probe_Connect();
             probe->Target_SelectDebugInterface(Probe::I_Probe::DebugInterface::SWD);
@@ -558,11 +707,20 @@ namespace L0::UI {
     }
 
     static void Temp_EraseTarget() {
+        if (!g_TargetDeviceModel) {
+            LOG_CORE_CRITICAL("No target device set\n");
+            return;
+        }
+        if (!g_ProbeID) {
+            LOG_CORE_CRITICAL("No probe selected\n");
+            return;
+        }
+
         if (!probe) {
             Target::SupportedDevices::LoadSupportedDevices();
-            auto& testDevice = Target::SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
+            auto& testDevice = Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
             probe            = new Probe::JLink;
-            probe->L0_SelectDevice(269301262);
+            probe->L0_SelectDevice(g_ProbeID);
             probe->Probe_Disconnect();
             probe->Probe_Connect();
             probe->Target_SelectDebugInterface(Probe::I_Probe::DebugInterface::SWD);
@@ -574,10 +732,55 @@ namespace L0::UI {
         probe->Target_Erase();
     }
 
+    static QByteArray s_MergePartA;
+    static void Temp_SetA64(const QString& path) {
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            LOG_CORE_ERROR("Failed to open file {}", path);
+            return;
+        }
+        s_MergePartA = file.readAll();
+        file.close();
+        while (s_MergePartA.size() < 1024 * 64) {
+            s_MergePartA.push_back((char)0);
+        }
+    }
+
+    static void Temp_SetA128(const QString& path) {
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            LOG_CORE_ERROR("Failed to open file {}", path);
+            return;
+        }
+        s_MergePartA = file.readAll();
+        file.close();
+        while (s_MergePartA.size() < 1024 * 128) {
+            s_MergePartA.push_back((char)0);
+        }
+    }
+
+    static void Temp_MergeA(const QString& path) {
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            LOG_CORE_ERROR("Failed to open file {}", path);
+            return;
+        }
+        auto prog = file.readAll();
+        file.close();
+
+        auto merged = s_MergePartA + prog;
+
+        QFile tempBin(path + ".merged.bin");
+        tempBin.open(QIODevice::ReadWrite | QIODevice::Truncate);
+        tempBin.write((const char*)merged.data(), merged.size());
+        tempBin.close();
+    }
+
     // Check what type of file this is and open it in either the text editor or a special editor
     void MainWindow::OpenFileHandler(const QString& path, const QString& type) {
         if (type == QSL("elf") || type == QSL("out")) {
-            auto obj = new ELF::ELF_Reader(path);
+            s_ELFPath = path;
+            auto obj  = new ELF::ELF_Reader(path);
             obj->LoadFile();
             obj->LoadSTABS();
         } else if (type == QSL("$HexEditor")) {
@@ -586,9 +789,16 @@ namespace L0::UI {
             Temp_LoadToTarget(path);
         } else if (type == QSL("$EraseTarget")) {
             Temp_EraseTarget();
+        } else if (type == QSL("$GluePartA64")) {
+            Temp_SetA64(path);
+        } else if (type == QSL("$GluePartA128")) {
+            Temp_SetA128(path);
+        } else if (type == QSL("$MergeA")) {
+            Temp_MergeA(path);
         } else {
             OpenFilePanel(path);
         }
+
     } // namespace L0::UI
 
 } // namespace L0::UI

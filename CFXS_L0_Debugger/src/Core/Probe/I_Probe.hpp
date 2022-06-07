@@ -30,10 +30,12 @@ namespace L0::Probe {
     public:
         enum class AccessWidth { _1 = 1, _2 = 2, _4 = 4 };
 
-        enum class DebugInterface { SWD };
+        enum class DebugInterface { SWD, JTAG };
         static const char* DebugInterfaceToString(DebugInterface interface) {
             if (interface == DebugInterface::SWD)
                 return "SWD";
+            else if (interface == DebugInterface::JTAG)
+                return "JTAG";
             else
                 return "Unknown";
         }
@@ -72,11 +74,11 @@ namespace L0::Probe {
 
         /// Get probe model name
         /// \return debug probe model name string
-        virtual const std::string& GetModelName() const = 0;
+        virtual const QString& GetModelName() const = 0;
 
         /// Get probe serial number string
         /// \return debug probe serial number string
-        virtual const std::string& GetSerialNumberString() const = 0;
+        virtual const QString& GetSerialNumberString() const = 0;
 
         /// Select target device
         /// \return true if selected/supported

@@ -52,12 +52,16 @@ namespace L0::UI {
 
     private:
         void OpenEditorContextMenu(const QPoint& point);
+        void ProcessSearchExpression();
 
     private:
         std::unique_ptr<Ui::HexEditorPanel> ui;
 
         QHexEdit* m_HexEditor;
         QLabel* m_BottomLabel;
+
+        // Test
+        bool m_FastMemoryView = false;
     };
 
 } // namespace L0::UI

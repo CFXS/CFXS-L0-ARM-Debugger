@@ -1,17 +1,17 @@
 // ---------------------------------------------------------------------
 // CFXS L0 ARM Debugger <https://github.com/CFXS/CFXS-L0-ARM-Debugger>
 // Copyright (C) 2022 | CFXS
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
@@ -28,6 +28,9 @@
 #include <QScrollBar>
 #include <QPoint>
 #include <QSyntaxStyle>
+#include <QMenu>
+#include <QAction>
+#include <QShortcut>
 
 #include <QCXXHighlighter>
 #include <QJSONHighlighter>
@@ -64,8 +67,18 @@ namespace L0::UI {
         m_Editor->setSyntaxStyle(QSyntaxStyle::defaultStyle());
         m_Editor->setWordWrapMode(QTextOption::NoWrap);
         m_Editor->setObjectName("monospaceTextObject");
+        m_Editor->setAutoParentheses(false);
 
         layout->addWidget(m_Editor);
+
+        QShortcut* shortcut = new QShortcut(QKeySequence("Ctrl+W"), m_Editor);
+        QObject::connect(shortcut, &QShortcut::activated, [this]() {
+            if (m_File.isOpen())
+                m_File.close();
+            m_File.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+            m_File.write(QByteArray(m_Editor->toPlainText().toStdString().c_str()));
+            m_File.close();
+        });
 
         setWidget(ui->root);
     }
