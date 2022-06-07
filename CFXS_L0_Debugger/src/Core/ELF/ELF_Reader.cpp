@@ -309,6 +309,11 @@ namespace L0::ELF {
     }
 
     bool ELF_Reader::LoadSTABS() {
+        if (!IsValid()) {
+            LOG_CORE_ERROR("LoadSTABS failed - file not valid");
+            return false;
+        }
+
         if (Is32bit()) {
             return LoadSTABS_32();
         } else {

@@ -187,7 +187,7 @@ namespace L0::UI {
 
     bool HexEditorPanel::LoadFile(const QString& filePath) {
         if (filePath.startsWith("$FastMemoryView")) {
-            ui->searchTextBar->setPlaceholderText("Load Range Expression or Lua Script ($path)\"");
+            ui->searchTextBar->setPlaceholderText("Load Range Expression or Lua Script ($path)");
             m_FastMemoryView = true;
 
             m_HexEditor->setData({});
