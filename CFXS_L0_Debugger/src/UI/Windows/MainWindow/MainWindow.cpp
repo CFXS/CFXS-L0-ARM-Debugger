@@ -25,6 +25,7 @@
 #include <QSettings>
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QTimer>
 
 #include <DockAreaWidget.h>
 #include "CFXS_Center_Widget.hpp"
@@ -71,6 +72,7 @@ using ads::DockWidgetArea;
 
 QString s_ELFPath;
 L0::Probe::JLink* g_JLink = nullptr;
+bool g_CortexA;
 void StartConnection() {
     if (g_ProbeID && g_TargetDeviceModel) {
         if (!g_JLink) {
@@ -82,7 +84,14 @@ void StartConnection() {
         auto& testDevice = L0::Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
         g_JLink->Probe_Disconnect();
         g_JLink->Probe_Connect();
-        g_JLink->Target_SelectDebugInterface(L0::Probe::I_Probe::DebugInterface::JTAG);
+        if (strcmp(g_TargetDeviceModel, "TM4C1294NC") == 0) {
+            g_JLink->Target_SelectDebugInterface(
+                L0::Probe::I_Probe::DebugInterface::SWD); // Cortex-M does not die with SWD + frequent start/stop memory reads
+            g_CortexA = false;
+        } else {
+            g_JLink->Target_SelectDebugInterface(L0::Probe::I_Probe::DebugInterface::JTAG); // Cortex-A does die
+            g_CortexA = true;
+        }
         g_JLink->Target_SelectDevice(testDevice);
         g_JLink->Target_Connect();
     }
@@ -375,7 +384,8 @@ namespace L0::UI {
              "Workspace",
              [](MainWindow* dis) {
                  dis->OpenPanel_Workspace();
-             }},
+             },
+             FileIconProvider{}.icon(FileIconProvider::Icon::FOLDER_OPEN)},
 
             // Separator
             {true},
@@ -384,7 +394,8 @@ namespace L0::UI {
              "Symbols",
              [](MainWindow* dis) {
                  dis->OpenPanel_Symbols();
-             }},
+             },
+             FileIconProvider{}.icon(FileIconProvider::Icon::HEX)},
 
             {false,
              "Range Memory View",
@@ -405,10 +416,11 @@ namespace L0::UI {
 
             // Open app log
             {false,
-             "Appication Log",
+             "Application Log",
              [](MainWindow* dis) {
                  dis->OpenPanel_AppLog();
-             }},
+             },
+             FileIconProvider{}.icon(FileIconProvider::Icon::LOG)},
         };
 
         InitializeActions_File();
@@ -488,6 +500,11 @@ namespace L0::UI {
         for (auto d : DEVICES) {
             auto a                 = m->addAction(d);
             s_DeviceActions[idx++] = a;
+            QTimer::singleShot(1000, [=]() {
+                if (g_TargetDeviceModel && strcmp(g_TargetDeviceModel, d) == 0) {
+                    a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::L0));
+                }
+            });
             connect(a, &QAction::triggered, this, [=]() {
                 g_TargetDeviceModel = d;
                 StartConnection();
@@ -514,6 +531,11 @@ namespace L0::UI {
             auto serial = p.serialNumber;
             s_ProbeActions.push_back(a);
             idx++;
+            QTimer::singleShot(1000, [=]() {
+                if (g_ProbeID == serial) {
+                    a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
+                }
+            });
             connect(a, &QAction::triggered, this, [=]() {
                 g_ProbeID = serial;
                 StartConnection();

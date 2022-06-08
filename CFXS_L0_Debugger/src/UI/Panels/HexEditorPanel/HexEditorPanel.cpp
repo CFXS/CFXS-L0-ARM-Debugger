@@ -49,6 +49,7 @@ namespace L0::ELF {
 extern const char* g_TargetDeviceModel;
 extern uint32_t g_ProbeID;
 extern L0::Probe::JLink* g_JLink;
+extern bool g_CortexA;
 extern void StartConnection();
 ///////////////////////////////////////////
 
@@ -441,8 +442,10 @@ namespace L0::UI {
                 return;
             }
 
-            g_JLink->Target_Halt();
-            g_JLink->Target_WaitForHalt(2000);
+            if (g_CortexA) {
+                g_JLink->Target_Halt();
+                g_JLink->Target_WaitForHalt(1000);
+            }
 
             LOG_CORE_TRACE("FastMemoryView Exec \"{}\"", searchText);
 
@@ -456,7 +459,8 @@ namespace L0::UI {
                 if (stat) {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
                     lua_close(L);
-                    g_JLink->Target_Run();
+                    if (g_CortexA)
+                        g_JLink->Target_Run();
                     return;
                 }
 
@@ -466,7 +470,8 @@ namespace L0::UI {
                 if (stat) {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
                     lua_close(L);
-                    g_JLink->Target_Run();
+                    if (g_CortexA)
+                        g_JLink->Target_Run();
                     return;
                 }
             }
@@ -475,7 +480,8 @@ namespace L0::UI {
             if (!(lua_istable(L, 1) || lua_isnil(L, 1))) {
                 LOG_CORE_ERROR("FastMemoryView Lua Error: Invalid _G.op");
                 lua_close(L);
-                g_JLink->Target_Run();
+                if (g_CortexA)
+                    g_JLink->Target_Run();
                 return;
             }
 
@@ -486,13 +492,15 @@ namespace L0::UI {
                 if (!lua_isnumber(L, 2)) {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: Address not a number");
                     lua_close(L);
-                    g_JLink->Target_Run();
+                    if (g_CortexA)
+                        g_JLink->Target_Run();
                     return;
                 }
                 if (!lua_isnumber(L, 3)) {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: Size not a number");
                     lua_close(L);
-                    g_JLink->Target_Run();
+                    if (g_CortexA)
+                        g_JLink->Target_Run();
                     return;
                 }
 
@@ -514,7 +522,8 @@ namespace L0::UI {
             }
 
             lua_close(L);
-            g_JLink->Target_Run();
+            if (g_CortexA)
+                g_JLink->Target_Run();
         } else {
             auto val = searchText;
             if (val.length() == 0) {
