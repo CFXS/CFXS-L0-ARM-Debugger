@@ -441,6 +441,34 @@ namespace L0::UI {
                 return;
             }
 
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                QString path = luaL_checkstring(L, 1);
+                if (!lua_isstring(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("include path not a string");
+                    return 1;
+                }
+
+                QFile libFile(path);
+                bool fileOpen = libFile.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text);
+
+                if (!fileOpen) {
+                    LOG_CORE_ERROR("FastMemoryView Lua include not loaded \"{}\"", path);
+                    return 0;
+                }
+
+                auto libStat = luaL_dostring(L, libFile.readAll().data());
+                libFile.close();
+
+                if (libStat) {
+                    LOG_CORE_ERROR("FastMemoryView Lua include error: {}", lua_tostring(L, -1));
+                    return 0;
+                }
+
+                return 0;
+            });
+            lua_setglobal(L, "include");
+
             g_JLink->Target_Halt();
             g_JLink->Target_WaitForHalt(2000);
 
