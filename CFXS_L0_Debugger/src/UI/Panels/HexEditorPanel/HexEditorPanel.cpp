@@ -33,6 +33,8 @@
 #include <QClipboard>
 #include <QAction>
 
+extern void e_ClearApplicationLog(); // XXX: temp
+
 ///////////////////////////////////////////
 // Test
 #include <Core/Probe/JLink/JLink.hpp>
@@ -352,12 +354,33 @@ namespace L0::UI {
                 } else {
                     lua_pushnil(L);
                     LOG_CORE_ERROR("ReadMem8 read error (0x{:X} - 0x{:X})", addr, addr + 1);
-                    ;
                 }
 
                 return 1;
             });
             lua_setglobal(L, "ReadMem8");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr  = luaL_checkinteger(L, 1);
+                auto value = luaL_checkinteger(L, 2);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem8 invalid addr");
+                    return 1;
+                }
+                if (!lua_isinteger(L, 2)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem8 invalid value");
+                    return 1;
+                }
+
+                if (!g_JLink->Target_WriteMemory_8(addr, value)) {
+                    LOG_CORE_ERROR("WriteMem8 write error (0x{:X} - 0x{:X})", addr, addr + 1);
+                }
+
+                return 0;
+            });
+            lua_setglobal(L, "WriteMem8");
 
             lua_pushcfunction(L, [](lua_State* L) -> int {
                 auto addr = luaL_checkinteger(L, 1);
@@ -430,6 +453,12 @@ namespace L0::UI {
                 return 0;
             });
             lua_setglobal(L, "__Print");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                e_ClearApplicationLog();
+                return 0;
+            });
+            lua_setglobal(L, "ClearApplicationLog");
 
             QFile libFile(":/Lua/CFXS_Lib.lua");
             libFile.open(QIODevice::OpenModeFlag::ReadOnly | QIODevice::OpenModeFlag::Text);

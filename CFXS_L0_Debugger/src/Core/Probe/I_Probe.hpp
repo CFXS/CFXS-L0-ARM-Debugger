@@ -131,6 +131,10 @@ namespace L0::Probe {
         /// \return true on success
         virtual bool Target_WriteMemory_32(uint32_t address, uint32_t val) = 0;
 
+        /// Write 8bit value to address
+        /// \return true on success
+        virtual bool Target_WriteMemory_8(uint32_t address, uint8_t val) = 0;
+
         virtual bool Target_Halt()              = 0;
         virtual bool Target_Run()               = 0;
         virtual bool Target_IsRunning()         = 0;

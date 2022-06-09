@@ -400,6 +400,10 @@ namespace L0::Probe {
         return GetDriver()->target_ReadMemoryEx(address, bytesToRead, to, (int)accessWidth);
     }
 
+    bool JLink::Target_WriteMemory_8(uint32_t address, uint8_t value) {
+        return GetDriver()->target_WriteMemory_8(address, value) == 0;
+    }
+
     bool JLink::Target_WriteMemory_32(uint32_t address, uint32_t value) {
         return GetDriver()->target_WriteMemory_32(address, value) == 0;
     }

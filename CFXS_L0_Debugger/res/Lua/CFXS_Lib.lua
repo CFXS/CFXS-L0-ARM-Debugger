@@ -30,15 +30,23 @@ _G.addressof = function(v, member)
     if type(v) == "string" then
         return _G.__SymbolNameToAddress(v) -- C binding
     else
-        return v.ptr and v.ptr or (v._pAddr and v._pAddr or (member and v["_pAddr_"..member] or nil))
+        if member then
+            return v["_pAddr_"..member]
+        else
+            return v.ptr and v.ptr or v._pAddr
+        end
     end
 end
 
-_G.sizeof = function(v)
+_G.sizeof = function(v, member)
     if type(v) == "string" then
         return _G.__SymbolNameToSize(v) -- C binding
     else
-        return v._T and v._T._sizeof or v._sizeof
+        if member then
+            return v._T[member].type._sizeof
+        else
+            return v._T and v._T._sizeof or v._sizeof
+        end
     end
 end
 _G.is_pointer = function(v)
@@ -63,9 +71,14 @@ end
 
 _G.print = function(...) _G.__Print(string.format(...)) end
 
-_G.TableKeys = function(t)
+_G.TableDump = function(t, indent)
+    if indent == nil then indent = 0 end
+
     for i, v in pairs(t) do
-        print("[%s]: %s %s", tostring(i), tostring(v), type(v) == "number" and string.format("(0x%X)", v) or "" )
+        print("%s[%s]: %s %s", string.rep(" ", indent), tostring(i), tostring(v), type(v) == "number" and string.format("(0x%X)", v) or "" )
+        if type(v) == "table" then
+            TableDump(v, indent + 4)
+        end
     end
 end
 
@@ -105,10 +118,28 @@ _G.ReadStruct = function(struct, addr, deref)
             if ((string.sub(i, 1, 1) ~= "_") and (string.sub(i, 1, 2) ~= "__")) then
                 if v.ignore == nil then
                     if v.type._isStruct then
+                        if _G.__debug_readstruct then
+                            print("Read STRUCT %s --------------", i)
+                        end
                         s[i] = ReadStruct(v.structType, addr + v.offset)
                         s["_pAddr_"..i] = addr + v.offset -- physical base address of struct as member
                     else
-                        s[i] = ReadMemX(sizeof(v.type), addr + v.offset)
+                        if _G.__debug_readstruct then
+                            print("Read %s", i)
+                        end
+                        local val = ReadMemX(sizeof(v.type), addr + v.offset)
+
+                        if v.type._isBool then
+                            -- DO NOT CONVERT TO AND/OR - true/false breaks the expression and always returns true somehow
+                            if val == 0 then
+                                s[i] = false
+                            else
+                                s[i] = true
+                            end
+                        else
+                            s[i] = val
+                        end
+                        -- (TYPED READS) s[i] = {_pAddr = addr + v.offset, type = v.type, value = ReadMemX(sizeof(v.type), addr + v.offset)}
                         s["_pAddr_"..i] = addr + v.offset -- physical address of read field
                     end
                 end
@@ -139,6 +170,10 @@ _G.deref_type = function(v)
     return v._T._referenceTo
 end
 
+_G.AlignTo = function(x, a)
+    return (x + a - 1) & ~(a - 1)
+end
+
 _G.advance = function(v, i)
     if i ~= nil and type(i) ~= "number" then
         error("advance by non-number")
@@ -154,7 +189,18 @@ _G.advance = function(v, i)
     end
 end
 
-_G.CreateStruct = function(structDesc, pack)
+local FirstMemberSize = function(s)
+    for i, v in pairs(s._T) do
+        if ((string.sub(i, 1, 1) ~= "_") and (string.sub(i, 1, 2) ~= "__")) then
+            if v.offset == 0 then
+                return v.type._sizeof
+            end
+        end
+    end
+    return 4
+end
+
+_G.CreateStruct = function(structDesc, pack, alignTo)
     local struct = {}
     local offsetVal = 0
     for i, v in pairs(structDesc) do
@@ -164,15 +210,15 @@ _G.CreateStruct = function(structDesc, pack)
             error("CreateStruct: Invalid type for "..v.field.." - "..tostring(v.type).."/"..(v.type and tostring(v.type._T) or ""))
         end
         local size = sizeof(v.type)
-        if pack and pack or size == 2 or size == 4 or size == 8 then
-            while(offsetVal % size ~= 0) do
-                offsetVal = offsetVal + 1
-            end
+        if pack and pack or size == 1 or size == 2 or size == 4 or size == 8 then
+            offsetVal = AlignTo(offsetVal, size)
+        else
+            offsetVal = AlignTo(offsetVal, FirstMemberSize(v.type))
         end
         struct[v.field] = {offset = offsetVal, type = v.type._T, structType = v.type, ignore = v.ignore}
         offsetVal = offsetVal + size
     end
-    struct._sizeof = offsetVal
+    struct._sizeof = alignTo and AlignTo(offsetVal, alignTo) or offsetVal
     struct._isStruct = true
     return struct
 end
@@ -186,7 +232,7 @@ _G.uint16_t = {_T = {_sizeof = 2, _isPrimitive = true}}
 _G.uint32_t = {_T = {_sizeof = 4, _isPrimitive = true}}
 _G.uint64_t = {_T = {_sizeof = 8, _isPrimitive = true}}
 _G.int = {_T = {_sizeof = 4, _signed=true, _isPrimitive = true}}
-_G.bool = uint8_t
+_G.bool = {_T = {_sizeof = 1, _isPrimitive = true, _isBool = true}}
 _G.size_t = {_T = {_sizeof = REG_WIDTH, _isPrimitive = true}}
 _G.void_ptr = {_T = {_sizeof = REG_WIDTH, _isPrimitive = true}}
 _G.c_str = {_T = {_sizeof = REG_WIDTH, _isPrimitive = true, _isString = true}}
@@ -197,7 +243,7 @@ _G.pointer_to = function(t, addr)
         return void_ptr;
     else
         local ptrType = {
-            _T = {["ptr"] = {offset = addr and addr or 0, type = void_ptr}, _sizeof = REG_WIDTH, _referenceTo = t, _isPrimitive = false},
+            _T = {["ptr"] = {offset = addr and addr or 0, type = void_ptr}, _sizeof = REG_WIDTH, _referenceTo = t, _isPrimitive = false, _isStruct = true},
             _pAddr = addr
         }
         return ptrType
@@ -264,33 +310,38 @@ function std_vector:index_iterator()
 end
 
 ------------------------
--- std::std_static_vector (array with no footprint)
-_G.std_static_vector = {
+-- std::array
+_G.std_array = {
     _T = CreateStruct({
     })
 }
 
-std_static_vector.template = function(elemType, elemCount)
-    local self = setmetatable({}, {__index = std_static_vector})
+std_array.template = function(elemType, elemCount)
+    local self = setmetatable({}, {__index = std_array})
     self._ElementType = elemType
     self._ElementCount = elemCount
+    self._T._sizeof = sizeof(elemType) * elemCount
     return self
 end
 
-function std_static_vector:init(addr)
+function std_array:init(addr)
     self.m_First = addr
     return self
 end
 
-function std_static_vector:size()
+function std_array:size()
     return self._ElementCount
 end
 
-function std_static_vector:offset(idx)
+function std_array:offset(idx)
     return sizeof(self._ElementType) * idx
 end
 
-function std_static_vector:at(idx)
+function std_array:at(idx)
+    if not self.m_First then
+        self.m_First = addressof(self)
+    end
+
     if self._ElementType._T._isPrimitive == true then
         return ReadMemX(sizeof(self._ElementType), self.m_First + idx * sizeof(self._ElementType));
     else
@@ -298,7 +349,7 @@ function std_static_vector:at(idx)
     end
 end
 
-function std_static_vector:list_iterator()
+function std_array:list_iterator()
     local i = 0
     local n = self:size()
     return function()
@@ -307,7 +358,7 @@ function std_static_vector:list_iterator()
     end
 end
 
-function std_static_vector:index_iterator(maxCount)
+function std_array:index_iterator(maxCount)
     local i = 0
     local n = maxCount and min(self:size(), maxCount) or self:size()
     return function()
@@ -317,3 +368,8 @@ function std_static_vector:index_iterator(maxCount)
         end
     end
 end
+
+
+
+
+
