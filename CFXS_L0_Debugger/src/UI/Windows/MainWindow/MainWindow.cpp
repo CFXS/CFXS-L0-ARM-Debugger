@@ -77,9 +77,9 @@ void StartConnection() {
     if (g_ProbeID && g_TargetDeviceModel) {
         if (!g_JLink) {
             g_JLink = new L0::Probe::JLink;
-            g_JLink->L0_SelectDevice(g_ProbeID);
         }
 
+        g_JLink->L0_SelectDevice(g_ProbeID);
         L0::Target::SupportedDevices::LoadSupportedDevices();
         auto& testDevice = L0::Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
         g_JLink->Probe_Disconnect();

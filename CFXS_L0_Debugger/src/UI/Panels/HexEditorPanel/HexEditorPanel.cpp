@@ -449,6 +449,17 @@ namespace L0::UI {
             lua_setglobal(L, "ReadMem64");
 
             lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto rawVal = luaL_checkinteger(L, 1);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    return 1;
+                }
+                lua_pushnumber(L, *(float*)&rawVal);
+                return 1;
+            });
+            lua_setglobal(L, "ParseRawFloat");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
                 LOG_CORE_TRACE("> {}", luaL_checkstring(L, 1));
                 return 0;
             });

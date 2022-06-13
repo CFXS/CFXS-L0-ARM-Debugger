@@ -223,6 +223,10 @@ _G.CreateStruct = function(structDesc, pack, alignTo)
     return struct
 end
 
+_G.CreateType = function(struct, typename)
+    return {_T = struct, _typename = typename}
+end
+
 -------------------------------
 -- Types
 _G.REG_WIDTH = 4 -- 32bit
@@ -236,6 +240,7 @@ _G.bool = {_T = {_sizeof = 1, _isPrimitive = true, _isBool = true}}
 _G.size_t = {_T = {_sizeof = REG_WIDTH, _isPrimitive = true}}
 _G.void_ptr = {_T = {_sizeof = REG_WIDTH, _isPrimitive = true}}
 _G.c_str = {_T = {_sizeof = REG_WIDTH, _isPrimitive = true, _isString = true}}
+_G.float = {_T = {_sizeof = 4, _isPrimitive = true, _isFloat = true}}
 _G.void = nil
 
 _G.pointer_to = function(t, addr)
@@ -317,7 +322,7 @@ _G.std_array = {
 }
 
 std_array.template = function(elemType, elemCount)
-    local self = setmetatable({}, {__index = std_array})
+    local self = setmetatable({}, {__index = CopyTable(std_array)})
     self._ElementType = elemType
     self._ElementCount = elemCount
     self._T._sizeof = sizeof(elemType) * elemCount
