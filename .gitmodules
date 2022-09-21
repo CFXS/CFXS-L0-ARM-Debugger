@@ -19,3 +19,6 @@
 [submodule "CFXS_L0_Debugger/vendor/QHexEdit2"]
 	path = CFXS_L0_Debugger/vendor/QHexEdit2
 	url = https://github.com/CFXS/QHexEdit2.git
+[submodule "CFXS_L0_Debugger/vendor/stlink"]
+	path = CFXS_L0_Debugger/vendor/stlink
+	url = https://github.com/CFXS/stlink
