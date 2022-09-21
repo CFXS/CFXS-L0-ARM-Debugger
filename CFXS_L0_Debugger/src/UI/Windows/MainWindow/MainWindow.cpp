@@ -520,35 +520,74 @@ namespace L0::UI {
 
         static std::vector<QAction*> s_ProbeActions;
 
-        m->addSeparator();
-        m->addAction(Utils::CreateQMenuTextSeparator(
-            "J-Link Probe", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
+        //////////////////////////////////////////////////////////////////////////
+        // J-Link
+        {
+            m->addSeparator();
+            m->addAction(Utils::CreateQMenuTextSeparator(
+                "J-Link Probes", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
 
-        auto probes = Probe::JLink::GetConnectedProbes();
-        idx         = 0;
-        for (auto& p : probes) {
-            auto a      = m->addAction(QString(p.modelName) + " (" + QString::number(p.serialNumber) + ")");
-            auto serial = p.serialNumber;
-            s_ProbeActions.push_back(a);
-            idx++;
-            QTimer::singleShot(1000, [=]() {
-                if (g_ProbeID == serial) {
-                    a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
-                }
-            });
-            connect(a, &QAction::triggered, this, [=]() {
-                g_ProbeID = serial;
-                StartConnection();
-                int i = 0;
-                for (auto pa : s_ProbeActions) {
-                    if (i == idx - 1) {
-                        pa->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
-                    } else {
-                        pa->setIcon(QIcon{});
+            auto probes = Probe::JLink::GetConnectedProbes();
+            idx         = 0;
+            for (auto& p : probes) {
+                auto a      = m->addAction(QString(p.modelName) + " (" + QString::number(p.serialNumber) + ")");
+                auto serial = p.serialNumber;
+                s_ProbeActions.push_back(a);
+                idx++;
+                QTimer::singleShot(1000, [=]() {
+                    if (g_ProbeID == serial) {
+                        a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
                     }
-                    i++;
-                }
-            });
+                });
+                connect(a, &QAction::triggered, this, [=]() {
+                    g_ProbeID = serial;
+                    StartConnection();
+                    int i = 0;
+                    for (auto pa : s_ProbeActions) {
+                        if (i == idx - 1) {
+                            pa->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
+                        } else {
+                            pa->setIcon(QIcon{});
+                        }
+                        i++;
+                    }
+                });
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        // ST-Link
+        {
+            m->addSeparator();
+            m->addAction(Utils::CreateQMenuTextSeparator(
+                "ST-Link Probes", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
+
+            auto probes = Probe::JLink::GetConnectedProbes();
+            idx         = 0;
+            for (auto& p : probes) {
+                auto a      = m->addAction(QString(p.modelName) + " (" + QString::number(p.serialNumber) + ")");
+                auto serial = p.serialNumber;
+                s_ProbeActions.push_back(a);
+                idx++;
+                QTimer::singleShot(1000, [=]() {
+                    if (g_ProbeID == serial) {
+                        a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
+                    }
+                });
+                connect(a, &QAction::triggered, this, [=]() {
+                    g_ProbeID = serial;
+                    StartConnection();
+                    int i = 0;
+                    for (auto pa : s_ProbeActions) {
+                        if (i == idx - 1) {
+                            pa->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
+                        } else {
+                            pa->setIcon(QIcon{});
+                        }
+                        i++;
+                    }
+                });
+            }
         }
 
         m->addSeparator();
