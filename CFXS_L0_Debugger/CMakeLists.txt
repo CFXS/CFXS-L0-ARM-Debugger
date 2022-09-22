@@ -90,11 +90,6 @@ if(BUILD_PROFILER)
 endif()
 
 string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-# copy dlls add_custom_command( TARGET ${EXE_NAME} POST_BUILD COMMAND
-# ${CMAKE_COMMAND} -E copy_if_different
-# "$<TARGET_FILE_DIR:${EXE_NAME}>/vendor/SDL/SDL2d.dll"
-# "$<TARGET_FILE_DIR:${EXE_NAME}>"
-# )
 
 message("Creating file copy commands for required Qt libraries and binaries to output directory....")
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Core.dll $<TARGET_FILE_DIR:${EXE_NAME}>)

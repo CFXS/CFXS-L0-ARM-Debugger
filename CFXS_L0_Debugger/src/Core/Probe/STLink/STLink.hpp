@@ -26,18 +26,27 @@ namespace L0::Probe {
         friend struct ProbeCallbackEntry;
 
     public:
+        struct ProbeInfo {
+            QString modelName;
+            QString serialNumber;
+        };
+
+    public:
         /// HWD load all probe types on app init
         static void L0_Load();
 
         // HWD unload all probe types before app exit
         static void L0_Unload();
 
+        // Get connected probes
+        static std::vector<ProbeInfo> GetConnectedProbes();
+
     public:
         virtual ~STLink();
 
         /// Select working device by serial number
         /// \param serialNumber serial number of probe. default 0 = first detected probe
-        void L0_SelectDevice(uint32_t serialNumber = 0);
+        void L0_SelectDevice(const QString& serialNumber = "0");
 
         /////////////////////////////////////////
 
@@ -84,6 +93,9 @@ namespace L0::Probe {
         STLink();
 
     private:
+        // driver stuff
+        static void InitializeChipIDs();
+
         // probe callbacks
         static void Probe_LogCallback(const char* message);
         static void Probe_WarningCallback(const char* message);

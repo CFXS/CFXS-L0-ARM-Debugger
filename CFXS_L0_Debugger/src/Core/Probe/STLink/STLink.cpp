@@ -32,6 +32,7 @@ namespace L0::Probe {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     void STLink::L0_Load() {
+        InitializeChipIDs();
     }
 
     void STLink::L0_Unload() {
@@ -52,7 +53,7 @@ namespace L0::Probe {
     //////////////////////////////////////////////////////////////////////
 
     // Select working device by serial number
-    void STLink::L0_SelectDevice(uint32_t serialNumber) {
+    void STLink::L0_SelectDevice(const QString& serialNumber) {
         if (Probe_IsConnected())
             Probe_Disconnect();
 

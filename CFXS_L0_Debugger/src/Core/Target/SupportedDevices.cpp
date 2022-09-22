@@ -38,6 +38,13 @@ namespace L0::Target {
                                                                          MemoryRegion{"SRAM", 0x20000000, 0x40000, Access::READ_WRITE},
                                                                      }};
 
+        s_SupportedTargets["STM32H7A3ZI"] = Target::DeviceDescription{"STM32H7A3ZI",
+                                                                      {
+                                                                          MemoryRegion{"Flash", 0x08000000, 0x200000, Access::READ},
+                                                                          MemoryRegion{"TCM_SRAM", 0x24000000, 0x20000, Access::READ_WRITE},
+                                                                          MemoryRegion{"SRAM", 0x24020000, 0x100000, Access::READ_WRITE},
+                                                                      }};
+
         s_SupportedTargets["ATSAMA5D36"] =
             Target::DeviceDescription{"ATSAMA5D36",
                                       {

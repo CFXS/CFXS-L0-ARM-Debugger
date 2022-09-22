@@ -36,6 +36,7 @@ namespace L0::Probe {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     void JLink::L0_Load() {
+        LOG_PROBE_TRACE("Load J-Link driver");
         s_Driver = new Driver::JLink_Driver;
 
         if (!s_Driver->IsLoaded()) {
@@ -64,11 +65,11 @@ namespace L0::Probe {
     //////////////////////////////////////////////////////////////////////
 
     // Select working device by serial number
-    void JLink::L0_SelectDevice(uint32_t serialNumber) {
+    void JLink::L0_SelectDevice(const QString& serialNumber) {
         if (Probe_IsConnected())
             Probe_Disconnect();
 
-        ErrorCode ec = GetDriver()->probe_SelectBySerialNumber_USB(serialNumber);
+        ErrorCode ec = GetDriver()->probe_SelectBySerialNumber_USB(serialNumber.toUInt());
 
         GetDriver()->probe_SetWarningCallback(Probe_WarningCallback);
         GetDriver()->probe_SetErrorCallback(Probe_ErrorCallback);
@@ -78,9 +79,9 @@ namespace L0::Probe {
             LOG_PROBE_ERROR("[JLink@{0}] Failed to select probe by serial number {1} - {2}", fmt::ptr(this), serialNumber, ec);
             m_DeviceAssigned = false;
         } else {
-            LOG_PROBE_TRACE("[JLink@{0}] Probe {1} selected", fmt::ptr(this), serialNumber);
+            LOG_PROBE_TRACE("[JLink@{0}] Probe {1} selected", fmt::ptr(this), serialNumber.toUInt());
 
-            m_SerialNumberString = QString::number(serialNumber);
+            m_SerialNumberString = serialNumber;
 
             m_DeviceAssigned = true;
         }

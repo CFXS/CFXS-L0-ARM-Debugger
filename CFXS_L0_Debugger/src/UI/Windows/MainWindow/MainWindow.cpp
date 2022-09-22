@@ -42,8 +42,9 @@
 #include <Core/ELF/ELF_Reader.hpp>
 
 #include <Core/Probe/JLink/JLink.hpp>
+#include <Core/Probe/STLink/STLink.hpp>
 const char* g_TargetDeviceModel = nullptr;
-uint32_t g_ProbeID              = 0;
+QString g_ProbeID               = "0";
 
 using ads::CDockManager;
 using ads::CDockWidget;
@@ -74,7 +75,7 @@ QString s_ELFPath;
 L0::Probe::JLink* g_JLink = nullptr;
 bool g_CortexA;
 void StartConnection() {
-    if (g_ProbeID && g_TargetDeviceModel) {
+    if (g_ProbeID != "0" && g_TargetDeviceModel) {
         if (!g_JLink) {
             g_JLink = new L0::Probe::JLink;
         }
@@ -359,7 +360,7 @@ namespace L0::UI {
                     if (strlen(tmpx))
                         g_TargetDeviceModel = tmpx;
                 }
-                g_ProbeID = stateData.value("_temp_ProbeID").toUInt();
+                g_ProbeID = stateData.value("_temp_ProbeID").toString();
                 StartConnection();
                 if (stateData.value("_ELF").isValid()) {
                     s_ELFPath = stateData.value("_ELF").toString();
@@ -489,7 +490,7 @@ namespace L0::UI {
 
     void MainWindow::InitializeActions_Debug() {
         auto m                       = ui->menubar->addMenu("Debug");
-        static const char* DEVICES[] = {"TM4C1294NC", "ATSAMA5D36"};
+        static const char* DEVICES[] = {"TM4C1294NC", "ATSAMA5D36", "STM32H7A3ZI"};
 
         m->addAction(Utils::CreateQMenuTextSeparator(
             "Target Device", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
@@ -535,12 +536,12 @@ namespace L0::UI {
                 s_ProbeActions.push_back(a);
                 idx++;
                 QTimer::singleShot(1000, [=]() {
-                    if (g_ProbeID == serial) {
+                    if (g_ProbeID.toUInt() == serial) {
                         a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
                     }
                 });
                 connect(a, &QAction::triggered, this, [=]() {
-                    g_ProbeID = serial;
+                    g_ProbeID = QString::number(serial);
                     StartConnection();
                     int i = 0;
                     for (auto pa : s_ProbeActions) {
@@ -562,10 +563,10 @@ namespace L0::UI {
             m->addAction(Utils::CreateQMenuTextSeparator(
                 "ST-Link Probes", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
 
-            auto probes = Probe::JLink::GetConnectedProbes();
+            auto probes = Probe::STLink::GetConnectedProbes();
             idx         = 0;
             for (auto& p : probes) {
-                auto a      = m->addAction(QString(p.modelName) + " (" + QString::number(p.serialNumber) + ")");
+                auto a      = m->addAction(p.modelName + " (" + p.serialNumber + ")");
                 auto serial = p.serialNumber;
                 s_ProbeActions.push_back(a);
                 idx++;
@@ -736,7 +737,7 @@ namespace L0::UI {
             LOG_CORE_CRITICAL("No target device selected\n");
             return;
         }
-        if (!g_ProbeID) {
+        if (g_ProbeID == "0") {
             LOG_CORE_CRITICAL("No probe selected\n");
             return;
         }
@@ -772,7 +773,7 @@ namespace L0::UI {
             LOG_CORE_CRITICAL("No target device set\n");
             return;
         }
-        if (!g_ProbeID) {
+        if (g_ProbeID == "0") {
             LOG_CORE_CRITICAL("No probe selected\n");
             return;
         }

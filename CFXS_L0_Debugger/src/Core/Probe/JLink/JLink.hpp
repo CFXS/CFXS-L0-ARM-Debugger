@@ -41,7 +41,7 @@ namespace L0::Probe {
 
         /// Select working device by serial number
         /// \param serialNumber serial number of probe. default 0 = first detected probe
-        void L0_SelectDevice(uint32_t serialNumber = 0);
+        void L0_SelectDevice(const QString& serialNumber = "0");
 
         /////////////////////////////////////////
 

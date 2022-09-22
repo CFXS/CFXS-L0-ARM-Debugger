@@ -1,5 +1,5 @@
 {
-    "C_Cpp.intelliSenseEngine": "Disabled",
+    "C_Cpp.intelliSenseEngine": "Default",
     "cmake.generator": "Ninja",
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.buildTask": false,
@@ -150,6 +150,7 @@
         "valarray": "cpp",
         "qabstracttablemodel": "cpp",
         "qwidgetaction": "cpp",
-        "logging.h": "c"
+        "logging.h": "c",
+        "strsafe.h": "c"
     }
 }
