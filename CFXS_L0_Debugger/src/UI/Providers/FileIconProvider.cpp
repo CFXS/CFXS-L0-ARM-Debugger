@@ -61,6 +61,7 @@ namespace L0::UI {
                 QPixmap(QSL(":/Icon/link")),
                 QPixmap(QSL(":/Icon/l0")),
                 QPixmap(QSL(":/Icon/hex")),
+                QPixmap(QSL(":/Icon/stm")),
 
                 // Closed folders
                 QPixmap(QSL(":/Icon/folder")),

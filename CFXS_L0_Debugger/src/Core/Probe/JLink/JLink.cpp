@@ -409,11 +409,20 @@ namespace L0::Probe {
         return GetDriver()->target_WriteMemory_32(address, value) == 0;
     }
 
-    bool JLink::Target_Halt() {
-        return GetDriver()->target_Halt();
+    bool JLink::Target_WriteMemory_16(uint32_t address, uint16_t value) {
+        return GetDriver()->target_WriteMemory_16(address, value) == 0;
     }
-    void JLink::Target_WaitForHalt(int to) {
-        GetDriver()->target_WaitForHalt(to);
+
+    bool JLink::Target_WriteMemory_64(uint32_t address, uint64_t value) {
+        return GetDriver()->target_WriteMemory_64(address, value) == 0;
+    }
+
+    bool JLink::Target_Halt(uint32_t waitHaltTimeout) {
+        bool haltState = GetDriver()->target_Halt();
+        if (haltState && waitHaltTimeout) {
+            GetDriver()->target_WaitForHalt(waitHaltTimeout);
+        }
+        return haltState;
     }
     bool JLink::Target_Run() {
         Target_Halt();

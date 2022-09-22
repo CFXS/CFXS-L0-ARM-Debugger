@@ -69,16 +69,16 @@ namespace L0::Probe {
         bool Target_WriteProgram(const uint8_t* data, uint32_t size) override;
         bool Target_Reset(bool haltAfterReset = true) override;
 
-        void Target_WaitForHalt(int to);
-
         uint8_t Target_ReadMemory_8(uint32_t address, bool* success = nullptr) override;
         uint16_t Target_ReadMemory_16(uint32_t address, bool* success = nullptr) override;
         uint32_t Target_ReadMemory_32(uint32_t address, bool* success = nullptr) override;
         uint64_t Target_ReadMemory_64(uint32_t address, bool* success = nullptr) override;
         int Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) override;
         bool Target_WriteMemory_8(uint32_t address, uint8_t val) override;
+        bool Target_WriteMemory_16(uint32_t address, uint16_t val) override;
         bool Target_WriteMemory_32(uint32_t address, uint32_t val) override;
-        bool Target_Halt() override;
+        bool Target_WriteMemory_64(uint32_t address, uint64_t val) override;
+        bool Target_Halt(uint32_t waitHaltTimeout = 0) override;
         bool Target_Run() override;
         bool Target_IsRunning() override;
         float Target_GetFlashProgress() override;

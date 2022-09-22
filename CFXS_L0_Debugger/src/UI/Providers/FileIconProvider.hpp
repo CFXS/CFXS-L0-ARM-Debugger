@@ -54,6 +54,7 @@ namespace L0::UI {
             LINK,
             L0,
             HEX,
+            STM,
 
             // Closed Folders
             FOLDER,

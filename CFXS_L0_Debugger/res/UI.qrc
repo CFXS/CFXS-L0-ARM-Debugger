@@ -55,6 +55,7 @@
         <file alias="Icon/log">Images/UI/FileBrowser/log.svg</file>
         <file alias="Icon/cfxs">Images/UI/FileBrowser/cfxs.png</file>
         <file alias="Icon/segger">Images/UI/FileBrowser/segger.png</file>
+        <file alias="Icon/stm">Images/UI/FileBrowser/stm.png</file>
         <file alias="Icon/link">Images/UI/FileBrowser/link.png</file>
         <file alias="Icon/l0">Images/UI/FileBrowser/L0.png</file>
     </qresource>

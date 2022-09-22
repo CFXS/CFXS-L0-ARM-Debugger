@@ -72,29 +72,32 @@ using ads::DockWidgetArea;
 //    Panel #5 - TextEditPanel|./CFXS_RTOS_Test/src/_TM4C129X_Startup_RTOS.cpp
 
 QString s_ELFPath;
-L0::Probe::JLink* g_JLink = nullptr;
+L0::Probe::I_Probe* g_ActiveProbe = nullptr;
 bool g_CortexA;
+template<typename T>
 void StartConnection() {
     if (g_ProbeID != "0" && g_TargetDeviceModel) {
-        if (!g_JLink) {
-            g_JLink = new L0::Probe::JLink;
+        if (!g_ActiveProbe) {
+            g_ActiveProbe = new T;
         }
 
-        g_JLink->L0_SelectDevice(g_ProbeID);
+        static_cast<T*>(g_ActiveProbe)->L0_SelectDevice(g_ProbeID);
         L0::Target::SupportedDevices::LoadSupportedDevices();
         auto& testDevice = L0::Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
-        g_JLink->Probe_Disconnect();
-        g_JLink->Probe_Connect();
-        if (strcmp(g_TargetDeviceModel, "TM4C1294NC") == 0) {
-            g_JLink->Target_SelectDebugInterface(
-                L0::Probe::I_Probe::DebugInterface::SWD); // Cortex-M does not die with SWD + frequent start/stop memory reads
-            g_CortexA = false;
-        } else {
-            g_JLink->Target_SelectDebugInterface(L0::Probe::I_Probe::DebugInterface::JTAG); // Cortex-A does die
+        g_ActiveProbe->Probe_Disconnect();
+        g_ActiveProbe->Probe_Connect();
+
+        // Cortex-M does not die with SWD + frequent start/stop memory reads
+        if (strcmp(g_TargetDeviceModel, "ATSAMA5D36") == 0) {
+            g_ActiveProbe->Target_SelectDebugInterface(L0::Probe::I_Probe::DebugInterface::JTAG); // Cortex-A does die
             g_CortexA = true;
+        } else {
+            g_ActiveProbe->Target_SelectDebugInterface(L0::Probe::I_Probe::DebugInterface::SWD);
+            g_CortexA = false;
         }
-        g_JLink->Target_SelectDevice(testDevice);
-        g_JLink->Target_Connect();
+
+        g_ActiveProbe->Target_SelectDevice(testDevice);
+        g_ActiveProbe->Target_Connect();
     }
 }
 
@@ -157,6 +160,8 @@ namespace L0::UI {
     }
 
     MainWindow::~MainWindow() {
+        if (g_ActiveProbe)
+            g_ActiveProbe->Probe_Disconnect();
     }
 
     ads::CDockManager* MainWindow::GetDockManager() {
@@ -361,7 +366,11 @@ namespace L0::UI {
                         g_TargetDeviceModel = tmpx;
                 }
                 g_ProbeID = stateData.value("_temp_ProbeID").toString();
-                StartConnection();
+                if (g_ProbeID.length() < 16) {
+                    StartConnection<L0::Probe::JLink>();
+                } else {
+                    StartConnection<L0::Probe::STLink>();
+                }
                 if (stateData.value("_ELF").isValid()) {
                     s_ELFPath = stateData.value("_ELF").toString();
                     auto obj  = new ELF::ELF_Reader(s_ELFPath);
@@ -490,7 +499,7 @@ namespace L0::UI {
 
     void MainWindow::InitializeActions_Debug() {
         auto m                       = ui->menubar->addMenu("Debug");
-        static const char* DEVICES[] = {"TM4C1294NC", "ATSAMA5D36", "STM32H7A3ZI"};
+        static const char* DEVICES[] = {"TM4C1294NC", "ATSAMA5D36", "STM32H7A3ZI", "STM32H753ZI"};
 
         m->addAction(Utils::CreateQMenuTextSeparator(
             "Target Device", QSL("padding-left: 4px; color: rgb(220, 220, 220); font-weight: 500; background: transparent;")));
@@ -508,7 +517,11 @@ namespace L0::UI {
             });
             connect(a, &QAction::triggered, this, [=]() {
                 g_TargetDeviceModel = d;
-                StartConnection();
+                if (g_ProbeID.length() < 16) {
+                    StartConnection<L0::Probe::JLink>();
+                } else {
+                    StartConnection<L0::Probe::STLink>();
+                }
                 for (int i = 0; i < sizeof(s_DeviceActions) / sizeof(s_DeviceActions[0]); i++) {
                     if (i == idx - 1) {
                         s_DeviceActions[i]->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::L0));
@@ -542,7 +555,7 @@ namespace L0::UI {
                 });
                 connect(a, &QAction::triggered, this, [=]() {
                     g_ProbeID = QString::number(serial);
-                    StartConnection();
+                    StartConnection<L0::Probe::JLink>();
                     int i = 0;
                     for (auto pa : s_ProbeActions) {
                         if (i == idx - 1) {
@@ -572,16 +585,16 @@ namespace L0::UI {
                 idx++;
                 QTimer::singleShot(1000, [=]() {
                     if (g_ProbeID == serial) {
-                        a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
+                        a->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::STM));
                     }
                 });
                 connect(a, &QAction::triggered, this, [=]() {
                     g_ProbeID = serial;
-                    StartConnection();
+                    StartConnection<L0::Probe::STLink>();
                     int i = 0;
                     for (auto pa : s_ProbeActions) {
                         if (i == idx - 1) {
-                            pa->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::SEGGER));
+                            pa->setIcon(FileIconProvider{}.icon(FileIconProvider::Icon::STM));
                         } else {
                             pa->setIcon(QIcon{});
                         }
@@ -594,14 +607,18 @@ namespace L0::UI {
         m->addSeparator();
         auto rst = m->addAction(FileIconProvider{}.icon(FileIconProvider::Icon::GEAR), "Reset Target");
         connect(rst, &QAction::triggered, this, [=]() {
-            if (g_JLink) {
-                g_JLink->Target_Reset(false);
+            if (g_ActiveProbe) {
+                g_ActiveProbe->Target_Reset(false);
             }
         });
 
         auto rcon = m->addAction(FileIconProvider{}.icon(FileIconProvider::Icon::GEAR), "Reconnect Target");
         connect(rcon, &QAction::triggered, this, [=]() {
-            StartConnection();
+            if (g_ProbeID.length() < 16) {
+                StartConnection<L0::Probe::JLink>();
+            } else {
+                StartConnection<L0::Probe::STLink>();
+            }
         });
     }
 

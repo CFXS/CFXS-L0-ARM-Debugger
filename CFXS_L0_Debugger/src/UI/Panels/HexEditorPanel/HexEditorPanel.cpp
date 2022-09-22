@@ -50,7 +50,7 @@ namespace L0::ELF {
 }
 extern const char* g_TargetDeviceModel;
 extern uint32_t g_ProbeID;
-extern L0::Probe::JLink* g_JLink;
+extern L0::Probe::I_Probe* g_ActiveProbe;
 extern bool g_CortexA;
 extern void StartConnection();
 ///////////////////////////////////////////
@@ -71,9 +71,12 @@ namespace L0::UI {
         ui->content->layout()->addWidget(m_BottomLabel);
         m_BottomLabel->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
         m_BottomLabel->setFixedHeight(18 * 2);
+        m_BottomLabel->setMinimumHeight(18 * 2);
         m_BottomLabel->setAlignment(Qt::AlignVCenter);
         m_BottomLabel->setObjectName("monospaceTextObject");
 
+        ui->searchTextBar->setMinimumHeight(20);
+        ui->searchTextBar->setFixedHeight(20);
         ui->searchTextBar->setStyleSheet("QLineEdit{color: gray;}");
         ui->searchTextBar->setObjectName("monospaceTextObject");
         connect(ui->searchTextBar, qOverload<const QString&>(&QLineEdit::textChanged), [=](const QString& text) {
@@ -297,12 +300,12 @@ namespace L0::UI {
         auto searchText = ui->searchTextBar->text().trimmed();
 
         if (m_FastMemoryView) {
-            if (!g_JLink) {
+            if (!g_ActiveProbe) {
                 LOG_CORE_CRITICAL("FastMemoryView Error: Probe/Device not selected");
                 return;
             }
 
-            if (!g_JLink->Probe_IsConnected() || !g_JLink->Target_IsConnected()) {
+            if (!g_ActiveProbe->Probe_IsConnected() || !g_ActiveProbe->Target_IsConnected()) {
                 LOG_CORE_CRITICAL("FastMemoryView Error: Probe/Device not connected");
                 return;
             }
@@ -347,7 +350,7 @@ namespace L0::UI {
                 }
 
                 bool s;
-                auto val = g_JLink->Target_ReadMemory_8(addr, &s);
+                auto val = g_ActiveProbe->Target_ReadMemory_8(addr, &s);
                 //LOG_CORE_TRACE("FastMemoryView: ReadMem8 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
@@ -374,13 +377,79 @@ namespace L0::UI {
                     return 1;
                 }
 
-                if (!g_JLink->Target_WriteMemory_8(addr, value)) {
+                if (!g_ActiveProbe->Target_WriteMemory_8(addr, value)) {
                     LOG_CORE_ERROR("WriteMem8 write error (0x{:X} - 0x{:X})", addr, addr + 1);
                 }
 
                 return 0;
             });
             lua_setglobal(L, "WriteMem8");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr  = luaL_checkinteger(L, 1);
+                auto value = luaL_checkinteger(L, 2);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem16 invalid addr");
+                    return 1;
+                }
+                if (!lua_isinteger(L, 2)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem16 invalid value");
+                    return 1;
+                }
+
+                if (!g_ActiveProbe->Target_WriteMemory_16(addr, value)) {
+                    LOG_CORE_ERROR("WriteMem16 write error (0x{:X} - 0x{:X})", addr, addr + 1);
+                }
+
+                return 0;
+            });
+            lua_setglobal(L, "WriteMem16");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr  = luaL_checkinteger(L, 1);
+                auto value = luaL_checkinteger(L, 2);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem32 invalid addr");
+                    return 1;
+                }
+                if (!lua_isinteger(L, 2)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem32 invalid value");
+                    return 1;
+                }
+
+                if (!g_ActiveProbe->Target_WriteMemory_32(addr, value)) {
+                    LOG_CORE_ERROR("WriteMem32 write error (0x{:X} - 0x{:X})", addr, addr + 1);
+                }
+
+                return 0;
+            });
+            lua_setglobal(L, "WriteMem32");
+
+            lua_pushcfunction(L, [](lua_State* L) -> int {
+                auto addr  = luaL_checkinteger(L, 1);
+                auto value = luaL_checkinteger(L, 2);
+                if (!lua_isinteger(L, 1)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem64 invalid addr");
+                    return 1;
+                }
+                if (!lua_isinteger(L, 2)) {
+                    lua_pushnil(L);
+                    LOG_CORE_ERROR("WriteMem64 invalid value");
+                    return 1;
+                }
+
+                if (!g_ActiveProbe->Target_WriteMemory_64(addr, value)) {
+                    LOG_CORE_ERROR("WriteMem64 write error (0x{:X} - 0x{:X})", addr, addr + 1);
+                }
+
+                return 0;
+            });
+            lua_setglobal(L, "WriteMem64");
 
             lua_pushcfunction(L, [](lua_State* L) -> int {
                 auto addr = luaL_checkinteger(L, 1);
@@ -391,7 +460,7 @@ namespace L0::UI {
                 }
 
                 bool s;
-                auto val = g_JLink->Target_ReadMemory_16(addr, &s);
+                auto val = g_ActiveProbe->Target_ReadMemory_16(addr, &s);
                 //LOG_CORE_TRACE("FastMemoryView: ReadMem16 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
@@ -413,7 +482,7 @@ namespace L0::UI {
                 }
 
                 bool s;
-                auto val = g_JLink->Target_ReadMemory_32(addr, &s);
+                auto val = g_ActiveProbe->Target_ReadMemory_32(addr, &s);
                 //LOG_CORE_TRACE("FastMemoryView: ReadMem32 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
@@ -435,7 +504,7 @@ namespace L0::UI {
                 }
 
                 bool s;
-                auto val = g_JLink->Target_ReadMemory_64(addr, &s);
+                auto val = g_ActiveProbe->Target_ReadMemory_64(addr, &s);
                 //LOG_CORE_TRACE("FastMemoryView: ReadMem64 @ 0x{:X} == 0x{:X}", addr, val);
                 if (s) {
                     lua_pushinteger(L, val);
@@ -513,8 +582,7 @@ namespace L0::UI {
             LOG_CORE_TRACE("FastMemoryView Exec \"{}\"", searchText);
 
             if (g_CortexA) {
-                g_JLink->Target_Halt();
-                g_JLink->Target_WaitForHalt(1000);
+                g_ActiveProbe->Target_Halt(1000);
             }
 
             if (searchText.at(0).toLatin1() == '$') {
@@ -528,7 +596,7 @@ namespace L0::UI {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
                     lua_close(L);
                     if (g_CortexA)
-                        g_JLink->Target_Run();
+                        g_ActiveProbe->Target_Run();
                     return;
                 }
 
@@ -539,7 +607,7 @@ namespace L0::UI {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: {}", lua_tostring(L, -1));
                     lua_close(L);
                     if (g_CortexA)
-                        g_JLink->Target_Run();
+                        g_ActiveProbe->Target_Run();
                     return;
                 }
             }
@@ -549,7 +617,7 @@ namespace L0::UI {
                 LOG_CORE_ERROR("FastMemoryView Lua Error: Invalid _G.op");
                 lua_close(L);
                 if (g_CortexA)
-                    g_JLink->Target_Run();
+                    g_ActiveProbe->Target_Run();
                 return;
             }
 
@@ -561,14 +629,14 @@ namespace L0::UI {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: Address not a number");
                     lua_close(L);
                     if (g_CortexA)
-                        g_JLink->Target_Run();
+                        g_ActiveProbe->Target_Run();
                     return;
                 }
                 if (!lua_isnumber(L, 3)) {
                     LOG_CORE_ERROR("FastMemoryView Lua Error: Size not a number");
                     lua_close(L);
                     if (g_CortexA)
-                        g_JLink->Target_Run();
+                        g_ActiveProbe->Target_Run();
                     return;
                 }
 
@@ -580,7 +648,7 @@ namespace L0::UI {
                 std::vector<char> readTemp;
                 readTemp.resize(size);
                 memset(readTemp.data(), 0, readTemp.size());
-                g_JLink->Target_ReadMemoryTo(addr, readTemp.data(), size, L0::Probe::I_Probe::AccessWidth::_1);
+                g_ActiveProbe->Target_ReadMemoryTo(addr, readTemp.data(), size, L0::Probe::I_Probe::AccessWidth::_1);
                 QByteArray readArray(readTemp.data(), readTemp.size());
 
                 auto sel0 = m_HexEditor->GetSelectionStart();
@@ -591,7 +659,7 @@ namespace L0::UI {
 
             lua_close(L);
             if (g_CortexA)
-                g_JLink->Target_Run();
+                g_ActiveProbe->Target_Run();
         } else {
             auto val = searchText;
             if (val.length() == 0) {
