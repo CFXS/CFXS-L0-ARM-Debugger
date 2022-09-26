@@ -222,7 +222,7 @@ namespace L0::ELF {
 
                 // prepare target bin buffer
                 // XXX: temp fix [!(section->flags & ELF32::SectionFlags::W)] - check why start of ram is placed in bin (CFXS_Motion_Controller driverlib vtable)
-                if (section->type == ELF32::SectionType::PROGBITS && !(section->flags & ELF32::SectionFlags::W) && section->size) {
+                if (section->type == ELF32::SectionType::PROGBITS && /*!(section->flags & ELF32::SectionFlags::W) &&*/ section->size) {
                     try {
                         if (!startAddressSet) {
                             startAddressSet    = true;
@@ -269,7 +269,7 @@ namespace L0::ELF {
 
                 // if section is a part of target firmware
                 // XXX: temp fix [!(section->flags & ELF32::SectionFlags::W)] - check why start of ram is placed in bin (CFXS_Motion_Controller driverlib vtable)
-                if ((section->type == ELF32::SectionType::PROGBITS) && !(section->flags & ELF32::SectionFlags::W) && section->size) {
+                if ((section->type == ELF32::SectionType::PROGBITS) && /*!(section->flags & ELF32::SectionFlags::W) &&*/ section->size) {
                     auto sectionSize = section->size;
                     auto loadAddress = section->address - startAddressOffset;
 

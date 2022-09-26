@@ -131,6 +131,13 @@ namespace L0::UI {
                     emit RequestOpenFile(info.absoluteFilePath(), QSL("$LoadToTarget"));
                 });
 
+                auto loadToDevice0x20000000 = new QAction(QPixmap(QSL(":/Icon/console")), QSL("Flash Target @ 0x2000000"), this);
+                menu->addAction(loadToDevice0x20000000);
+                connect(loadToDevice0x20000000, &QAction::triggered, this, [=]() {
+                    LOG_CORE_TRACE("Load to target @ 0x2000000\"{}\"", info.absoluteFilePath());
+                    emit RequestOpenFile(info.absoluteFilePath(), QSL("$LoadToTarget0x20000000"));
+                });
+
                 auto eraseDev = new QAction(QPixmap(QSL(":/Icon/l0")), QSL("Erase Target"), this);
                 menu->addAction(eraseDev);
                 connect(eraseDev, &QAction::triggered, this, [=]() {

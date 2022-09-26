@@ -321,6 +321,7 @@ namespace L0::UI {
                 if (it != L0::ELF::g_Test_ELF_Reader->GetBasicSymbolTable().end()) {
                     lua_pushinteger(L, (*it).address);
                 } else {
+                    LOG_CORE_ERROR("SymbolNameToAddress: \"{}\" not found", name);
                     lua_pushnil(L);
                 }
                 return 1;
@@ -332,6 +333,7 @@ namespace L0::UI {
                 if (it != L0::ELF::g_Test_ELF_Reader->GetBasicSymbolTable().end()) {
                     lua_pushinteger(L, (*it).size);
                 } else {
+                    LOG_CORE_ERROR("SymbolNameToSize: \"{}\" not found", name);
                     lua_pushnil(L);
                 }
                 return 1;

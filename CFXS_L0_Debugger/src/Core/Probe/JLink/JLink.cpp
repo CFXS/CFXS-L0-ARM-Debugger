@@ -404,6 +404,14 @@ namespace L0::Probe {
         return GetDriver()->target_WriteMemory_8(address, value) == 0;
     }
 
+    void JLink::Target_WriteMemory(void* data, size_t size, size_t addr) {
+        LOG_CORE_CRITICAL("Write Immediate {}", GetDriver()->target_WriteMemoryImmediate(addr, size, data));
+    }
+
+    void JLink::Target_SetPC(size_t pc) {
+        GetDriver()->target_WriteRegister(L0::Probe::Driver::JLink_Types::CPU_Registers::ARM::R15, pc);
+    }
+
     bool JLink::Target_WriteMemory_32(uint32_t address, uint32_t value) {
         return GetDriver()->target_WriteMemory_32(address, value) == 0;
     }

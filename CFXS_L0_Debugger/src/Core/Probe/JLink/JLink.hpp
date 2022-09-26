@@ -84,6 +84,9 @@ namespace L0::Probe {
         float Target_GetFlashProgress() override;
         uint64_t Target_ReadPC(bool* success = nullptr) override;
 
+        void Target_WriteMemory(void* data, size_t size, size_t addr);
+        void Target_SetPC(size_t pc);
+
         /////////////////////////////////////////
 
     public:

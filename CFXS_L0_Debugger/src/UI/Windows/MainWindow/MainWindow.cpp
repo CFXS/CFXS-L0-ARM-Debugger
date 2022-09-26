@@ -164,6 +164,9 @@ namespace L0::UI {
 
     void MainWindow::closeEvent(QCloseEvent* event) {
         LOG_UI_TRACE("Close MainWindow");
+        if (g_JLink) {
+            g_JLink->Probe_Disconnect();
+        }
         SaveState();
         emit Closed();
         event->accept();
@@ -728,6 +731,33 @@ namespace L0::UI {
         probe->Target_Run();
     }
 
+    static void Temp_LoadToTarget0x20000000(const QString& path) {
+        if (!g_TargetDeviceModel) {
+            LOG_CORE_CRITICAL("No target device selected\n");
+            return;
+        }
+        if (!g_ProbeID) {
+            LOG_CORE_CRITICAL("No probe selected\n");
+            return;
+        }
+
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            LOG_CORE_ERROR("Failed to open file {}", path);
+            return;
+        }
+        auto prog = file.readAll();
+        file.close();
+
+        StartConnection();
+
+        probe->Target_Halt();
+        probe->Target_WaitForHalt(1000);
+        probe->Target_WriteMemory(prog.data(), prog.size(), 0x20000000);
+        probe->Target_SetPC(0x20000000);
+        //probe->Target_Run();
+    }
+
     static void Temp_EraseTarget() {
         if (!g_TargetDeviceModel) {
             LOG_CORE_CRITICAL("No target device set\n");
@@ -809,6 +839,8 @@ namespace L0::UI {
             OpenHexEditor(path);
         } else if (type == QSL("$LoadToTarget")) {
             Temp_LoadToTarget(path);
+        } else if (type == QSL("$LoadToTarget0x20000000")) {
+            Temp_LoadToTarget0x20000000(path);
         } else if (type == QSL("$EraseTarget")) {
             Temp_EraseTarget();
         } else if (type == QSL("$GluePartA64")) {
