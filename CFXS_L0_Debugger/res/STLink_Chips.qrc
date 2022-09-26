@@ -1,0 +1,66 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file alias="stlink/F03x.chip">..\vendor\stlink\config\chips\F03x.chip</file>
+        <file alias="stlink/F04x.chip">..\vendor\stlink\config\chips\F04x.chip</file>
+        <file alias="stlink/F05x.chip">..\vendor\stlink\config\chips\F05x.chip</file>
+        <file alias="stlink/F07x.chip">..\vendor\stlink\config\chips\F07x.chip</file>
+        <file alias="stlink/F09x.chip">..\vendor\stlink\config\chips\F09x.chip</file>
+        <file alias="stlink/F1xx_CL.chip">..\vendor\stlink\config\chips\F1xx_CL.chip</file>
+        <file alias="stlink/F1xx_HD.chip">..\vendor\stlink\config\chips\F1xx_HD.chip</file>
+        <file alias="stlink/F1xx_LD.chip">..\vendor\stlink\config\chips\F1xx_LD.chip</file>
+        <file alias="stlink/F1xx_MD.chip">..\vendor\stlink\config\chips\F1xx_MD.chip</file>
+        <file alias="stlink/F1xx_VL_HD.chip">..\vendor\stlink\config\chips\F1xx_VL_HD.chip</file>
+        <file alias="stlink/F1xx_VL_MD_LD.chip">..\vendor\stlink\config\chips\F1xx_VL_MD_LD.chip</file>
+        <file alias="stlink/F1xx_XLD.chip">..\vendor\stlink\config\chips\F1xx_XLD.chip</file>
+        <file alias="stlink/F2xx.chip">..\vendor\stlink\config\chips\F2xx.chip</file>
+        <file alias="stlink/F301_F302_F318.chip">..\vendor\stlink\config\chips\F301_F302_F318.chip</file>
+        <file alias="stlink/F302_F303_F358.chip">..\vendor\stlink\config\chips\F302_F303_F358.chip</file>
+        <file alias="stlink/F302_F303_F398_HD.chip">..\vendor\stlink\config\chips\F302_F303_F398_HD.chip</file>
+        <file alias="stlink/F303_F328_F334.chip">..\vendor\stlink\config\chips\F303_F328_F334.chip</file>
+        <file alias="stlink/F37x.chip">..\vendor\stlink\config\chips\F37x.chip</file>
+        <file alias="stlink/F401xB_xC.chip">..\vendor\stlink\config\chips\F401xB_xC.chip</file>
+        <file alias="stlink/F401xD_xE.chip">..\vendor\stlink\config\chips\F401xD_xE.chip</file>
+        <file alias="stlink/F410.chip">..\vendor\stlink\config\chips\F410.chip</file>
+        <file alias="stlink/F411xC_xE.chip">..\vendor\stlink\config\chips\F411xC_xE.chip</file>
+        <file alias="stlink/F412.chip">..\vendor\stlink\config\chips\F412.chip</file>
+        <file alias="stlink/F413_F423.chip">..\vendor\stlink\config\chips\F413_F423.chip</file>
+        <file alias="stlink/F42x_F43x.chip">..\vendor\stlink\config\chips\F42x_F43x.chip</file>
+        <file alias="stlink/F446.chip">..\vendor\stlink\config\chips\F446.chip</file>
+        <file alias="stlink/F46x_F47x.chip">..\vendor\stlink\config\chips\F46x_F47x.chip</file>
+        <file alias="stlink/F4x5_F4x7.chip">..\vendor\stlink\config\chips\F4x5_F4x7.chip</file>
+        <file alias="stlink/F72x_F73x.chip">..\vendor\stlink\config\chips\F72x_F73x.chip</file>
+        <file alias="stlink/F74x_F75x.chip">..\vendor\stlink\config\chips\F74x_F75x.chip</file>
+        <file alias="stlink/F76x_F77x.chip">..\vendor\stlink\config\chips\F76x_F77x.chip</file>
+        <file alias="stlink/G03x_G04x.chip">..\vendor\stlink\config\chips\G03x_G04x.chip</file>
+        <file alias="stlink/G05x_G06x.chip">..\vendor\stlink\config\chips\G05x_G06x.chip</file>
+        <file alias="stlink/G07x_G08x.chip">..\vendor\stlink\config\chips\G07x_G08x.chip</file>
+        <file alias="stlink/G0Bx_G0Cx.chip">..\vendor\stlink\config\chips\G0Bx_G0Cx.chip</file>
+        <file alias="stlink/G43x_G44x.chip">..\vendor\stlink\config\chips\G43x_G44x.chip</file>
+        <file alias="stlink/G47x_G48x.chip">..\vendor\stlink\config\chips\G47x_G48x.chip</file>
+        <file alias="stlink/G49x_G4Ax.chip">..\vendor\stlink\config\chips\G49x_G4Ax.chip</file>
+        <file alias="stlink/H72x_H73x.chip">..\vendor\stlink\config\chips\H72x_H73x.chip</file>
+        <file alias="stlink/H74x_H75x.chip">..\vendor\stlink\config\chips\H74x_H75x.chip</file>
+        <file alias="stlink/H7Ax_H7Bx.chip">..\vendor\stlink\config\chips\H7Ax_H7Bx.chip</file>
+        <file alias="stlink/L0xxx_Cat_1.chip">..\vendor\stlink\config\chips\L0xxx_Cat_1.chip</file>
+        <file alias="stlink/L0xxx_Cat_2.chip">..\vendor\stlink\config\chips\L0xxx_Cat_2.chip</file>
+        <file alias="stlink/L0xxx_Cat_3.chip">..\vendor\stlink\config\chips\L0xxx_Cat_3.chip</file>
+        <file alias="stlink/L0xxx_Cat_5.chip">..\vendor\stlink\config\chips\L0xxx_Cat_5.chip</file>
+        <file alias="stlink/L1xx_Cat_1.chip">..\vendor\stlink\config\chips\L1xx_Cat_1.chip</file>
+        <file alias="stlink/L1xx_Cat_2.chip">..\vendor\stlink\config\chips\L1xx_Cat_2.chip</file>
+        <file alias="stlink/L1xx_Cat_3.chip">..\vendor\stlink\config\chips\L1xx_Cat_3.chip</file>
+        <file alias="stlink/L1xx_Cat_4.chip">..\vendor\stlink\config\chips\L1xx_Cat_4.chip</file>
+        <file alias="stlink/L1xx_Cat_5.chip">..\vendor\stlink\config\chips\L1xx_Cat_5.chip</file>
+        <file alias="stlink/L41x_L42x.chip">..\vendor\stlink\config\chips\L41x_L42x.chip</file>
+        <file alias="stlink/L43x_L44x.chip">..\vendor\stlink\config\chips\L43x_L44x.chip</file>
+        <file alias="stlink/L45x_L46x.chip">..\vendor\stlink\config\chips\L45x_L46x.chip</file>
+        <file alias="stlink/L47x_L48x.chip">..\vendor\stlink\config\chips\L47x_L48x.chip</file>
+        <file alias="stlink/L496x_L4A6x.chip">..\vendor\stlink\config\chips\L496x_L4A6x.chip</file>
+        <file alias="stlink/L4Px.chip">..\vendor\stlink\config\chips\L4Px.chip</file>
+        <file alias="stlink/L4Rx.chip">..\vendor\stlink\config\chips\L4Rx.chip</file>
+        <file alias="stlink/unknown_device.chip">..\vendor\stlink\config\chips\unknown_device.chip</file>
+        <file alias="stlink/WBx0_WBx5.chip">..\vendor\stlink\config\chips\WBx0_WBx5.chip</file>
+        <file alias="stlink/WLx5.chip">..\vendor\stlink\config\chips\WLx5.chip</file>
+
+    </qresource>
+</RCC>

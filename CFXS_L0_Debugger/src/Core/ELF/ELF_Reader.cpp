@@ -187,12 +187,12 @@ namespace L0::ELF {
         if (header->sectionHeaderOffset) {
             ForEachSection([&](int sectionIndex, const ELF32::SectionHeader* section, const char* sectionName) {
                 m_SectionNameIndexMap[sectionName] = sectionIndex;
-                LOG_CORE_TRACE("Section {} \"{}\" ({}/{}) [data @ 0x{:X}]",
-                               sectionIndex,
-                               sectionName,
-                               ToString(section->type),
-                               ToString(section->flags),
-                               section->offsetInFile);
+                //LOG_CORE_TRACE("Section {} \"{}\" ({}/{}) [data @ 0x{:X}]",
+                //               sectionIndex,
+                //               sectionName,
+                //               ToString(section->type),
+                //               ToString(section->flags),
+                //               section->offsetInFile);
             });
         }
 

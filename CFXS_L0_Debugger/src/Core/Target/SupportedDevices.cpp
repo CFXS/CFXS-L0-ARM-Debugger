@@ -38,6 +38,30 @@ namespace L0::Target {
                                                                          MemoryRegion{"SRAM", 0x20000000, 0x40000, Access::READ_WRITE},
                                                                      }};
 
+        s_SupportedTargets["STM32H7A3ZI"] =
+            Target::DeviceDescription{"STM32H7A3ZI",
+                                      {
+                                          MemoryRegion{"Flash", 0x08000000, 2_MB, Access::READ},
+                                          MemoryRegion{"SRAM", 0x24000000, 1_MB, Access::READ_WRITE},
+                                          // TODO: check if these can be cross accessed
+                                          //MemoryRegion{"DTCM_SRAM1", 0x20000000, 64_kB, Access::READ_WRITE},
+                                          //MemoryRegion{"DTCM_SRAM2", 0x20010000, 64_kB, Access::READ_WRITE},
+                                          MemoryRegion{"DTCM_SRAM", 0x20000000, 128_kB, Access::READ_WRITE},
+                                          MemoryRegion{"ITCM_SRAM", 0x00000000, 64_kB, Access::READ_WRITE},
+                                          MemoryRegion{"SRAM_CD", 0x30000000, 128_kB, Access::READ_WRITE},
+                                          MemoryRegion{"SRAM_SRD", 0x38000000, 32_kB, Access::READ_WRITE},
+                                      }};
+
+        s_SupportedTargets["STM32H753ZI"] = Target::DeviceDescription{"STM32H753ZI",
+                                                                      {
+                                                                          MemoryRegion{"Flash", 0x08000000, 2_MB, Access::READ},
+                                                                          MemoryRegion{"SRAM_D1", 0x24000000, 512_kB, Access::READ_WRITE},
+                                                                          MemoryRegion{"SRAM_D2", 0x30000000, 288_kB, Access::READ_WRITE},
+                                                                          MemoryRegion{"SRAM_D3", 0x38000000, 64_kB, Access::READ_WRITE},
+                                                                          MemoryRegion{"ITCM_SRAM", 0x00000000, 64_kB, Access::READ_WRITE},
+                                                                          MemoryRegion{"DTCM_SRAM", 0x20000000, 128_kB, Access::READ_WRITE},
+                                                                      }};
+
         s_SupportedTargets["ATSAMA5D36"] =
             Target::DeviceDescription{"ATSAMA5D36",
                                       {

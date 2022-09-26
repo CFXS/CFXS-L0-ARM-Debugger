@@ -77,7 +77,7 @@ namespace L0::Test {
         auto& testDevice = Target::SupportedDevices::GetSupportedDevices().at("TM4C1294NC");
 
         auto jl = new JLink;
-        jl->L0_SelectDevice(801022602);
+        jl->L0_SelectDevice("801022602");
         jl->Probe_Connect();
         jl->Target_SelectDebugInterface(I_Probe::DebugInterface::SWD);
         jl->Target_SelectDevice(testDevice);

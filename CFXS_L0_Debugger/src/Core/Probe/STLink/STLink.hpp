@@ -19,15 +19,18 @@
 #pragma once
 
 #include <Core/Probe/I_Probe.hpp>
-#include "Driver/JLink_Driver.hpp"
+#include <stlink/stlink.h>
 
 namespace L0::Probe {
 
-    class JLink final : public I_Probe {
+    class STLink final : public I_Probe {
         friend struct ProbeCallbackEntry;
 
-        using MessageCallback       = Driver::JLink_Types::LogCallback;
-        using FlashProgressCallback = Driver::JLink_Types::FlashProgressCallback;
+    public:
+        struct ProbeInfo {
+            QString modelName;
+            QString serialNumber;
+        };
 
     public:
         /// HWD load all probe types on app init
@@ -36,8 +39,11 @@ namespace L0::Probe {
         // HWD unload all probe types before app exit
         static void L0_Unload();
 
+        // Get connected probes
+        static std::vector<ProbeInfo> GetConnectedProbes();
+
     public:
-        virtual ~JLink();
+        virtual ~STLink();
 
         /// Select working device by serial number
         /// \param serialNumber serial number of probe. default 0 = first detected probe
@@ -49,7 +55,6 @@ namespace L0::Probe {
 
         /////////////////////////////////////////
         // Probe overrides
-
         bool Probe_IsReady() const override;
         bool Probe_Connect() override;
         bool Probe_Disconnect() override;
@@ -60,7 +65,6 @@ namespace L0::Probe {
 
         /////////////////////////////////////////
         // Probe target overrides
-
         bool Target_SelectDevice(const Target::DeviceDescription& device) override;
         bool Target_SelectDebugInterface(DebugInterface interface) override;
         bool Target_IsConnected() const override;
@@ -84,46 +88,24 @@ namespace L0::Probe {
         float Target_GetFlashProgress() override;
         uint64_t Target_ReadPC(bool* success = nullptr) override;
 
-        void Target_WriteMemory(void* data, size_t size, size_t addr);
-        void Target_SetPC(size_t pc);
-
         /////////////////////////////////////////
 
     public:
-        JLink();
-        static std::vector<Driver::JLink_Types::ProbeInfo> GetConnectedProbes();
+        STLink();
 
     private:
-        static Driver::JLink_Driver* GetDriver() {
-            if (!s_Driver)
-                LOG_PROBE_ERROR("Driver not initialized");
+        // driver stuff
+        static void InitializeChipIDs();
 
-            return s_Driver;
-        }
-
-    private:
         // probe callbacks
-
         static void Probe_LogCallback(const char* message);
         static void Probe_WarningCallback(const char* message);
         static void Probe_ErrorCallback(const char* message);
         static void Probe_FlashProgressCallback(const char* action, const char* prog, int percentage);
 
-        // specific config
-
-        void Probe_DisableFlashProgressPopup();
-
-        // Private probe stuff
-
-        void UpdateProbeInfo();
-
         // Private target stuff
-
         void PrepareTarget();
         void UpdateTargetInfo();
-
-    private:
-        static Driver::JLink_Driver* s_Driver;
 
     private:
         /// True if physical device is assigned to drive
@@ -131,10 +113,10 @@ namespace L0::Probe {
 
         DebugInterface m_DebugInterface;
 
-        Driver::JLink_Types::ProbeCapabilities m_ProbeCapabilities = {}; // initialize to 0
-
-        QString m_ModelName          = "JLink";
+        QString m_ModelName          = "ST-Link";
         QString m_SerialNumberString = "?";
+
+        stlink_t* m_Driver = nullptr;
     };
 
 } // namespace L0::Probe

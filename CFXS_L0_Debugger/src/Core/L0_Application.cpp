@@ -20,6 +20,7 @@
 #include <QString>
 #include <QStandardPaths>
 #include <Core/Probe/JLink/JLink.hpp>
+#include <Core/Probe/STLink/STLink.hpp>
 #include "Project/ProjectManager.hpp"
 #include <QFontDatabase>
 #include <QFile>
@@ -60,6 +61,7 @@ namespace L0 {
     void L0_Application::Load_Probe() {
         LOG_CORE_INFO("Load probes");
         Probe::JLink::L0_Load();
+        Probe::STLink::L0_Load();
     }
 
     void L0_Application::Unload_Probe() {

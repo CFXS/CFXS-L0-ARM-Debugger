@@ -127,18 +127,26 @@ namespace L0::Probe {
         /// \return bytes read
         virtual int Target_ReadMemoryTo(uint32_t address, void* to, uint32_t bytesToRead, AccessWidth accessWidth) = 0;
 
-        /// Write 32bit value to address
-        /// \return true on success
-        virtual bool Target_WriteMemory_32(uint32_t address, uint32_t val) = 0;
-
         /// Write 8bit value to address
         /// \return true on success
         virtual bool Target_WriteMemory_8(uint32_t address, uint8_t val) = 0;
 
-        virtual bool Target_Halt()              = 0;
-        virtual bool Target_Run()               = 0;
-        virtual bool Target_IsRunning()         = 0;
-        virtual float Target_GetFlashProgress() = 0;
+        /// Write 16bit value to address
+        /// \return true on success
+        virtual bool Target_WriteMemory_16(uint32_t address, uint16_t val) = 0;
+
+        /// Write 32bit value to address
+        /// \return true on success
+        virtual bool Target_WriteMemory_32(uint32_t address, uint32_t val) = 0;
+
+        /// Write 64bit value to address
+        /// \return true on success
+        virtual bool Target_WriteMemory_64(uint32_t address, uint64_t val) = 0;
+
+        virtual bool Target_Halt(uint32_t waitHaltTimeout = 0) = 0;
+        virtual bool Target_Run()                              = 0;
+        virtual bool Target_IsRunning()                        = 0;
+        virtual float Target_GetFlashProgress()                = 0;
 
     private:
     };
