@@ -160,8 +160,6 @@ namespace L0::UI {
     }
 
     MainWindow::~MainWindow() {
-        if (g_ActiveProbe)
-            g_ActiveProbe->Probe_Disconnect();
     }
 
     ads::CDockManager* MainWindow::GetDockManager() {
@@ -170,9 +168,8 @@ namespace L0::UI {
 
     void MainWindow::closeEvent(QCloseEvent* event) {
         LOG_UI_TRACE("Close MainWindow");
-        if (g_JLink) {
-            g_JLink->Probe_Disconnect();
-        }
+        if (g_ActiveProbe)
+            g_ActiveProbe->Probe_Disconnect();
         SaveState();
         emit Closed();
         event->accept();
@@ -793,7 +790,7 @@ namespace L0::UI {
             LOG_CORE_CRITICAL("No target device selected\n");
             return;
         }
-        if (!g_ProbeID) {
+        if (g_ProbeID == "0") {
             LOG_CORE_CRITICAL("No probe selected\n");
             return;
         }
@@ -806,10 +803,13 @@ namespace L0::UI {
         auto prog = file.readAll();
         file.close();
 
-        StartConnection();
+        if (g_ProbeID.length() < 16) {
+            StartConnection<L0::Probe::JLink>();
+        } else {
+            StartConnection<L0::Probe::STLink>();
+        }
 
-        probe->Target_Halt();
-        probe->Target_WaitForHalt(1000);
+        probe->Target_Halt(1000);
         probe->Target_WriteMemory(prog.data(), prog.size(), 0x20000000);
         probe->Target_SetPC(0x20000000);
         //probe->Target_Run();

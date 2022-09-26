@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
 # MSVC policy for static runtime
 cmake_policy(SET CMP0091 NEW)
 
@@ -11,7 +12,7 @@ if(STATIC_RUNTIME)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-project(HardwareDebuggerProject CXX C)
+project(CFXS_L0_Debugger CXX C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

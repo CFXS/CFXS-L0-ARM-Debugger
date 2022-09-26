@@ -12,11 +12,11 @@ target_include_directories(${EXE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vend
 
 target_link_libraries(
   ${EXE_NAME}
-  PRIVATE 
+  PRIVATE
   qtadvanceddocking
   QCodeEditor
   QHexEdit2
   Lua
   stlink-static
-  C:/CFXS_Projects/CFXS-L0-ARM-Debugger/build/3rdparty/libusb-1.0.25/VS2019/MS64/Release/lib/libusb-1.0.lib
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/libusb/VS2019/MS64/Release/lib/libusb-1.0.lib
 )
