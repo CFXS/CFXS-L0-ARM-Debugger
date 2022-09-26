@@ -22,6 +22,7 @@
 
 #include <set>
 #include <QString>
+#include "Core/Probe/JLink/Driver/JLink_Types.hpp"
 
 namespace L0::Probe {
 
@@ -156,7 +157,7 @@ namespace L0::Probe {
             return false;
         }
 
-        Probe_DisableFlashProgressPopup();
+        //Probe_DisableFlashProgressPopup();
         GetDriver()->probe_SetFlashProgProgressCallback(Probe_FlashProgressCallback);
         //GetDriver()->probe_SetWarningCallback(s_ProbeCallbackEntries[m_ProbeIndex].warning);
 
@@ -406,7 +407,7 @@ namespace L0::Probe {
     }
 
     void JLink::Target_WriteMemory(void* data, size_t size, size_t addr) {
-        LOG_CORE_CRITICAL("Write Immediate {}", GetDriver()->target_WriteMemoryImmediate(addr, size, data));
+        LOG_PROBE_ERROR("WriteMemory: {}", GetDriver()->target_WriteProgram(addr, size, data));
     }
 
     void JLink::Target_SetPC(size_t pc) {

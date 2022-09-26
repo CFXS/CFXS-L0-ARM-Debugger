@@ -85,6 +85,7 @@ void StartConnection() {
         L0::Target::SupportedDevices::LoadSupportedDevices();
         auto& testDevice = L0::Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
         g_ActiveProbe->Probe_Disconnect();
+
         g_ActiveProbe->Probe_Connect();
 
         // Cortex-M does not die with SWD + frequent start/stop memory reads
@@ -812,7 +813,7 @@ namespace L0::UI {
         probe->Target_Halt(1000);
         probe->Target_WriteMemory(prog.data(), prog.size(), 0x20000000);
         probe->Target_SetPC(0x20000000);
-        //probe->Target_Run();
+        probe->Target_Run();
     }
 
     static void Temp_EraseTarget() {

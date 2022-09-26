@@ -26,7 +26,7 @@ extern "C" void process_chipfile_buffer(const char **fileBufferLines, int lineCo
 
 namespace L0::Probe {
 
-    static constexpr auto MAX_STLINK_PROBES = 8;
+    static constexpr auto MAX_STLINK_PROBES = 0;
 
     static const QVector<QString> s_ChipFiles = {
         ":stlink/F03x.chip",           ":stlink/F04x.chip",           ":stlink/F05x.chip",           ":stlink/F07x.chip",
