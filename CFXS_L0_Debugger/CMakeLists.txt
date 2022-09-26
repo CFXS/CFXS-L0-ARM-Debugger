@@ -2,10 +2,10 @@ set(EXE_NAME CFXS_L0_Debugger)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
 set(CMAKE_PREFIX_PATH "$ENV{CFXS_QT_CMAKE_PATH}") # C:\\Qt\\6.2.3\\msvc2019_64\\lib\\cmake
 set(QT_CMAKE_PATH ${CMAKE_PREFIX_PATH})
+message("Qt Path: ${QT_CMAKE_PATH}")
 
-#set(CMAKE_UNITY_BUILD true)
-#set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
-
+# set(CMAKE_UNITY_BUILD true)
+# set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
 include("_Sources.cmake")
 
 add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
@@ -13,7 +13,7 @@ add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
 add_compile_definitions("CFXS_VERSION_STRING=\"v0.1-dev\"")
 add_compile_definitions("CFXS_PROGRAM_NAME=\"CFXS L0 ARM Debugger\"")
 
-set(CMAKE_AUTOMOC ON) 
+set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
@@ -48,7 +48,6 @@ target_precompile_headers(
   "src/Log/Log.hpp"
   "src/Utils.hpp")
 
-
 target_compile_definitions(${EXE_NAME} PRIVATE "QSL=QStringLiteral")
 
 if(WIN32)
@@ -73,16 +72,16 @@ endif()
 target_link_libraries(
   ${EXE_NAME}
   PRIVATE project_options
-          project_warnings
-          Qt::Core
-          Qt::Widgets
-          Qt::Network
-          Qt::Qml
-          Qt::Quick
-          Qt::QuickControls2
-          Qt::Gui
-          Qt::Svg
-          Qt::Xml
+  project_warnings
+  Qt::Core
+  Qt::Widgets
+  Qt::Network
+  Qt::Qml
+  Qt::Quick
+  Qt::QuickControls2
+  Qt::Gui
+  Qt::Svg
+  Qt::Xml
 )
 
 if(BUILD_PROFILER)
@@ -90,12 +89,12 @@ if(BUILD_PROFILER)
 endif()
 
 string(REGEX REPLACE "/W[3|4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 # copy dlls add_custom_command( TARGET ${EXE_NAME} POST_BUILD COMMAND
 # ${CMAKE_COMMAND} -E copy_if_different
 # "$<TARGET_FILE_DIR:${EXE_NAME}>/vendor/SDL/SDL2d.dll"
 # "$<TARGET_FILE_DIR:${EXE_NAME}>"
 # )
-
 message("Creating file copy commands for required Qt libraries and binaries to output directory....")
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Core.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Cored.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
