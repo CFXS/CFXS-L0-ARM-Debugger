@@ -2,10 +2,10 @@ set(EXE_NAME CFXS_L0_Debugger)
 set(ROOT_DIR "${CMAKE_SOURCE_DIR}/${EXE_NAME}")
 set(CMAKE_PREFIX_PATH "$ENV{CFXS_QT_CMAKE_PATH}") # C:\\Qt\\6.2.3\\msvc2019_64\\lib\\cmake
 set(QT_CMAKE_PATH ${CMAKE_PREFIX_PATH})
+message("Qt Path: ${QT_CMAKE_PATH}")
 
-#set(CMAKE_UNITY_BUILD true)
-#set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
-
+# set(CMAKE_UNITY_BUILD true)
+# set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
 include("_Sources.cmake")
 
 add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
@@ -13,7 +13,7 @@ add_compile_definitions("_CRT_SECURE_NO_WARNINGS")
 add_compile_definitions("CFXS_VERSION_STRING=\"v0.1-dev\"")
 add_compile_definitions("CFXS_PROGRAM_NAME=\"CFXS L0 ARM Debugger\"")
 
-set(CMAKE_AUTOMOC ON) 
+set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
@@ -47,7 +47,6 @@ target_precompile_headers(
   "src/Assert.hpp"
   "src/Log/Log.hpp"
   "src/Utils.hpp")
-
 
 target_compile_definitions(${EXE_NAME} PRIVATE "QSL=QStringLiteral")
 

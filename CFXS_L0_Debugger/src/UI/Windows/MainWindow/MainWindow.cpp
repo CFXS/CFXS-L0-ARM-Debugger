@@ -85,6 +85,7 @@ void StartConnection() {
         L0::Target::SupportedDevices::LoadSupportedDevices();
         auto& testDevice = L0::Target::SupportedDevices::GetSupportedDevices().at(g_TargetDeviceModel);
         g_ActiveProbe->Probe_Disconnect();
+
         g_ActiveProbe->Probe_Connect();
 
         // Cortex-M does not die with SWD + frequent start/stop memory reads
@@ -160,8 +161,6 @@ namespace L0::UI {
     }
 
     MainWindow::~MainWindow() {
-        if (g_ActiveProbe)
-            g_ActiveProbe->Probe_Disconnect();
     }
 
     ads::CDockManager* MainWindow::GetDockManager() {
@@ -170,6 +169,8 @@ namespace L0::UI {
 
     void MainWindow::closeEvent(QCloseEvent* event) {
         LOG_UI_TRACE("Close MainWindow");
+        if (g_ActiveProbe)
+            g_ActiveProbe->Probe_Disconnect();
         SaveState();
         emit Closed();
         event->accept();
@@ -785,6 +786,36 @@ namespace L0::UI {
         probe->Target_Run();
     }
 
+    static void Temp_LoadToTarget0x20000000(const QString& path) {
+        if (!g_TargetDeviceModel) {
+            LOG_CORE_CRITICAL("No target device selected\n");
+            return;
+        }
+        if (g_ProbeID == "0") {
+            LOG_CORE_CRITICAL("No probe selected\n");
+            return;
+        }
+
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            LOG_CORE_ERROR("Failed to open file {}", path);
+            return;
+        }
+        auto prog = file.readAll();
+        file.close();
+
+        if (g_ProbeID.length() < 16) {
+            StartConnection<L0::Probe::JLink>();
+        } else {
+            StartConnection<L0::Probe::STLink>();
+        }
+
+        probe->Target_Halt(1000);
+        probe->Target_WriteMemory(prog.data(), prog.size(), 0x20000000);
+        probe->Target_SetPC(0x20000000);
+        probe->Target_Run();
+    }
+
     static void Temp_EraseTarget() {
         if (!g_TargetDeviceModel) {
             LOG_CORE_CRITICAL("No target device set\n");
@@ -866,6 +897,8 @@ namespace L0::UI {
             OpenHexEditor(path);
         } else if (type == QSL("$LoadToTarget")) {
             Temp_LoadToTarget(path);
+        } else if (type == QSL("$LoadToTarget0x20000000")) {
+            Temp_LoadToTarget0x20000000(path);
         } else if (type == QSL("$EraseTarget")) {
             Temp_EraseTarget();
         } else if (type == QSL("$GluePartA64")) {

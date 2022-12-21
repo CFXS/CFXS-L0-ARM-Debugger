@@ -1,5 +1,4 @@
-# CFXS L0 ARM Debugger For Embedded Devices
-![CFXS L0](https://github.com/CFXS/CFXS-L0-ARM-Debugger/blob/master/Logo.png)
+# CFXS L0 Debugger For ARM Cortex Devices
 
 # Build/Development Requirements
 - Still working on these...
