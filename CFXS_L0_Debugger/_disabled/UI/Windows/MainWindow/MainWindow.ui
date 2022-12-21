@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>800</width>
+                <height>600</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>MainWindow</string>
+        </property>
+        <widget class="ads::CDockManager" name="dockManager" />
+        <widget class="QMenuBar" name="menubar">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>800</width>
+                    <height>22</height>
+                </rect>
+            </property>
+            <widget class="QMenu" name="menuFile">
+                <property name="title">
+                    <string>File</string>
+                </property>
+                <widget class="QMenu" name="menuOpen_Recent">
+                    <property name="title">
+                        <string>Open Recent</string>
+                    </property>
+                </widget>
+                <addaction name="actionOpen_Project" />
+                <addaction name="menuOpen_Recent" />
+                <addaction name="separator" />
+                <addaction name="actionSave" />
+                <addaction name="actionSave_All" />
+                <addaction name="separator" />
+                <addaction name="actionSettings" />
+                <addaction name="separator" />
+                <addaction name="actionExit" />
+            </widget>
+            <widget class="QMenu" name="menuView">
+                <property name="title">
+                    <string>View</string>
+                </property>
+            </widget>
+            <widget class="QMenu" name="menuHelp">
+                <property name="title">
+                    <string>Help</string>
+                </property>
+                <addaction name="actionCFXS_L0_Github_Page" />
+                <addaction name="actionCFXS_Discord" />
+                <addaction name="separator" />
+                <addaction name="actionAbout" />
+            </widget>
+            <addaction name="menuFile" />
+            <addaction name="menuView" />
+            <addaction name="menuHelp" />
+        </widget>
+        <widget class="QStatusBar" name="statusbar" />
+        <action name="actionUndo">
+            <property name="checkable">
+                <bool>false</bool>
+            </property>
+            <property name="text">
+                <string>Undo</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+Z</string>
+            </property>
+        </action>
+        <action name="actionRedo">
+            <property name="text">
+                <string>Redo</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+Y</string>
+            </property>
+        </action>
+        <action name="actionCut">
+            <property name="text">
+                <string>Cut</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+X</string>
+            </property>
+        </action>
+        <action name="actionCopy">
+            <property name="text">
+                <string>Copy</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+C</string>
+            </property>
+        </action>
+        <action name="actionPaste">
+            <property name="text">
+                <string>Paste</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+V</string>
+            </property>
+        </action>
+        <action name="actionFind">
+            <property name="text">
+                <string>Find</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+F</string>
+            </property>
+        </action>
+        <action name="actionReplace">
+            <property name="text">
+                <string>Replace    </string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+H</string>
+            </property>
+        </action>
+        <action name="actionOpen_Project">
+            <property name="text">
+                <string>Open Project...</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+O</string>
+            </property>
+        </action>
+        <action name="actionSave">
+            <property name="text">
+                <string>Save</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+S</string>
+            </property>
+        </action>
+        <action name="actionSave_All">
+            <property name="text">
+                <string>Save All</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+Shift+S</string>
+            </property>
+        </action>
+        <action name="actionSettings">
+            <property name="text">
+                <string>Settings</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+,</string>
+            </property>
+        </action>
+        <action name="actionExit">
+            <property name="text">
+                <string>Exit</string>
+            </property>
+        </action>
+        <action name="actionWorkspace">
+            <property name="text">
+                <string>Workspace        </string>
+            </property>
+        </action>
+        <action name="actionCFXS_L0_Github_Page">
+            <property name="text">
+                <string>CFXS L0 Debugger Github Page...    </string>
+            </property>
+        </action>
+        <action name="actionCFXS_Discord">
+            <property name="text">
+                <string>CFXS Discord...</string>
+            </property>
+        </action>
+        <action name="actionAbout">
+            <property name="text">
+                <string>About</string>
+            </property>
+        </action>
+    </widget>
+    <customwidgets>
+        <customwidget>
+            <class>ads::CDockManager</class>
+            <extends>QFrame</extends>
+            <header location="global">DockManager.h</header>
+            <container>1</container>
+        </customwidget>
+    </customwidgets>
+    <resources />
+    <connections />
+</ui>

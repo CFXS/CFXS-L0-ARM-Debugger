@@ -158,6 +158,11 @@
         "qwebengineurlschemehandler": "cpp",
         "qwebengineurlrequestjob": "cpp",
         "qwebengineurlscheme": "cpp",
-        "qmessagebox": "cpp"
+        "qmessagebox": "cpp",
+        "qapplication": "cpp",
+        "qresizeevent": "cpp",
+        "qsize": "cpp",
+        "qmainwindow": "cpp",
+        "qvboxlayout": "cpp"
     }
 }

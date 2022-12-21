@@ -21,7 +21,7 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui Svg Xml WebEngineCore WebEngineWidgets WebChannel)
 
-add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files} "${ROOT_DIR}/src/win.rc")
+add_executable(${EXE_NAME} ${headers} ${sources} ${QRC_files} "${ROOT_DIR}/src/win.rc")
 
 include("_Modules.cmake")
 

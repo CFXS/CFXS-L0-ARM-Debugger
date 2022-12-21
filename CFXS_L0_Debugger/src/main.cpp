@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 // ---------------------------------------------------------------------
 // [CFXS] //
-#include <Core/L0_Application.hpp>
+// #include <Core/L0_Application.hpp>
 #include <Log/Log.hpp>
 #include <QWebEngineView>
 #include <QWebEngineProfile>
@@ -26,9 +26,11 @@
 #include <QWebEngineUrlScheme>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QTimer>
 #include <QObject>
+#include <QApplication>
 
 struct TimeExec {
     TimeExec(const char* n) {
@@ -121,8 +123,8 @@ int main(int argc, char** argv) {
     auto page = new QWebEnginePage(profile);
     view->setPage(page);
     page->load(INDEX);
-    // view->resize(1920, 1080);
     view->showMaximized();
+    page->setBackgroundColor(QColor{16, 16, 16});
 
     return app.exec();
 }
