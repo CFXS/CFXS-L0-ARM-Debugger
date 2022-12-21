@@ -183,7 +183,7 @@ namespace L0::Probe {
             return false;
         }
 
-        auto res = stlink_target_connect(m_Driver, CONNECT_NORMAL);
+        auto res = stlink_target_connect(m_Driver, CONNECT_UNDER_RESET);
 
         if (res) {
             LOG_PROBE_ERROR("[STLink@{0}] Could not connect to target - {1}", fmt::ptr(this), res);

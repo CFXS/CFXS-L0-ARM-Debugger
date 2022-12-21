@@ -151,6 +151,13 @@
         "qabstracttablemodel": "cpp",
         "qwidgetaction": "cpp",
         "logging.h": "c",
-        "strsafe.h": "c"
+        "strsafe.h": "c",
+        "qwebengineview": "cpp",
+        "qwebengineprofile": "cpp",
+        "qwebenginesettings": "cpp",
+        "qwebengineurlschemehandler": "cpp",
+        "qwebengineurlrequestjob": "cpp",
+        "qwebengineurlscheme": "cpp",
+        "qmessagebox": "cpp"
     }
 }

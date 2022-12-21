@@ -2,61 +2,6 @@
 <RCC version="1.0">
     <qresource>
         <file alias="L0_Icon">Images/CFXS_L0_BIG.png</file>
-        <file alias="Image/CFXS">Images/CFXS_NotPerfect.svg</file>
-        <file alias="Image/SmallRightArrow.svg">Images/UI/smooth-arrow-right-small.svg</file>
-        <file alias="Image/SmallDownArrow.svg">Images/UI/smooth-arrow-down-small.svg</file>
-        <file alias="Image/MidRightArrow.svg">Images/UI/smooth-arrow-right-mid.svg</file>
-        <file alias="Image/MidDownArrow.svg">Images/UI/smooth-arrow-down-mid.svg</file>
-
-        <file alias="Icon/folder">Images/UI/FileBrowser/folder.svg</file>
-        <file alias="Icon/folder-open">Images/UI/FileBrowser/folder-open.svg</file>
-        <file alias="Icon/folder-src">Images/UI/FileBrowser/folder-src.svg</file>
-        <file alias="Icon/folder-src-open">Images/UI/FileBrowser/folder-src-open.svg</file>
-        <file alias="Icon/folder-build">Images/UI/FileBrowser/folder-dist.svg</file>
-        <file alias="Icon/folder-build-open">Images/UI/FileBrowser/folder-dist-open.svg</file>
-        <file alias="Icon/folder-vscode">Images/UI/FileBrowser/folder-vscode.svg</file>
-        <file alias="Icon/folder-vscode-open">Images/UI/FileBrowser/folder-vscode-open.svg</file>
-        <file alias="Icon/folder-git">Images/UI/FileBrowser/folder-git.svg</file>
-        <file alias="Icon/folder-git-open">Images/UI/FileBrowser/folder-git-open.svg</file>
-        <file alias="Icon/folder-lib">Images/UI/FileBrowser/folder-lib.svg</file>
-        <file alias="Icon/folder-lib-open">Images/UI/FileBrowser/folder-lib-open.svg</file>
-        <file alias="Icon/folder-resource">Images/UI/FileBrowser/folder-resource.svg</file>
-        <file alias="Icon/folder-resource-open">Images/UI/FileBrowser/folder-resource-open.svg</file>
-        <file alias="Icon/folder-cfxs">Images/UI/FileBrowser/folder-cfxs.png</file>
-        <file alias="Icon/folder-cfxs-open">Images/UI/FileBrowser/folder-cfxs-open.png</file>
-        <file alias="Icon/folder-l0">Images/UI/FileBrowser/folder-L0.png</file>
-        <file alias="Icon/folder-l0-open">Images/UI/FileBrowser/folder-L0-open.png</file>
-
-        <file alias="Icon/console">Images/UI/FileBrowser/console.svg</file>
-        <file alias="Icon/file">Images/UI/FileBrowser/file.svg</file>
-        <file alias="Icon/doc">Images/UI/FileBrowser/document.svg</file>
-        <file alias="Icon/asm">Images/UI/FileBrowser/assembly.svg</file>
-        <file alias="Icon/bin">Images/UI/FileBrowser/assembly.svg</file>
-        <file alias="Icon/hex">Images/UI/FileBrowser/hex.svg</file>
-        <file alias="Icon/c">Images/UI/FileBrowser/c.svg</file>
-        <file alias="Icon/cert">Images/UI/FileBrowser/certificate.svg</file>
-        <file alias="Icon/cmake">Images/UI/FileBrowser/cmake.svg</file>
-        <file alias="Icon/compressed">Images/UI/FileBrowser/zip.svg</file>
-        <file alias="Icon/cpp">Images/UI/FileBrowser/cpp.svg</file>
-        <file alias="Icon/exe">Images/UI/FileBrowser/exe.svg</file>
-        <file alias="Icon/font">Images/UI/FileBrowser/font.svg</file>
-        <file alias="Icon/gear">Images/UI/FileBrowser/settings.svg</file>
-        <file alias="Icon/git">Images/UI/FileBrowser/git.svg</file>
-        <file alias="Icon/h">Images/UI/FileBrowser/h.svg</file>
-        <file alias="Icon/hpp">Images/UI/FileBrowser/hpp.svg</file>
-        <file alias="Icon/image">Images/UI/FileBrowser/image.svg</file>
-        <file alias="Icon/json">Images/UI/FileBrowser/json.svg</file>
-        <file alias="Icon/lib">Images/UI/FileBrowser/lib.svg</file>
-        <file alias="Icon/lua">Images/UI/FileBrowser/lua.svg</file>
-        <file alias="Icon/pdf">Images/UI/FileBrowser/pdf.svg</file>
-        <file alias="Icon/py">Images/UI/FileBrowser/python.svg</file>
-        <file alias="Icon/xml">Images/UI/FileBrowser/xml.svg</file>
-        <file alias="Icon/info">Images/UI/FileBrowser/readme.svg</file>
-        <file alias="Icon/log">Images/UI/FileBrowser/log.svg</file>
-        <file alias="Icon/cfxs">Images/UI/FileBrowser/cfxs.png</file>
-        <file alias="Icon/segger">Images/UI/FileBrowser/segger.png</file>
-        <file alias="Icon/stm">Images/UI/FileBrowser/stm.png</file>
-        <file alias="Icon/link">Images/UI/FileBrowser/link.png</file>
-        <file alias="Icon/l0">Images/UI/FileBrowser/L0.png</file>
+        <file alias="UI/index.html">index.html</file>
     </qresource>
 </RCC>

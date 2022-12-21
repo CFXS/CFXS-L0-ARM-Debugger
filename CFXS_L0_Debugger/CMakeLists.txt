@@ -17,7 +17,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui Svg Xml)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml Quick QuickControls2 Gui Svg Xml WebEngineCore WebEngineWidgets WebChannel)
 
 add_executable(${EXE_NAME} ${headers} ${sources} ${UI_files} ${QRC_files} "${ROOT_DIR}/src/win.rc")
 
@@ -35,7 +35,7 @@ target_precompile_headers(
   <algorithm>
   <unordered_map>
   <chrono>
-  <array>
+  <array> 
   <ostream>
   <sstream>
   <unordered_set>
@@ -83,6 +83,9 @@ target_link_libraries(
           Qt::Gui
           Qt::Svg
           Qt::Xml
+          Qt::WebEngineCore
+          Qt::WebEngineWidgets
+          Qt::WebChannel
 )
 
 if(BUILD_PROFILER)
@@ -102,6 +105,33 @@ add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E cop
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Svgd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Xml.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Xmld.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6WebEngineWidgets.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6WebEngineWidgetsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6WebEngineCore.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6WebEngineCored.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Quick.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Quickd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6QuickWidgets.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6QuickWidgetsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6PrintSupport.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6PrintSupportd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6WebChannel.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6WebChanneld.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Qml.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Qmld.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6OpenGL.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6OpenGLd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Network.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Networkd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6QmlModels.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6QmlModelsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Positioning.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\Qt6Positioningd.dll $<TARGET_FILE_DIR:${EXE_NAME}>)
+
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\QtWebEngineProcess.exe $<TARGET_FILE_DIR:${EXE_NAME}>)
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\bin\\QtWebEngineProcessd.exe $<TARGET_FILE_DIR:${EXE_NAME}>)
+
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${QT_CMAKE_PATH}\\..\\..\\resources\\ $<TARGET_FILE_DIR:${EXE_NAME}>\\resources\\)
 
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\plugins\\platforms\\qwindows.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindows.dll)
 add_custom_command(TARGET ${EXE_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${QT_CMAKE_PATH}\\..\\..\\plugins\\platforms\\qwindowsd.dll $<TARGET_FILE_DIR:${EXE_NAME}>\\platforms\\qwindowsd.dll)
