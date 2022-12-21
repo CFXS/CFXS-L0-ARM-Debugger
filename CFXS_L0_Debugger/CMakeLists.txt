@@ -4,6 +4,8 @@ set(CMAKE_PREFIX_PATH "$ENV{CFXS_QT_CMAKE_PATH}") # C:\\Qt\\6.2.3\\msvc2019_64\\
 set(QT_CMAKE_PATH ${CMAKE_PREFIX_PATH})
 message("Qt Path: ${QT_CMAKE_PATH}")
 
+set(LIBUSB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/vendor/libusb)
+
 # set(CMAKE_UNITY_BUILD true)
 # set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
 include("_Sources.cmake")
