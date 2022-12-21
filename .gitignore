@@ -2,3 +2,4 @@ build/
 .vs/
 .cache/
 L0.log
+!build/3rdpart/*
